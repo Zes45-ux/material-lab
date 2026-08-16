@@ -832,6 +832,7 @@ body {
 
 .material-inspector {
   position: absolute;
+  z-index: 5;
   top: var(--topbar-height);
   right: 0;
   bottom: 0;
