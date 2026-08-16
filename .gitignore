@@ -6,6 +6,7 @@ wasm-pack.log
 pkg/
 bin/
 node_modules
+.worktrees/
 dist
 crate/pkg
 crate/target
