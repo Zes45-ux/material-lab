@@ -5,9 +5,7 @@ const Menu = ({ close, children }) => {
     <div className="menu-scrim">
       <div className={"menu"}>
         {children}
-        <a href="../" className="x" onClick={close}>
-          <button aria-label="关闭" title="关闭">×</button>
-        </a>
+        <a href="../" className="x" onClick={close} aria-label="关闭" title="关闭">×</a>
       </div>
     </div>
   );

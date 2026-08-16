@@ -59,7 +59,7 @@ if ("serviceWorker" in navigator) {
 }
 
 let n = 300;
-const universe = isBench ? window.u : Universe.new(n, n);
+const universe = isBench ? null : Universe.new(n, n);
 
 let width = n;
 let height = n;
@@ -83,8 +83,8 @@ if (!isBench) {
   fluid = startFluid({ universe });
   drawSand = startWebGL({ canvas, universe });
 } else {
-  fluid = window.f;
-  drawSand = window.r;
+  fluid = { update() {}, reset() {} };
+  drawSand = () => {};
 }
 const renderLoop = () => {
   if (!window.paused) {
@@ -96,14 +96,17 @@ const renderLoop = () => {
 
   window.animationId = requestAnimationFrame(renderLoop);
 };
-renderLoop();
-window.u = universe;
 
 if (!isBench) {
+  renderLoop();
+  window.u = universe;
   boot(width, height);
 }
 
 function reset() {
+  if (!universe) {
+    return;
+  }
   fluid.reset();
   fluid.update();
   fluid.reset();
