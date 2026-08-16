@@ -23,6 +23,18 @@ test("repository uses one reproducible npm workflow", () => {
   assert.doesNotMatch(lock, /registry\.npmmirror\.com/);
 });
 
+test("project metadata uses the Material Lab identity", () => {
+  const pkg = JSON.parse(read("package.json"));
+  const lock = JSON.parse(read("package-lock.json"));
+  const description = "A standalone falling-sand sandbox for exploring pixel materials and physical reactions, built with Rust/WASM, WebGL, and JavaScript.";
+
+  assert.equal(pkg.name, "material-lab");
+  assert.equal(pkg.description, description);
+  assert.equal(pkg.repository.url, "git+https://github.com/Zes45-ux/material-lab.git");
+  assert.equal(lock.name, "material-lab");
+  assert.equal(lock.packages[""].name, "material-lab");
+});
+
 test("webpack provides regl with CommonJS shader source strings", () => {
   const webpackConfig = read("webpack.config.js");
   assert.match(
@@ -169,6 +181,7 @@ test("material lab shell centers the canvas and exposes a two-level inspector", 
   assert.match(ui, /className="material-rail"/);
   assert.match(ui, /className="material-inspector"/);
   assert.match(ui, /className="inspector-tab/);
+  assert.match(ui, /<strong>Material Lab<\/strong>/);
   assert.match(ui, />\s*简介\s*<\/button>/);
   assert.match(ui, />\s*反应\s*<\/button>/);
   assert.match(ui, /MATERIAL_GROUPS/);
@@ -217,7 +230,7 @@ test("sandbox controls bind Chinese text and accessible names to their controls"
 test("information page keeps fully translated material details and original reference links", () => {
   const info = read("js/components/info.js");
 
-  assert.match(info, /<h1>像素炼金术（Sandspiel）<\/h1>/);
+  assert.match(info, /<h1>Material Lab<\/h1>/);
   assert.match(
     info,
     /<p aria-label="由 Max Bittker 创作">\s*由 <a href="https:\/\/maxbittker\.com">Max Bittker<\/a> 创作/
@@ -379,8 +392,8 @@ test("static shell is Chinese and has no remote runtime dependency", () => {
   const layout = read("js/layout.js");
 
   assert.match(html, /<html lang="zh-CN">/);
-  assert.match(html, /<title>像素炼金术<\/title>/);
-  assert.match(html, /一款可以自由绘制沙、水、植物和火焰的像素物理沙盒/);
+  assert.match(html, /<title>Material Lab<\/title>/);
+  assert.match(html, /A standalone falling-sand sandbox for exploring pixel materials and physical reactions/);
   assert.doesNotMatch(html, /https:\/\//);
   assert.doesNotMatch(html, /\b(?:src|href)\s*=\s*["'](?:https?:)?\/\//i);
   assert.doesNotMatch(html, /adsbygoogle|googletagmanager|a\.sandspiel\.club|adslot_1/);
@@ -388,8 +401,8 @@ test("static shell is Chinese and has no remote runtime dependency", () => {
     html,
     /<body(?:\s+data-view="[^"]+")?>\s*<div id="background">\s*<div id="ui"><\/div>\s*<div id="fps"><\/div>\s*<main id="canvas-stage"[^>]*>\s*<canvas id="sand-canvas"><\/canvas>\s*<canvas id="fluid-canvas"><\/canvas>\s*<\/main>\s*<\/div>\s*<\/body>/
   );
-  assert.equal(manifest.name, "像素炼金术");
-  assert.equal(manifest.short_name, "像素炼金术");
+  assert.equal(manifest.name, "Material Lab");
+  assert.equal(manifest.short_name, "Material Lab");
   assert.equal(manifest.scope, "./");
   assert.equal(manifest.start_url, "./");
   assert.deepEqual(
