@@ -3,7 +3,7 @@ import React from "react";
 const Info = () => {
   return (
     <div className="Info">
-      <h1>像素炼金术（Sandspiel）</h1>
+      <h1>Material Lab</h1>
       <p aria-label="由 Max Bittker 创作">
         由 <a href="https://maxbittker.com">Max Bittker</a> 创作
       </p>

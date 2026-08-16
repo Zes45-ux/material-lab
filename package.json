@@ -1,11 +1,11 @@
 {
-  "name": "sandtable",
+  "name": "material-lab",
   "version": "1.0.0",
   "packageManager": "npm@11.19.0",
   "engines": {
     "node": "^20.17.0 || >=22.9.0"
   },
-  "description": "",
+  "description": "A standalone falling-sand sandbox for exploring pixel materials and physical reactions, built with Rust/WASM, WebGL, and JavaScript.",
   "main": "index.js",
   "scripts": {
     "build": "webpack --mode=production",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maxbittker/sandtable.git"
+    "url": "git+https://github.com/Zes45-ux/material-lab.git"
   },
   "keywords": [
     "webassembly",

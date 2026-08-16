@@ -272,10 +272,10 @@ class Index extends React.Component {
         <header className="topbar">
           <div className="brand-lockup">
             <span className="brand-mark" aria-hidden="true">
-              s
+              M
             </span>
             <div>
-              <strong>sandspiel</strong>
+              <strong>Material Lab</strong>
               <span>材料实验台</span>
             </div>
           </div>
