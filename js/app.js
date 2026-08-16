@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
-import Info from "./components/info";
 import { Index } from "./components/ui";
 import Browse from "./components/browse";
 import Admin from "./components/admin";
@@ -40,15 +39,6 @@ function AppRouter() {
   return (
     <Router>
       <Route path="/" component={Index} />
-      <Route
-        exact
-        path="/info/"
-        component={() => (
-          <Menu>
-            <Info />
-          </Menu>
-        )}
-      />
       <Route exact path="/bench" component={BenchmarkRunner} />
       <Route path="/browse" component={BrowseRouter} />
       <Route path="/admin" component={AdminRouter} />

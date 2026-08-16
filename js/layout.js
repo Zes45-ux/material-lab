@@ -1,57 +1,43 @@
-let resize = () => {
+const resize = () => {
   const canvas = document.getElementById("sand-canvas");
   const canvas2 = document.getElementById("fluid-canvas");
-  const ui = document.getElementById("ui");
+  const stage = document.getElementById("canvas-stage");
 
-  if (!canvas || !canvas2 || !ui) return;
+  if (!canvas || !canvas2 || !stage) return;
 
-  let screen_width = window.innerWidth;
-  let uiheight = 50;
-  let screen_height = window.innerHeight - uiheight;
+  const stageWidth = stage.clientWidth;
+  const stageHeight = stage.clientHeight;
+  const isMobile = window.innerWidth < 768;
+  const padding = isMobile ? 20 : 36;
+  const size = Math.max(
+    120,
+    Math.min(stageWidth - padding * 2, stageHeight - padding * 2)
+  );
 
-  let canvasStyle = "";
-  let uiStyle = "";
-  let adStyle = "display:none;";
+  [canvas, canvas2].forEach((target) => {
+    target.style.width = `${size}px`;
+    target.style.height = `${size}px`;
+    target.style.left = "50%";
+    target.style.top = "50%";
+    target.style.right = "auto";
+    target.style.bottom = "auto";
+    target.style.margin = "0";
+  });
 
-  if (screen_width > screen_height) {
-    if (screen_width - window.innerHeight < 400) {
-      // landscape compressed
-      canvasStyle = `height: ${window.innerHeight}px; margin:3px`;
-      uiStyle = `width: ${
-        screen_width - window.innerHeight - 12
-      }px; margin: 2px;`;
-    } else {
-      // landscape wide
-      canvasStyle = `
-       height: ${window.innerHeight}px;
-       width:${window.innerHeight}px;
-       margin:0;
-       left: auto;
-       right: 206px`;
-      uiStyle = `width: 200px; margin: 2px;`;
-      adStyle = `width: ${
-        screen_width - window.innerHeight - (206 + 150)
-      }px; margin: 1px;`;
-    }
-  } else {
-    //portrait (mobile)
-    canvasStyle = `width: ${screen_width}px; bottom:3px;`;
-    uiStyle = "";
+  const fps = document.getElementById("fps");
+  if (fps) {
+    fps.style.right = isMobile ? "8px" : "calc(var(--inspector-width) + 14px)";
+    fps.style.bottom = isMobile ? "8px" : "14px";
   }
-  ui.style = uiStyle;
-  canvas.style = canvasStyle;
-  canvas2.style = canvasStyle;
-  const adSlot = document.getElementsByClassName("adslot_1")[0];
-  if (adSlot) adSlot.style = adStyle;
-  let btnHeight = ui.getBoundingClientRect().height;
-  const pullTabContent = document.getElementById("PullTabContent");
-  if (pullTabContent) pullTabContent.style.top = btnHeight + "px";
 };
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', resize);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", resize);
 } else {
   resize();
 }
+
 window.addEventListener("deviceorientation", resize, true);
 window.addEventListener("resize", resize);
+
+export { resize };

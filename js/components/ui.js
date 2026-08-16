@@ -10,8 +10,8 @@ import { height, universe, width, reset } from "../index.js";
 import { snapshot, pallette } from "../render.js";
 import { functions, storage } from "../api.js";
 import SignInButton from "./signinButton.js";
-import Promotab from "./promotab";
 import { svgToImageData, rgbaToSpecies } from "../convertSVG";
+import { MATERIAL_GROUPS, getMaterialDetails } from "./materials";
 
 import Menu from "./menu";
 
@@ -21,10 +21,12 @@ let pallette_data = pallette();
 const ElementButton = (name, selectedElement, setElement) => {
   let elementID = Species[name];
 
-  let color = pallette_data[elementID];
+  let color = pallette_data[elementID] || "rgba(128, 128, 128, 0.35)";
+  let solidColor = color.replace(/,\s*0\.25\)/, ", 0.86)");
   let selected = elementID == selectedElement;
+  let details = getMaterialDetails(name);
 
-  let background = "inherit";
+  let background = "transparent";
   if (elementID == 14) {
     background = `linear-gradient(45deg, 
     rgba(202, 121, 125, 0.25), 
@@ -40,20 +42,120 @@ const ElementButton = (name, selectedElement, setElement) => {
   }
   return (
     <button
-      className={selected ? "selected" : ""}
+      type="button"
+      className={`material-option ${selected ? "selected" : ""}`}
       key={name}
+      aria-pressed={selected}
+      title={`${details.label}，${details.intro}`}
       onClick={() => {
         setElement(elementID);
       }}
       style={{
-        background,
-        backgroundColor: selected ? color.replace("0.25", "1.5") : color,
+        "--material-color": solidColor,
+        "--material-background": background === "transparent" ? solidColor : background,
       }}
     >
-      {"  "}
-      {name}
-      {"  "}
+      <span className="material-swatch" aria-hidden="true" />
+      <span className="material-option-copy">
+        <span className="material-option-label">{details.label}</span>
+        <span className="material-option-code">{name}</span>
+      </span>
     </button>
+  );
+};
+
+const speciesNameForId = (elementID) => {
+  if (elementID === -1) return "Wind";
+  return (
+    Object.keys(Species).find(
+      (name) => !Number.isInteger(Number.parseInt(name)) && Species[name] === elementID
+    ) || "Water"
+  );
+};
+
+const materialColorFor = (name) => {
+  if (name === "Wind") return "#c65d3b";
+  return (pallette_data[Species[name]] || "rgba(128, 128, 128, 0.35)").replace(
+    /,\s*0\.25\)/,
+    ", 0.86)"
+  );
+};
+
+const MaterialInspector = ({ name, tab, setTab }) => {
+  const details = getMaterialDetails(name);
+  const color = materialColorFor(name);
+  const selectedID = name === "Wind" ? -1 : Species[name];
+  const swatchBackground = selectedID === 14
+    ? "linear-gradient(135deg, #d56f76, #a878c8 32%, #7576c3 55%, #79c4b9 75%, #b9c375)"
+    : color;
+
+  return (
+    <aside className="material-inspector" aria-label="材料说明">
+      <div className="inspector-heading">
+        <div
+          className="inspector-swatch"
+          aria-hidden="true"
+          style={{ background: swatchBackground }}
+        >
+          <span>{name === "Wind" ? "风" : details.label.slice(0, 1)}</span>
+        </div>
+        <div>
+          <p className="panel-kicker">当前材料</p>
+          <h2>{details.label}</h2>
+          <p className="inspector-code">{name}</p>
+        </div>
+      </div>
+
+      <div className="inspector-tabs" role="tablist" aria-label="材料信息层级">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "intro"}
+          className={tab === "intro" ? "inspector-tab active" : "inspector-tab"}
+          onClick={() => setTab("intro")}
+        >
+          简介
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "reactions"}
+          className={tab === "reactions" ? "inspector-tab active" : "inspector-tab"}
+          onClick={() => setTab("reactions")}
+        >
+          反应
+        </button>
+      </div>
+
+      <div className="inspector-content" role="tabpanel">
+        {tab === "intro" ? (
+          <div className="intro-content">
+            <p className="material-intro">{details.intro}</p>
+            <div className="inspector-note">
+              <span className="note-mark" aria-hidden="true" />
+              <p>{details.note}</p>
+            </div>
+            <div className="material-facts">
+              <span>类别</span>
+              <strong>{details.family}</strong>
+            </div>
+          </div>
+        ) : (
+          <div className="reaction-content">
+            <p className="reaction-lede">选择一个材料，查看它在画布中的主要变化。</p>
+            <div className="reaction-list">
+              {details.reactions.map((reaction, index) => (
+                <article className="reaction-item" key={`${reaction.material}-${index}`}>
+                  <div className="reaction-material">{reaction.material}</div>
+                  <div className="reaction-arrow" aria-hidden="true">+</div>
+                  <div className="reaction-result">{reaction.result}</div>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </aside>
   );
 };
 
@@ -71,6 +173,7 @@ class Index extends React.Component {
       dataURL: {},
       currentSubmission: null,
       selectedElement: Species.Water,
+      inspectorTab: "intro",
     };
     window.UI = this;
     //if we start in the background, pause;
@@ -377,100 +480,133 @@ class Index extends React.Component {
   }
 
   render() {
-    let { size, paused, selectedElement, currentSubmission } = this.state;
+    let { size, paused, selectedElement, currentSubmission, inspectorTab } = this.state;
+    let selectedName = speciesNameForId(selectedElement);
     let hash =
       currentSubmission && currentSubmission.id
         ? `#${currentSubmission.id}`
         : "";
     return (
       <React.Fragment>
-        <Promotab />
-        <button
-          onClick={() => this.togglePause()}
-          className={paused ? "selected" : ""}
-        >
-          {paused ? (
-            <svg height="20" width="20" id="d" viewBox="0 0 300 300">
-              <polygon id="play" points="0,0 , 300,150 0,300" />
-            </svg>
-          ) : (
-            <svg height="20" width="20" id="d" viewBox="0 0 300 300">
-              <polygon id="bar2" points="0,0 110,0 110,300 0,300" />
-              <polygon id="bar1" points="190,0 300,0 300,300 190,300" />
-            </svg>
-          )}
-        </button>
-
-        {!window.location.pathname.includes("school") && (
-          <>
-            <button onClick={() => this.upload()}>Upload</button>
-            <Link
-              to={{
-                pathname: "/browse/",
-                hash,
-              }}
-            >
-              <button>Browse</button>
-            </Link>
-          </>
-        )}
-
-        <button onClick={() => this.reset()}>Reset</button>
-        <Link
-          to={{
-            pathname: "/info/",
-            hash,
-          }}
-        >
-          <button>Info</button>
-        </Link>
-
-        {/* {paused && <button onClick={() => universe.tick()}>Tick</button>} */}
-        <span className="sizes">
-          {sizeMap.map((v, i) => (
+        <header className="topbar">
+          <div className="brand-lockup">
+            <span className="brand-mark" aria-hidden="true">s</span>
+            <div>
+              <strong>sandspiel</strong>
+              <span>材料实验台</span>
+            </div>
+          </div>
+          <div className="canvas-status" aria-live="polite">
+            <span className={paused ? "status-pip paused" : "status-pip"} aria-hidden="true" />
+            {paused ? "已暂停" : "运行中"}
+          </div>
+          <nav className="topbar-actions" aria-label="画布操作">
             <button
-              key={i}
-              className={i == size ? "selected" : ""}
-              onClick={(e) => this.setSize(e, i)}
-              style={{ padding: "0px" }}
+              type="button"
+              onClick={() => this.togglePause()}
+              className={paused ? "topbar-button is-active" : "topbar-button"}
+              aria-label={paused ? "继续模拟" : "暂停模拟"}
+              title={paused ? "继续模拟" : "暂停模拟"}
             >
-              <svg height="23" width="23" id="d" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r={3 + v} />
-              </svg>
+              <span className={paused ? "control-glyph play-glyph" : "control-glyph pause-glyph"} aria-hidden="true" />
+              <span>{paused ? "继续" : "暂停"}</span>
             </button>
-          ))}
-        </span>
-        <button
-          onClick={() => {
-            reset();
-            universe.pop_undo();
-          }}
-          style={{ fontSize: 35 }}
-        >
-          ↜
-        </button>
-        <button
-          className={-1 == selectedElement ? "selected" : ""}
-          key={name}
-          onClick={() => {
-            this.setState({ selectedElement: -1 });
-          }}
-        >
-          Wind
-        </button>
-        {Object.keys(Species)
-          .filter((x) => !Number.isInteger(Number.parseInt(x)))
-          .map((n) =>
-            ElementButton(n, selectedElement, (id) =>
-              this.setState({ selectedElement: id })
-            )
-          )}
-        {/* <span className="promo">
-          *new*{" "}
-          <a href="https://orb.farm" target="_blank">
-            orb.farm
-          </a>
-        </span> */}
+            {!window.location.pathname.includes("school") && (
+              <>
+                <button type="button" className="topbar-button" onClick={() => this.upload()}>
+                  上传
+                </button>
+                <Link
+                  className="topbar-button"
+                  to={{
+                    pathname: "/browse/",
+                    hash,
+                  }}
+                >
+                  作品
+                </Link>
+              </>
+            )}
+            <button type="button" className="topbar-button" onClick={() => this.reset()}>
+              重置
+            </button>
+            <button
+              type="button"
+              className="topbar-button icon-only"
+              onClick={() => {
+                reset();
+                universe.pop_undo();
+              }}
+              aria-label="撤销"
+              title="撤销"
+            >
+              ↶
+            </button>
+          </nav>
+        </header>
+
+        <aside className="material-rail" aria-label="材料选择">
+          <div className="panel-heading">
+            <div>
+              <p className="panel-kicker">材料工具</p>
+              <h1>选择材料</h1>
+            </div>
+            <span className="material-count">19 种</span>
+          </div>
+          <div className="material-rail-scroll">
+            <button
+              type="button"
+              className={selectedElement === -1 ? "wind-option selected" : "wind-option"}
+              aria-pressed={selectedElement === -1}
+              onClick={() => this.setState({ selectedElement: -1, inspectorTab: "intro" })}
+            >
+              <span className="wind-glyph" aria-hidden="true">↝</span>
+              <span>
+                <strong>风</strong>
+                <small>推动轻质材料</small>
+              </span>
+            </button>
+            {MATERIAL_GROUPS.map((group) => (
+              <section className="material-group" key={group.label}>
+                <h2>{group.label}</h2>
+                <div className="material-grid">
+                  {group.items.map((name) =>
+                    ElementButton(name, selectedElement, (id) =>
+                      this.setState({ selectedElement: id, inspectorTab: "intro" })
+                    )
+                  )}
+                </div>
+              </section>
+            ))}
+          </div>
+          <div className="brush-control">
+            <div className="brush-heading">
+              <span>笔刷大小</span>
+              <output>{sizeMap[size]} px</output>
+            </div>
+            <div className="brush-size-grid" role="group" aria-label="笔刷大小">
+              {sizeMap.map((v, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  className={i === size ? "brush-size selected" : "brush-size"}
+                  onClick={(e) => this.setSize(e, i)}
+                  aria-label={`笔刷大小 ${v}`}
+                  aria-pressed={i === size}
+                >
+                  <span style={{ width: `${Math.max(4, Math.min(22, 4 + v / 2))}px`, height: `${Math.max(4, Math.min(22, 4 + v / 2))}px` }} />
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        <MaterialInspector
+          name={selectedName}
+          tab={inspectorTab}
+          setTab={(tab) => this.setState({ inspectorTab: tab })}
+        />
+
         {this.state.currentSubmission && (
           <div className="submission-title">
             <button onClick={() => this.incScore()}>
@@ -482,24 +618,21 @@ class Index extends React.Component {
 
         {this.state.submissionMenuOpen && (
           <Menu close={() => this.closeMenu()}>
-            <h4>Share your creation with the people! (try using #hashtags)</h4>
-            <p>
-              Please be nice. Users who post hateful or sexually explicit
-              content will be banned.
-            </p>
+            <h4>分享你的作品</h4>
+            <p>给作品写一个标题，然后发布到作品浏览页。</p>
             <img src={this.state.data.dataURL} className="submissionImg" />
             <SignInButton>
               <div style={{ display: "flex" }}>
                 <input
                   maxlength="200"
-                  placeholder="Title"
+                  placeholder="作品标题"
                   onChange={(e) => this.setState({ title: e.target.value })}
                 />
                 <button
                   disabled={this.state.submitting || this.rateLimited()}
                   onClick={() => this.submit()}
                 >
-                  Submit
+                  发布
                 </button>
               </div>
             </SignInButton>
