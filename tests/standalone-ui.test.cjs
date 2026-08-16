@@ -49,6 +49,12 @@ test("Vercel uses the checked-in wasm package without invoking Cargo", () => {
   );
 });
 
+test("Vercel serves the webpack dist output", () => {
+  const vercel = JSON.parse(read("vercel.json"));
+  assert.equal(vercel.buildCommand, "npm run build");
+  assert.equal(vercel.outputDirectory, "dist");
+});
+
 test("community, cloud, ads and telemetry are absent", () => {
   const removed = [
     "functions", ".firebaserc", "firebase.json", "firestore.indexes.json",
