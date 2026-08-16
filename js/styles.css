@@ -63,16 +63,6 @@ button {
   cursor: pointer;
 }
 
-.active button,
-button.active {
-  background-color: gainsboro;
-}
-
-button:disabled {
-  background-color: gainsboro;
-  color: gray;
-}
-
 button:focus {
   outline: none;
 }
@@ -143,20 +133,6 @@ button.selected {
   right: 4px;
   top: 5px;
   line-height: 0px;
-}
-
-input {
-  position: relative;
-  height: 25px;
-  min-width: 30px;
-  font-size: 19px;
-  padding: 1px 5px;
-  background-color: whitesmoke;
-  color: black;
-  border: 1.6px solid whitesmoke;
-  border-color: gainsboro;
-  flex-grow: 1;
-  fill: black;
 }
 
 .benchmark {

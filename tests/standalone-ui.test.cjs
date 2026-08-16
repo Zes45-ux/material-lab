@@ -156,13 +156,31 @@ test("menu and benchmark controls use their complete Chinese copy", () => {
 test("static shell is Chinese and has no remote runtime dependency", () => {
   const html = read("index.html");
   const manifest = JSON.parse(read("manifest.json"));
+  const css = read("js/styles.css");
+  const layout = read("js/layout.js");
+
   assert.match(html, /<html lang="zh-CN">/);
   assert.match(html, /<title>像素炼金术<\/title>/);
   assert.match(html, /一款可以自由绘制沙、水、植物和火焰的像素物理沙盒/);
   assert.doesNotMatch(html, /https:\/\//);
+  assert.doesNotMatch(html, /\b(?:src|href)\s*=\s*["'](?:https?:)?\/\//i);
   assert.doesNotMatch(html, /adsbygoogle|googletagmanager|a\.sandspiel\.club|adslot_1/);
+  for (const id of ["background", "ui", "fps", "sand-canvas", "fluid-canvas"]) {
+    assert.equal((html.match(new RegExp(`id="${id}"`, "g")) || []).length, 1, `${id} must occur once`);
+  }
   assert.equal(manifest.name, "像素炼金术");
   assert.equal(manifest.short_name, "像素炼金术");
   assert.equal(manifest.scope, "/");
   assert.equal(manifest.start_url, "/");
+  for (const icon of manifest.icons) {
+    assert.match(icon.src, /^assets\//, `${icon.sizes} icon must be local`);
+    assert.equal(fs.existsSync(path.join(root, icon.src)), true, `${icon.src} is missing`);
+  }
+
+  assert.match(css, /canvas\s*,\s*img[\s\S]*?image-rendering:\s*pixelated/);
+  assert.match(css, /#sand-canvas\s*\{\s*z-index:\s*2/);
+  assert.doesNotMatch(css, /\.active button|button\.active|button:disabled|\binput\s*\{/);
+  assert.doesNotMatch(layout, /adStyle|adSlot|pullTabContent/);
+  assert.match(layout, /canvas\.style\s*=\s*canvasStyle/);
+  assert.match(layout, /canvas2\.style\s*=\s*canvasStyle/);
 });
