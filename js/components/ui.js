@@ -81,7 +81,7 @@ const materialColorFor = (name) => {
   );
 };
 
-const MaterialInspector = ({ name, tab, setTab }) => {
+const MaterialInspector = ({ name, tab, setTab, open, onClose }) => {
   const details = getMaterialDetails(name);
   const color = materialColorFor(name);
   const selectedID = name === "Wind" ? -1 : Species[name];
@@ -90,7 +90,20 @@ const MaterialInspector = ({ name, tab, setTab }) => {
     : color;
 
   return (
-    <aside className="material-inspector" aria-label="材料说明">
+    <aside
+      id="material-inspector"
+      className={open ? "material-inspector is-open" : "material-inspector"}
+      aria-label="材料说明"
+      aria-hidden={!open}
+    >
+      <button
+        type="button"
+        className="inspector-close"
+        onClick={onClose}
+        aria-label="收起材料说明"
+      >
+        ×
+      </button>
       <div className="inspector-heading">
         <div
           className="inspector-swatch"
@@ -174,8 +187,14 @@ class Index extends React.Component {
       currentSubmission: null,
       selectedElement: Species.Water,
       inspectorTab: "intro",
+      inspectorOpen: false,
     };
     window.UI = this;
+    this.handleInspectorKeyDown = (event) => {
+      if (event.key === "Escape" && this.state.inspectorOpen) {
+        this.setState({ inspectorOpen: false });
+      }
+    };
     //if we start in the background, pause;
     if (
       this.props.location.pathname !== "/" &&
@@ -185,6 +204,14 @@ class Index extends React.Component {
     }
 
     this.load();
+  }
+
+  componentDidMount() {
+    window.addEventListener("keydown", this.handleInspectorKeyDown);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("keydown", this.handleInspectorKeyDown);
   }
 
   componentDidUpdate(prevProps) {
@@ -480,7 +507,7 @@ class Index extends React.Component {
   }
 
   render() {
-    let { size, paused, selectedElement, currentSubmission, inspectorTab } = this.state;
+    let { size, paused, selectedElement, currentSubmission, inspectorTab, inspectorOpen } = this.state;
     let selectedName = speciesNameForId(selectedElement);
     let hash =
       currentSubmission && currentSubmission.id
@@ -544,6 +571,17 @@ class Index extends React.Component {
             </button>
           </nav>
         </header>
+
+        <button
+          type="button"
+          className="inspector-trigger"
+          aria-expanded={inspectorOpen}
+          aria-controls="material-inspector"
+          onClick={() => this.setState({ inspectorOpen: !inspectorOpen })}
+        >
+          <span aria-hidden="true">i</span>
+          <span>{selectedName}</span>
+        </button>
 
         <aside className="material-rail" aria-label="材料选择">
           <div className="panel-heading">
@@ -609,6 +647,8 @@ class Index extends React.Component {
           name={selectedName}
           tab={inspectorTab}
           setTab={(tab) => this.setState({ inspectorTab: tab })}
+          open={inspectorOpen}
+          onClose={() => this.setState({ inspectorOpen: false })}
         />
 
         {this.state.currentSubmission && (
