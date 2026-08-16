@@ -19,7 +19,7 @@
     <link rel="manifest" href="<%= htmlWebpackPlugin.options.assetPrefix %>manifest.json" />
     <link rel="stylesheet" type="text/css" href="<%= htmlWebpackPlugin.options.assetPrefix %>styles.css" />
   </head>
-  <body>
+  <body data-view="<%= htmlWebpackPlugin.options.view %>">
     <div id="background">
       <div id="ui"></div><div id="fps"></div>
       <canvas id="sand-canvas"></canvas><canvas id="fluid-canvas"></canvas>

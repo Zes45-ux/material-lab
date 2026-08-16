@@ -5,11 +5,11 @@ import Info from "./components/info";
 import { Index } from "./components/ui";
 import Menu from "./components/menu";
 import BenchmarkRunner from "./components/benchmarkRunner";
+import { pageView } from "./page-view";
 
-const route = window.location.pathname.replace(/\/+$/, "");
-const view = route.endsWith("/info") ? (
+const view = pageView === "info" ? (
   <Menu><Info /></Menu>
-) : route.endsWith("/bench") ? (
+) : pageView === "bench" ? (
   <BenchmarkRunner />
 ) : (
   <Index />

@@ -6,9 +6,10 @@ import { fps } from "./fps";
 import {} from "./paint";
 import {} from "./app";
 import { startFluid } from "./fluid";
+import { pageView } from "./page-view";
 import {} from "./layout";
 
-const isBench = window.location.pathname.replace(/\/+$/, "").endsWith("/bench");
+const isBench = pageView === "bench";
 if (window.safari) {
   history.pushState(null, null, location.href);
   window.onpopstate = function (event) {

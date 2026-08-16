@@ -1,5 +1,5 @@
 const path = require("path");
-const dist = path.resolve(__dirname, "dist");
+const dist = process.env.SANDSPIEL_DIST_DIR || path.resolve(__dirname, "dist");
 
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
@@ -31,18 +31,20 @@ module.exports = (env, argv) => {
         ...assetFiles.map((file) => ({ from: `assets/${file}`, to: `assets/${file}` })),
       ],
     }),
-    new HtmlWebpackPlugin({ template: "index.html", assetPrefix: "" }),
+    new HtmlWebpackPlugin({ template: "index.html", assetPrefix: "", view: "home" }),
     new HtmlWebpackPlugin({
       template: "index.html",
       filename: "info/index.html",
       publicPath: "../",
       assetPrefix: "../",
+      view: "info",
     }),
     new HtmlWebpackPlugin({
       template: "index.html",
       filename: "bench/index.html",
       publicPath: "../",
       assetPrefix: "../",
+      view: "bench",
     }),
   ];
 

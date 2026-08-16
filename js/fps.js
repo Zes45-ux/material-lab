@@ -13,20 +13,16 @@ const fps = new (class {
     this.lastFrameTimeStamp = now;
     const fps = (1 / delta) * 1000;
 
-    // Save only the latest 100 timings.
+    // Save only the latest 30 frame timings.
     this.frames.push(fps);
     if (this.frames.length > 30) {
       this.frames.shift();
     }
 
-    // Find the max, min, and mean of our 100 latest timings.
-    let min = Infinity;
-    let max = -Infinity;
+    // Find the mean of our 30 latest timings.
     let sum = 0;
     for (let i = 0; i < this.frames.length; i++) {
       sum += this.frames[i];
-      min = Math.min(this.frames[i], min);
-      max = Math.max(this.frames[i], max);
     }
     let mean = sum / this.frames.length;
     // Render the statistics.

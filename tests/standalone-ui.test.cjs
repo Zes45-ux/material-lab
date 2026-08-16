@@ -2,6 +2,9 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const os = require("node:os");
+const http = require("node:http");
+const { spawnSync } = require("node:child_process");
 const root = path.resolve(__dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -189,7 +192,7 @@ test("static shell is Chinese and has no remote runtime dependency", () => {
   assert.doesNotMatch(html, /adsbygoogle|googletagmanager|a\.sandspiel\.club|adslot_1/);
   assert.match(
     html,
-    /<body>\s*<div id="background">\s*<div id="ui"><\/div>\s*<div id="fps"><\/div>\s*<canvas id="sand-canvas"><\/canvas>\s*<canvas id="fluid-canvas"><\/canvas>\s*<\/div>\s*<\/body>/
+    /<body(?:\s+data-view="[^"]+")?>\s*<div id="background">\s*<div id="ui"><\/div>\s*<div id="fps"><\/div>\s*<canvas id="sand-canvas"><\/canvas>\s*<canvas id="fluid-canvas"><\/canvas>\s*<\/div>\s*<\/body>/
   );
   assert.equal(manifest.name, "像素炼金术");
   assert.equal(manifest.short_name, "像素炼金术");
@@ -253,21 +256,72 @@ test("benchmark results and standalone information copy are fully Chinese", () =
   assert.doesNotMatch(info, /在这里分享作品|分享作品/);
 });
 
-test("static output supports direct retained routes and subpath asset resolution", () => {
-  const config = read("webpack.config.js");
-  const html = read("index.html");
-  const app = read("js/app.js");
-  const index = read("js/index.js");
-  assert.match(config, /publicPath: "auto"/);
-  assert.match(config, /filename: "info\/index\.html"/);
-  assert.match(config, /filename: "bench\/index\.html"/);
-  assert.match(html, /htmlWebpackPlugin\.options\.assetPrefix/);
-  assert.match(app, /location\.pathname/);
-  assert.doesNotMatch(app, /BrowserRouter|RouterDOM\[|react-router-dom/);
-  assert.doesNotMatch(read("js\/components\/ui.js"), /props\.location/);
-  assert.match(index, /__webpack_public_path__/);
-  assert.match(index, /endsWith\("\/bench"\)/);
-  assert.match(index, /document\.readyState === "complete"/);
+const webpackCli = path.join(root, "node_modules", "webpack", "bin", "webpack.js");
+
+test("production build emits marked static entries for root and colliding base paths", { skip: !fs.existsSync(webpackCli) }, async () => {
+  const output = fs.mkdtempSync(path.join(os.tmpdir(), "sandspiel-static-test-"));
+  const result = spawnSync(process.execPath, [webpackCli, "--mode=production"], {
+    cwd: root,
+    env: { ...process.env, SANDSPIEL_DIST_DIR: output },
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+
+  const entry = (folder, file = "index.html") => fs.readFileSync(path.join(folder, file), "utf8");
+  assert.match(entry(output), /<body data-view="home">/);
+  assert.match(entry(output, "info/index.html"), /<body data-view="info">/);
+  assert.match(entry(output, "bench/index.html"), /<body data-view="bench">/);
+  assert.match(entry(output), /src="[^/][^"]+\.js"/);
+  assert.equal(JSON.parse(entry(output, "manifest.json")).scope, "./");
+
+  const serviceWorker = entry(output, "service-worker.js");
+  for (const removed of ["ads.txt", "site.webmanifest", "price.png", "App_Store_Badge"]) {
+    assert.equal(serviceWorker.includes(removed), false, `${removed} entered the precache`);
+  }
+
+  const serve = async (host, routes) => {
+    const server = http.createServer((request, response) => {
+      const urlPath = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
+      const file = path.join(host, urlPath, urlPath.endsWith("/") ? "index.html" : "");
+      if (fs.existsSync(file) && fs.statSync(file).isFile()) {
+        response.writeHead(200, { "content-type": "text/html" });
+        response.end(fs.readFileSync(file));
+        return;
+      }
+      response.writeHead(404).end();
+    });
+    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    const port = server.address().port;
+    try {
+      for (const [route, view] of routes) {
+        const response = await fetch(`http://127.0.0.1:${port}${route}`);
+        assert.equal(response.status, 200, route);
+        assert.match(await response.text(), new RegExp(`<body data-view="${view}">`), route);
+      }
+    } finally {
+      await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  };
+  const normalHost = fs.mkdtempSync(path.join(os.tmpdir(), "sandspiel-static-host-"));
+  const collisionHost = fs.mkdtempSync(path.join(os.tmpdir(), "sandspiel-static-collision-"));
+  fs.cpSync(output, normalHost, { recursive: true });
+  fs.cpSync(output, path.join(normalHost, "sandbox"), { recursive: true });
+  fs.cpSync(output, path.join(collisionHost, "info"), { recursive: true });
+  fs.cpSync(output, path.join(collisionHost, "bench"), { recursive: true });
+  try {
+    await serve(normalHost, [
+      ["/", "home"], ["/info/", "info"], ["/bench/", "bench"],
+      ["/sandbox/", "home"], ["/sandbox/info/", "info"], ["/sandbox/bench/", "bench"],
+    ]);
+    await serve(collisionHost, [
+      ["/info/", "home"], ["/info/info/", "info"],
+      ["/bench/", "home"], ["/bench/bench/", "bench"],
+    ]);
+  } finally {
+    fs.rmSync(output, { recursive: true, force: true });
+    fs.rmSync(normalHost, { recursive: true, force: true });
+    fs.rmSync(collisionHost, { recursive: true, force: true });
+  }
 });
 
 test("production packaging has an explicit local asset allowlist and no dead deploy dependencies", () => {

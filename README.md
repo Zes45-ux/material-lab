@@ -33,12 +33,12 @@ cd crate
 wasm-pack build --target bundler
 cd ..
 npm install
-npm run start
 npm test
 npm run build
+npm run start
 ```
 
-`npm run start` 会启动本地开发服务器；在终端显示的本地地址打开游戏。`npm test` 运行中文界面、离线运行和 npm 工作流的自动化契约测试。`npm run build` 会生成可部署的 `dist/` 静态文件。
+`npm test` 运行源码契约与临时生产构建产物的自动化检查；`npm run build` 会生成可部署的 `dist/` 静态文件。最后执行的 `npm run start` 会持续启动本地开发服务器；如需在它运行期间再次测试或构建，请另开一个终端。
 
 ## 构建与部署说明
 
