@@ -1077,7 +1077,6 @@ body {
 .material-option:hover,
 .material-option:focus-visible {
   border-color: var(--line-strong);
-  outline: none;
   transform: translateY(-1px);
 }
 
