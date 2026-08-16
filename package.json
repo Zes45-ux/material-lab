@@ -1,6 +1,7 @@
 {
   "name": "sandtable",
   "version": "1.0.0",
+  "packageManager": "npm@12.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -33,7 +34,7 @@
     "glslify-loader": "^1.0.2",
     "html-webpack-plugin": "^5.6.5",
     "http-server": "^0.11.1",
-    "raw-loader": "^1.0.0",
+    "raw-loader": "^4.0.2",
     "webpack": "^5.104.1",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.2.3",

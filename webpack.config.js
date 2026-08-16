@@ -74,7 +74,10 @@ module.exports = (env, argv) => {
     rules: [
       {
         test: /\.(glsl|frag|vert)$/,
-        use: "raw-loader",
+        use: {
+          loader: "raw-loader",
+          options: { esModule: false },
+        },
         exclude: /node_modules/,
       },
       {

@@ -6,6 +6,24 @@ const root = path.resolve(__dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+test("repository uses one reproducible npm workflow", () => {
+  assert.equal(fs.existsSync(path.join(root, "package-lock.json")), true);
+  assert.equal(fs.existsSync(path.join(root, "pnpm-lock.yaml")), false);
+  assert.equal(fs.existsSync(path.join(root, "yarn.lock")), false);
+  const pkg = JSON.parse(read("package.json"));
+  assert.match(pkg.packageManager, /^npm@/);
+  assert.equal(pkg.scripts.test, "node --test tests/*.test.cjs");
+  assert.equal(pkg.dependencies["@babel/runtime"], "^7.28.6");
+});
+
+test("webpack provides regl with CommonJS shader source strings", () => {
+  const webpackConfig = read("webpack.config.js");
+  assert.match(
+    webpackConfig,
+    /loader: "raw-loader",\s*options: \{ esModule: false \}/
+  );
+});
+
 test("community, cloud, ads and telemetry are absent", () => {
   const removed = [
     "functions", ".firebaserc", "firebase.json", "firestore.indexes.json",
