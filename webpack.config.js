@@ -1,5 +1,5 @@
 const path = require("path");
-const dist = path.resolve(__dirname, "dist");
+const dist = process.env.SANDSPIEL_DIST_DIR || path.resolve(__dirname, "dist");
 
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
@@ -8,23 +8,50 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 const { GenerateSW } = require("workbox-webpack-plugin");
 
+const assetFiles = [
+  "favicon-16x16.png", "favicon-32x32.png",
+  "icon-72x72.png", "icon-96x96.png", "icon-128x128.png",
+  "icon-144x144.png", "icon-152x152.png", "icon-192x192.png",
+  "icon-384x384.png", "icon-512x512.png",
+];
+
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
+  // The checked-in wasm package makes ordinary and Vercel builds deterministic.
+  // Set SANDSPIEL_BUILD_WASM=1 when Rust code changes and a local toolchain is ready.
+  const shouldBuildWasm =
+    !process.env.VERCEL &&
+    process.env.SANDSPIEL_BUILD_WASM === "1" &&
+    process.env.SANDSPIEL_SKIP_WASM !== "1";
 
   const plugins = [
     new CleanWebpackPlugin(),
-    new WasmPackPlugin({
+    ...(shouldBuildWasm ? [new WasmPackPlugin({
       crateDirectory: path.resolve(__dirname, "crate"),
       extraArgs: "--target bundler",
-    }),
+    })] : []),
     new CopyWebpackPlugin({
       patterns: [
         "js/styles.css",
         "manifest.json",
-        { from: "assets/*" },
+        ...assetFiles.map((file) => ({ from: `assets/${file}`, to: `assets/${file}` })),
       ],
     }),
-    new HtmlWebpackPlugin({ template: "index.html" }),
+    new HtmlWebpackPlugin({ template: "index.html", assetPrefix: "", view: "home" }),
+    new HtmlWebpackPlugin({
+      template: "index.html",
+      filename: "info/index.html",
+      publicPath: "../",
+      assetPrefix: "../",
+      view: "info",
+    }),
+    new HtmlWebpackPlugin({
+      template: "index.html",
+      filename: "bench/index.html",
+      publicPath: "../",
+      assetPrefix: "../",
+      view: "bench",
+    }),
   ];
 
   // Only add service worker in production to avoid watch mode warnings
@@ -57,11 +84,12 @@ module.exports = (env, argv) => {
     output: {
       path: dist,
       filename: "[name].[contenthash].js",
-      publicPath: "/",
+      publicPath: "auto",
     },
     devServer: {
       static: dist,
-      allowedHosts: "all",
+      host: "127.0.0.1",
+      allowedHosts: ["localhost", "127.0.0.1", "[::1]"],
       historyApiFallback: true,
     },
     experiments: {
@@ -74,7 +102,10 @@ module.exports = (env, argv) => {
     rules: [
       {
         test: /\.(glsl|frag|vert)$/,
-        use: "raw-loader",
+        use: {
+          loader: "raw-loader",
+          options: { esModule: false },
+        },
         exclude: /node_modules/,
       },
       {

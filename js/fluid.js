@@ -47,12 +47,15 @@ const isIOS = iOS();
 function startFluid({ universe }) {
   canvas.width = universe.width();
   canvas.height = universe.height();
+  const isSmallViewport =
+    Math.min(window.innerWidth, window.innerHeight) < 700;
+  const defaultPressureIterations = isIOS || isSmallViewport ? 12 : 20;
   let config = {
     TEXTURE_DOWNSAMPLE: 0,
     DENSITY_DISSIPATION: 0.98,
     VELOCITY_DISSIPATION: 0.99,
     PRESSURE_DISSIPATION: 0.8,
-    PRESSURE_ITERATIONS: 25,
+    PRESSURE_ITERATIONS: defaultPressureIterations,
     CURL: 15,
     SPLAT_RADIUS: 0.005,
   };
@@ -60,6 +63,8 @@ function startFluid({ universe }) {
   let pointers = [];
   let splatStack = [];
   let isWebGL2;
+  let gui;
+  let destroyed = false;
 
   const { gl, ext } = getWebGLContext(canvas);
   let {
@@ -188,12 +193,15 @@ function startFluid({ universe }) {
     );
 
     const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-    if (status != gl.FRAMEBUFFER_COMPLETE) return false;
-    return true;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.deleteFramebuffer(fbo);
+    gl.deleteTexture(texture);
+    return status == gl.FRAMEBUFFER_COMPLETE;
   }
 
   function startGUI() {
-    var gui = new dat.GUI({ width: 300 });
+    gui = new dat.GUI({ width: 300 });
     gui
       .add(config, "TEXTURE_DOWNSAMPLE", { Full: 0, Half: 1, Quarter: 2 })
       .name("resolution")
@@ -264,6 +272,10 @@ function startFluid({ universe }) {
     bind() {
       gl.useProgram(this.program);
     }
+
+    destroy() {
+      gl.deleteProgram(this.program);
+    }
   }
 
   let texWidth;
@@ -276,6 +288,34 @@ function startFluid({ universe }) {
   let divergence;
   let curl;
   let pressure;
+
+  function destroyFBO(fbo) {
+    if (!fbo) {
+      return;
+    }
+    gl.deleteTexture(fbo[0]);
+    gl.deleteFramebuffer(fbo[1]);
+  }
+
+  function destroyDoubleFBO(doubleFBO) {
+    if (!doubleFBO) {
+      return;
+    }
+    destroyFBO(doubleFBO.read);
+    destroyFBO(doubleFBO.write);
+  }
+
+  function destroyFramebuffers() {
+    destroyDoubleFBO(velocity);
+    destroyDoubleFBO(density);
+    destroyFBO(divergence);
+    destroyFBO(curl);
+    destroyDoubleFBO(pressure);
+    destroyFBO(burns);
+    destroyFBO(cells);
+    destroyFBO(velocityOut);
+  }
+
   initFramebuffers();
 
   const clearProgram = new GLProgram(baseVertexShader, clearShader);
@@ -296,8 +336,38 @@ function startFluid({ universe }) {
     baseVertexShader,
     gradientSubtractShader
   );
+  const programs = [
+    clearProgram,
+    displayProgram,
+    velocityOutProgram,
+    splatProgram,
+    advectionProgram,
+    divergenceProgram,
+    curlProgram,
+    vorticityProgram,
+    pressureProgram,
+    gradientSubtractProgram,
+  ];
+  [
+    baseVertexShader,
+    clearShader,
+    displayShader,
+    splatShader,
+    advectionManualFilteringShader,
+    advectionShader,
+    divergenceShader,
+    curlShader,
+    vorticityShader,
+    pressureShader,
+    gradientSubtractShader,
+    velocityOutShader,
+  ].forEach((shader) => gl.deleteShader(shader));
 
   function initFramebuffers() {
+    if (destroyed) {
+      return;
+    }
+    destroyFramebuffers();
     texWidth = gl.drawingBufferWidth >> config.TEXTURE_DOWNSAMPLE;
     texHeight = gl.drawingBufferHeight >> config.TEXTURE_DOWNSAMPLE;
 
@@ -355,18 +425,18 @@ function startFluid({ universe }) {
       8,
       texWidth,
       texHeight,
-      rg.internalFormat,
-      rg.format,
-      texType,
+      gl.RGBA,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
       ext.supportLinearFiltering ? gl.LINEAR : gl.NEAREST
     );
     cells = createFBO(
       10,
       texWidth,
       texHeight,
-      rg.internalFormat,
-      rg.format,
-      texType,
+      gl.RGBA,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
       ext.supportLinearFiltering ? gl.LINEAR : gl.NEAREST
     );
     velocityOut = createFBO(
@@ -438,14 +508,19 @@ function startFluid({ universe }) {
   const width = universe.width();
   const height = universe.height();
 
+  const blitBuffers = [];
   const blit = (() => {
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    const vertexBuffer = gl.createBuffer();
+    blitBuffers.push(vertexBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.bufferData(
       gl.ARRAY_BUFFER,
       new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]),
       gl.STATIC_DRAW
     );
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
+    const indexBuffer = gl.createBuffer();
+    blitBuffers.push(indexBuffer);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     gl.bufferData(
       gl.ELEMENT_ARRAY_BUFFER,
       new Uint16Array([0, 1, 2, 0, 2, 3]),
@@ -454,6 +529,7 @@ function startFluid({ universe }) {
 
     if (isWebGL2 && !isIOS) {
       const pbo = gl.createBuffer();
+      blitBuffers.push(pbo);
       gl.bindBuffer(gl.PIXEL_PACK_BUFFER, pbo);
       gl.bufferData(
         gl.PIXEL_PACK_BUFFER,
@@ -494,6 +570,9 @@ function startFluid({ universe }) {
   );
 
   function reset() {
+    if (destroyed) {
+      return;
+    }
     clearProgram.bind();
 
     var texUnit = 0;
@@ -542,6 +621,9 @@ function startFluid({ universe }) {
   let sync = undefined;
 
   function update() {
+    if (destroyed) {
+      return;
+    }
     winds = new Uint8Array(memory.buffer, universe.winds(), width * height * 4);
 
     burnsData = new Uint8Array(
@@ -593,26 +675,26 @@ function startFluid({ universe }) {
     velocity.swap();
 
     gl.bindTexture(gl.TEXTURE_2D, burns[0]);
-    gl.texImage2D(
+    gl.texSubImage2D(
       gl.TEXTURE_2D,
       0,
-      gl.RGBA,
+      0,
+      0,
       width,
       height,
-      0,
       gl.RGBA,
       gl.UNSIGNED_BYTE,
       burnsData
     );
 
     gl.bindTexture(gl.TEXTURE_2D, cells[0]);
-    gl.texImage2D(
+    gl.texSubImage2D(
       gl.TEXTURE_2D,
       0,
-      gl.RGBA,
+      0,
+      0,
       width,
       height,
-      0,
       gl.RGBA,
       gl.UNSIGNED_BYTE,
       cellsData
@@ -867,6 +949,34 @@ function startFluid({ universe }) {
     blit(null);
   }
 
+  function destroy() {
+    if (destroyed) {
+      return;
+    }
+    destroyed = true;
+
+    window.removeEventListener("resize", resize);
+    window.removeEventListener("deviceorientation", resize, true);
+    sandCanvas.removeEventListener("mousemove", handleMouseMove);
+    sandCanvas.removeEventListener("touchmove", handleTouchMove, false);
+    sandCanvas.removeEventListener("mousedown", handleMouseDown);
+    sandCanvas.removeEventListener("touchstart", handleTouchStart);
+    window.removeEventListener("mouseup", handleMouseUp);
+    window.removeEventListener("touchend", handleTouchEnd);
+
+    if (gui) {
+      gui.destroy();
+      gui = undefined;
+    }
+    if (sync && gl.deleteSync) {
+      gl.deleteSync(sync);
+      sync = undefined;
+    }
+    destroyFramebuffers();
+    blitBuffers.forEach((buffer) => gl.deleteBuffer(buffer));
+    programs.forEach((program) => program.destroy());
+  }
+
   function splat(x, y, dx, dy, color) {
     splatProgram.bind();
 
@@ -918,7 +1028,7 @@ function startFluid({ universe }) {
   let scaleX;
   let scaleY;
 
-  let resize = () => {
+  const resize = () => {
     boundingRect = sandCanvas.getBoundingClientRect();
     scaleX =
       sandCanvas.width /
@@ -933,7 +1043,7 @@ function startFluid({ universe }) {
   window.addEventListener("resize", resize);
   window.addEventListener("deviceorientation", resize, true);
 
-  sandCanvas.addEventListener("mousemove", (e) => {
+  const handleMouseMove = (e) => {
     const canvasLeft = (e.clientX - boundingRect.left) * scaleX;
     const canvasTop = (e.clientY - boundingRect.top) * scaleY;
     pointers[0].moved = pointers[0].down;
@@ -941,11 +1051,10 @@ function startFluid({ universe }) {
     pointers[0].dy = (canvasTop - pointers[0].y) * 10.0;
     pointers[0].x = canvasLeft;
     pointers[0].y = canvasTop;
-  });
+  };
+  sandCanvas.addEventListener("mousemove", handleMouseMove);
 
-  sandCanvas.addEventListener(
-    "touchmove",
-    (e) => {
+  const handleTouchMove = (e) => {
       if (!window.paused) {
         if (e.cancelable) {
           e.preventDefault();
@@ -962,18 +1071,18 @@ function startFluid({ universe }) {
         pointer.dx = (canvasLeft - pointer.x) * 10.0;
         pointer.dy = (canvasTop - pointer.y) * 10.0;
         pointer.x = canvasLeft;
-        pointer.y = canvasTop;
+          pointer.y = canvasTop;
       }
-    },
-    false
-  );
+  };
+  sandCanvas.addEventListener("touchmove", handleTouchMove, false);
 
-  sandCanvas.addEventListener("mousedown", () => {
+  const handleMouseDown = () => {
     pointers[0].down = true;
     pointers[0].color = fluidColor;
-  });
+  };
+  sandCanvas.addEventListener("mousedown", handleMouseDown);
 
-  sandCanvas.addEventListener("touchstart", (e) => {
+  const handleTouchStart = (e) => {
     if (e.cancelable) {
       e.preventDefault();
     }
@@ -990,20 +1099,23 @@ function startFluid({ universe }) {
       pointers[i].y = canvasTop;
       pointers[i].color = fluidColor;
     }
-  });
+  };
+  sandCanvas.addEventListener("touchstart", handleTouchStart);
 
-  window.addEventListener("mouseup", () => {
+  const handleMouseUp = () => {
     pointers[0].down = false;
-  });
+  };
+  window.addEventListener("mouseup", handleMouseUp);
 
-  window.addEventListener("touchend", (e) => {
+  const handleTouchEnd = (e) => {
     const touches = e.changedTouches;
     for (let i = 0; i < touches.length; i++)
       for (let j = 0; j < pointers.length; j++)
         if (touches[i].identifier == pointers[j].id) pointers[j].down = false;
-  });
+  };
+  window.addEventListener("touchend", handleTouchEnd);
 
-  return { update, reset };
+  return { update, reset, destroy };
 }
 
 export { startFluid };

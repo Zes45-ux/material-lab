@@ -1,0 +1,20 @@
+{
+  "name": "sandtable",
+  "type": "module",
+  "collaborators": [
+    "maxbittker"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "sandtable_bg.wasm",
+    "sandtable.js",
+    "sandtable_bg.js",
+    "sandtable.d.ts"
+  ],
+  "main": "sandtable.js",
+  "types": "sandtable.d.ts",
+  "sideEffects": [
+    "./sandtable.js",
+    "./snippets/*"
+  ]
+}

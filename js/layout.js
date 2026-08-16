@@ -5,8 +5,8 @@ const resize = () => {
 
   if (!canvas || !canvas2 || !stage) return;
 
-  const stageWidth = stage.clientWidth;
-  const stageHeight = stage.clientHeight;
+  const stageWidth = stage.clientWidth || window.innerWidth;
+  const stageHeight = stage.clientHeight || window.innerHeight;
   const isMobile = window.innerWidth < 768;
   const padding = isMobile ? 20 : 36;
   const size = Math.max(
@@ -22,6 +22,7 @@ const resize = () => {
     target.style.right = "auto";
     target.style.bottom = "auto";
     target.style.margin = "0";
+    target.style.transform = "translate(-50%, -50%)";
   });
 
   const fps = document.getElementById("fps");

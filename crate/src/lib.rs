@@ -10,7 +10,7 @@ mod utils;
 
 use rand::{Rng, SeedableRng};
 use rand_xoshiro::SplitMix64;
-use species::Species;
+pub use species::Species;
 use std::collections::VecDeque;
 use wasm_bindgen::prelude::*;
 // use web_sys::console;
@@ -38,7 +38,7 @@ pub struct Cell {
 impl Cell {
     pub fn new(species: Species) -> Cell {
         Cell {
-            species: species,
+            species,
             ra: 100 + (js_sys::Math::random() * 50.) as u8,
             rb: 0,
             clock: 0,
@@ -76,7 +76,7 @@ pub struct SandApi<'a> {
 
 impl<'a> SandApi<'a> {
     pub fn get(&mut self, dx: i32, dy: i32) -> Cell {
-        if dx > 2 || dx < -2 || dy > 2 || dy < -2 {
+        if !(-2..=2).contains(&dx) || !(-2..=2).contains(&dy) {
             panic!("oob set");
         }
         let nx = self.x + dx;
@@ -92,7 +92,7 @@ impl<'a> SandApi<'a> {
         self.universe.get_cell(nx, ny)
     }
     pub fn set(&mut self, dx: i32, dy: i32, v: Cell) {
-        if dx > 2 || dx < -2 || dy > 2 || dy < -2 {
+        if !(-2..=2).contains(&dx) || !(-2..=2).contains(&dy) {
             panic!("oob set");
         }
         let nx = self.x + dx;
@@ -200,7 +200,7 @@ impl Universe {
         }
         self.generation = self.generation.wrapping_add(1);
         for x in 0..self.width {
-            let scanx = if self.generation % 2 == 0 {
+            let scanx = if self.generation.is_multiple_of(2) {
                 self.width - (1 + x)
             } else {
                 x
@@ -250,7 +250,6 @@ impl Universe {
         self.burns.as_ptr()
     }
     pub fn paint(&mut self, x: i32, y: i32, size: i32, species: Species) {
-        let size = size;
         let radius: f64 = (size as f64) / 2.0;
 
         let floor = (radius + 1.0) as i32;
@@ -270,11 +269,11 @@ impl Universe {
                 }
                 if self.get_cell(px, py).species == Species::Empty || species == Species::Empty {
                     self.cells[i] = Cell {
-                        species: species,
+                        species,
                         ra: 60
                             + (size as u8)
                             + (self.rng.gen::<f32>() * 30.) as u8
-                            + ((self.generation % 127) as i8 - 60).abs() as u8,
+                            + ((self.generation % 127) as i8 - 60).unsigned_abs(),
                         rb: 0,
                         clock: self.generation,
                     }
@@ -290,9 +289,8 @@ impl Universe {
 
     pub fn pop_undo(&mut self) {
         let old_state = self.undo_stack.pop_front();
-        match old_state {
-            Some(state) => self.cells = state,
-            None => (),
+        if let Some(state) = old_state {
+            self.cells = state;
         };
     }
 
@@ -341,16 +339,16 @@ impl Universe {
 
     fn get_cell(&self, x: i32, y: i32) -> Cell {
         let i = self.get_index(x, y);
-        return self.cells[i];
+        self.cells[i]
     }
 
     fn get_wind(&self, x: i32, y: i32) -> Wind {
         let i = self.get_index(x, y);
-        return self.winds[i];
+        self.winds[i]
     }
 
     fn blow_wind(cell: Cell, wind: Wind, mut api: SandApi) {
-        if cell.clock - api.universe.generation == 1 {
+        if cell.clock == api.universe.generation.wrapping_add(1) {
             return;
         }
         if cell.species == Species::Empty {
@@ -427,14 +425,39 @@ impl Universe {
                 dy = -2;
             }
             api.set(dx, dy, cell);
-            return;
         }
     }
     fn update_cell(cell: Cell, api: SandApi) {
-        if cell.clock - api.universe.generation == 1 {
+        if cell.clock == api.universe.generation.wrapping_add(1) {
             return;
         }
 
         cell.update(api);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Species, Universe};
+
+    #[test]
+    fn empty_universe_can_tick_without_panicking() {
+        let mut universe = Universe::new(4, 4);
+
+        universe.tick();
+
+        assert_eq!(universe.width(), 4);
+        assert_eq!(universe.height(), 4);
+    }
+
+    #[test]
+    fn sand_moves_into_an_empty_cell_on_tick() {
+        let mut universe = Universe::new(3, 3);
+        universe.paint(1, 0, 1, Species::Sand);
+
+        universe.tick();
+
+        assert_eq!(universe.get_cell(1, 0).species, Species::Empty);
+        assert_eq!(universe.get_cell(1, 1).species, Species::Sand);
     }
 }

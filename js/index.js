@@ -1,23 +1,4 @@
-import * as Sentry from "@sentry/browser";
-import { Integrations } from "@sentry/tracing";
-import { Wasm as WasmIntegration } from "@sentry/wasm";
 import { boot } from "./boot";
-if (!window.location.host.startsWith("localhost")) {
-  Sentry.init({
-    dsn: "https://4bf8c3ab764f40569d573fc4021efe40@o40136.ingest.sentry.io/1331284",
-
-    // Alternatively, use `process.env.npm_package_version` for a dynamic release version
-    // if your build tool supports it.
-    integrations: [new Integrations.BrowserTracing(), new WasmIntegration()],
-
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: 0.01,
-  });
-}
-
-import "./api";
 import { Universe } from "../crate/pkg";
 
 import { startWebGL } from "./render";
@@ -25,9 +6,10 @@ import { fps } from "./fps";
 import {} from "./paint";
 import {} from "./app";
 import { startFluid } from "./fluid";
+import { pageView } from "./page-view";
 import {} from "./layout";
 
-const isBench = window.location.pathname === "/bench";
+const isBench = pageView === "bench";
 if (window.safari) {
   history.pushState(null, null, location.href);
   window.onpopstate = function (event) {
@@ -58,21 +40,26 @@ if (mobileAndTabletcheck()) {
 }
 
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
+  const registerServiceWorker = () => {
     navigator.serviceWorker
-      .register("/service-worker.js")
+      .register(new URL("service-worker.js", __webpack_public_path__))
       .then((registration) => {
         console.log("SW registered: ", registration);
-        fetch("index.html"); // refresh cache (?)
       })
       .catch((registrationError) => {
         console.log("SW registration failed: ", registrationError);
       });
-  });
+  };
+
+  if (document.readyState === "complete") {
+    registerServiceWorker();
+  } else {
+    window.addEventListener("load", registerServiceWorker, { once: true });
+  }
 }
 
 let n = 300;
-const universe = isBench ? window.u : Universe.new(n, n);
+const universe = isBench ? null : Universe.new(n, n);
 
 let width = n;
 let height = n;
@@ -96,8 +83,8 @@ if (!isBench) {
   fluid = startFluid({ universe });
   drawSand = startWebGL({ canvas, universe });
 } else {
-  fluid = window.f;
-  drawSand = window.r;
+  fluid = { update() {}, reset() {} };
+  drawSand = () => {};
 }
 const renderLoop = () => {
   if (!window.paused) {
@@ -109,14 +96,17 @@ const renderLoop = () => {
 
   window.animationId = requestAnimationFrame(renderLoop);
 };
-renderLoop();
-window.u = universe;
 
 if (!isBench) {
+  renderLoop();
+  window.u = universe;
   boot(width, height);
 }
 
 function reset() {
+  if (!universe) {
+    return;
+  }
   fluid.reset();
   fluid.update();
   fluid.reset();

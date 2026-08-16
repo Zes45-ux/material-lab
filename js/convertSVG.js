@@ -78,56 +78,148 @@ export function rgbaToSpecies(r, g, b, a) {
   return species ? species : Species.Empty;
 }
 
-export async function svgToImageData (svgString) {
+const MAX_SVG_INPUT_BYTES = 1_000_000;
+const MAX_SVG_NODE_COUNT = 10_000;
+const FORBIDDEN_SVG_ELEMENTS = new Set([
+  "script",
+  "foreignobject",
+  "iframe",
+  "object",
+  "embed",
+  "image",
+  "audio",
+  "video",
+  "use",
+  "link",
+  "style",
+]);
+
+function validateSvgDocument(doc, svgString) {
+  if (!svgString || /<!DOCTYPE|<!ENTITY/i.test(svgString)) {
+    throw new Error("SVG contains a forbidden document declaration.");
+  }
+
+  const root = doc.documentElement;
+  if (!root || root.localName.toLowerCase() !== "svg") {
+    throw new Error("SVG root element is missing.");
+  }
+
+  const elements = doc.querySelectorAll("*");
+  if (elements.length > MAX_SVG_NODE_COUNT) {
+    throw new Error("SVG contains too many elements.");
+  }
+
+  for (const element of elements) {
+    const elementName = element.localName.toLowerCase();
+    if (FORBIDDEN_SVG_ELEMENTS.has(elementName)) {
+      throw new Error("SVG contains a forbidden element.");
+    }
+
+    for (const attribute of element.attributes) {
+      const attributeName = attribute.name.toLowerCase();
+      const attributeValue = attribute.value.trim();
+
+      if (
+        attributeName.startsWith("on") ||
+        attributeName === "src" ||
+        attributeName === "xml:base" ||
+        attributeName === "action" ||
+        attributeName === "formaction"
+      ) {
+        throw new Error("SVG contains an executable or external attribute.");
+      }
+      if (
+        attributeName === "href" ||
+        attributeName === "xlink:href"
+      ) {
+        if (!attributeValue.startsWith("#")) {
+          throw new Error("SVG contains an external reference.");
+        }
+      }
+      if (/url\s*\(|@import|expression\s*\(/i.test(attributeValue)) {
+        throw new Error("SVG contains an external CSS reference.");
+      }
+    }
+  }
+}
+
+export async function svgToImageData(svgString) {
   const width = 300;
   const height = 300;
+  if (typeof svgString !== "string") {
+    throw new TypeError("SVG input must be a string.");
+  }
+  if (new Blob([svgString]).size > MAX_SVG_INPUT_BYTES) {
+    throw new Error("SVG input is too large.");
+  }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(svgString, "image/svg+xml");
+  const errorNode = doc.querySelector("parsererror");
+  if (errorNode) {
+    throw new Error("Error while parsing SVG.");
+  }
+  validateSvgDocument(doc, svgString);
+
+  // We want to fit any pasted SVG to the default Sandspiel universe size.
+  doc.documentElement.setAttribute("width", width + "px");
+  doc.documentElement.setAttribute("height", height + "px");
+
+  const serializer = new XMLSerializer();
+  const svgStringSized = serializer.serializeToString(doc);
+  const blob = new Blob([svgStringSized], { type: "image/svg+xml" });
 
   return new Promise((resolve, reject) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(svgString, "image/svg+xml");
-  
-    const errorNode = doc.querySelector("parsererror");
-    if (errorNode) {
-      reject("Error while parsing SVG.");
-      return;
-    } 
-    
-    // We want to fit any pasted SVG to the default Sandspiel universe size.
-    doc.documentElement.setAttribute("width", width + "px");
-    doc.documentElement.setAttribute("height", height + "px");
-  
-    const serializer = new XMLSerializer();
-    const svgStringSized = serializer.serializeToString(doc);
-
-    // Load the SVG into an image element
-    const blob = new Blob([svgStringSized], {type: 'image/svg+xml'});
     const img = document.createElement("img");
     img.width = width;
     img.height = height;
-  
-    img.addEventListener("load", () => {
-      // Then we write the image pixels to a canvas.
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      
-      // Transform context to match Sandspiel Universe
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate((-90 * Math.PI) / 180);
-      ctx.scale(-1, 1.0);
-      ctx.translate(-canvas.width / 2, -canvas.height / 2);
-  
-      ctx.drawImage(img, 0, 0);
-  
-      const imgData = ctx.getImageData(0, 0, width, height);
-      resolve(imgData);
-    });
+    let objectUrl = null;
 
-    img.addEventListener('error', function (error) {
+    const cleanup = () => {
+      if (objectUrl !== null) {
+        URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
+      }
+      img.removeEventListener("load", handleLoad);
+      img.removeEventListener("error", handleError);
+    };
+    const handleError = (error) => {
+      cleanup();
       reject(error);
-    })
+    };
+    const handleLoad = () => {
+      try {
+        // Then we write the image pixels to a canvas.
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          throw new Error("Unable to create a 2D canvas context.");
+        }
 
-    img.src = URL.createObjectURL(blob);
+        // Transform context to match Sandspiel Universe.
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((-90 * Math.PI) / 180);
+        ctx.scale(-1, 1.0);
+        ctx.translate(-canvas.width / 2, -canvas.height / 2);
+
+        ctx.drawImage(img, 0, 0);
+        resolve(ctx.getImageData(0, 0, width, height));
+      } catch (error) {
+        reject(error);
+      } finally {
+        cleanup();
+      }
+    };
+
+    img.addEventListener("load", handleLoad, { once: true });
+    img.addEventListener("error", handleError, { once: true });
+    try {
+      objectUrl = URL.createObjectURL(blob);
+      img.src = objectUrl;
+    } catch (error) {
+      handleError(error);
+    }
   });
 }

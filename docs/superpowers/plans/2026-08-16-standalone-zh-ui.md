@@ -33,7 +33,7 @@
 - Consumes: existing `Index`, `Info`, `BenchmarkRunner`, `Universe`, canvas and renderer.
 - Produces: local-only router/UI and `npm test` contract command.
 
-- [ ] **Step 1: Write the failing standalone contract**
+- [x] **Step 1: Write the failing standalone contract**
 
 Create `tests/standalone-ui.test.cjs`:
 
@@ -73,13 +73,13 @@ test("community, cloud, ads and telemetry are absent", () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 Run `node --test tests/standalone-ui.test.cjs`.
 
 Expected: assertion failure `functions still exists`, not a syntax or module error.
 
-- [ ] **Step 3: Remove community runtime code**
+- [x] **Step 3: Remove community runtime code**
 
 Make `js/app.js` register only `/`, `/info/` and `/bench`:
 
@@ -106,7 +106,7 @@ In `js/index.js`, remove Sentry imports/configuration, `import "./api"` and the 
 
 In `js/components/ui.js`, remove cloud/community imports; reduce state to `paused`, `size`, `selectedElement`; delete upload/rate-limit/submit/cloud-load/vote/menu methods and render blocks. Keep WASM `memory` and `loadSVG` for local SVG paste. Keep pause, reset, undo, wind, brush sizes and all material buttons.
 
-- [ ] **Step 4: Delete the full-stack files and prune dependencies**
+- [x] **Step 4: Delete the full-stack files and prune dependencies**
 
 Delete every path listed under this task. Add `"test": "node --test tests/*.test.cjs"` to scripts, remove every dependency asserted by the test, and add:
 
@@ -114,7 +114,7 @@ Delete every path listed under this task. Add `"test": "node --test tests/*.test
 "@babel/runtime": "^7.28.6"
 ```
 
-- [ ] **Step 5: Verify GREEN and commit**
+- [x] **Step 5: Verify GREEN and commit**
 
 Run `npm test`; expect one passing test. Then commit:
 
@@ -136,7 +136,7 @@ git commit -m "refactor: remove community and cloud stack"
 - Consumes: unchanged English `Species` keys.
 - Produces: `elementLabels[name]` 中文标签和中文可访问名称。
 
-- [ ] **Step 1: Append failing localization tests**
+- [x] **Step 1: Append failing localization tests**
 
 ```js
 test("all material controls have approved Chinese labels", () => {
@@ -162,13 +162,13 @@ test("remaining controls and pages use Chinese copy", () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 Run `node --test --test-name-pattern="Chinese|中文" tests/standalone-ui.test.cjs`.
 
 Expected: assertion failure `Chinese label map is missing`.
 
-- [ ] **Step 3: Implement the exact label map and controls**
+- [x] **Step 3: Implement the exact label map and controls**
 
 Create `js/element-labels.json` with the exact asserted object. Import it in UI using `import elementLabels from "../element-labels.json";`. Continue selecting `Species[name]`; render only `{elementLabels[name]}` as translated button text.
 
@@ -181,7 +181,7 @@ title={paused ? "继续" : "暂停"}
 
 Use `笔刷大小 1` through `笔刷大小 5` for size buttons and `撤销` for the undo icon.
 
-- [ ] **Step 4: Translate information and secondary controls**
+- [x] **Step 4: Translate information and secondary controls**
 
 Translate `info.js` completely while preserving author, license-relevant attribution and original reference links. It must include:
 
@@ -193,7 +193,7 @@ Translate `info.js` completely while preserving author, license-relevant attribu
 
 Translate all material headings/descriptions. In `menu.js`, use `<button aria-label="关闭" title="关闭">×</button>`. In benchmark UI, use `测试中：`、`重新测试`、`关闭`.
 
-- [ ] **Step 5: Verify GREEN and commit**
+- [x] **Step 5: Verify GREEN and commit**
 
 Run `npm test`; expect all tests to pass. Commit:
 
@@ -214,7 +214,7 @@ git commit -m "feat: localize sandbox UI in Chinese"
 - Consumes: `#background`, `#ui`, `#fps`, `#sand-canvas`, `#fluid-canvas`.
 - Produces: 中文静态页面，无远程脚本；画布布局计算不变。
 
-- [ ] **Step 1: Append the failing shell test**
+- [x] **Step 1: Append the failing shell test**
 
 ```js
 test("static shell is Chinese and has no remote runtime dependency", () => {
@@ -232,13 +232,13 @@ test("static shell is Chinese and has no remote runtime dependency", () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 Run `node --test --test-name-pattern="static shell" tests/standalone-ui.test.cjs`.
 
 Expected: assertion failure because `<html>` lacks `lang="zh-CN"`.
 
-- [ ] **Step 3: Make HTML and manifest standalone**
+- [x] **Step 3: Make HTML and manifest standalone**
 
 Set title `像素炼金术` and description `一款可以自由绘制沙、水、植物和火焰的像素物理沙盒。`. Remove App Store metadata, Google Fonts, AdSense, Analytics, the ad container, `a.sandspiel.club` and its tracking pixel. Keep only:
 
@@ -253,11 +253,11 @@ Set title `像素炼金术` and description `一款可以自由绘制沙、水�
 
 In `manifest.json`, translate `name`/`short_name`, use lowercase `scope`, set `scope` and `start_url` to `/`, and correct 192/384/512 icon paths from `images/` to existing `assets/` files.
 
-- [ ] **Step 4: Remove dead layout/CSS branches without touching canvas rules**
+- [x] **Step 4: Remove dead layout/CSS branches without touching canvas rules**
 
 Delete `adStyle`, `adSlot`, `pullTabContent` and their assignments from `layout.js`. Delete CSS used only by `.promo`, submissions, admin, Firebase UI and `#PullTabContent`/`#PullTab`; preserve canvas, toolbar, material, menu, Info, benchmark and FPS selectors.
 
-- [ ] **Step 5: Verify GREEN and commit**
+- [x] **Step 5: Verify GREEN and commit**
 
 Run `npm test`; expect all tests to pass. Commit:
 
@@ -280,7 +280,7 @@ git commit -m "refactor: make the game shell standalone"
 - Consumes: Node/npm、Rust/rustup、wasm-pack.
 - Produces: 单一 npm lockfile、中文运行文档和通过验收的 `dist/`。
 
-- [ ] **Step 1: Append the failing npm workflow contract**
+- [x] **Step 1: Append the failing npm workflow contract**
 
 ```js
 test("repository uses one reproducible npm workflow", () => {
@@ -294,7 +294,7 @@ test("repository uses one reproducible npm workflow", () => {
 });
 ```
 
-- [ ] **Step 2: Verify RED and generate one lockfile**
+- [x] **Step 2: Verify RED and generate one lockfile**
 
 Run the test with `--test-name-pattern="npm workflow"`; expect failure because `package-lock.json` is absent. Set `"packageManager": "npm@12.0.1"`, then run:
 
@@ -304,7 +304,7 @@ npm install --package-lock-only --ignore-scripts
 
 Confirm `package-lock.json` exists before deleting `pnpm-lock.yaml` and `yarn.lock`. Do not use `--force` if npm reports an error; diagnose the remaining dependency first.
 
-- [ ] **Step 3: Rewrite README as a Chinese standalone guide**
+- [x] **Step 3: Rewrite README as a Chinese standalone guide**
 
 Document requirements and these exact commands:
 
@@ -320,17 +320,17 @@ npm run build
 
 State that no account, cloud backend or community service is required. Preserve original Sandspiel and WebGL fluid simulation attribution plus license information.
 
-- [ ] **Step 4: Verify tests, install and production build**
+- [x] **Step 4: Verify tests, install and production build**
 
 Run `npm test`, `npm install --ignore-scripts`, and `npm run build`. Expect exit 0 and `dist/index.html`, one `.wasm` file and JS bundles.
 
-- [ ] **Step 5: Browser-check desktop and mobile**
+- [x] **Step 5: Browser-check desktop and mobile**
 
 Serve with `py -3 -m http.server 8081 --bind 127.0.0.1 --directory dist`. At desktop size verify Chinese controls, draw sand and water, pause/continue, undo, reset confirmation and Info. At 390 x 844 verify toolbar wrapping, no horizontal overflow and pointer painting.
 
 Inspect `performance.getEntriesByType("resource")`; every HTTP(S) origin must equal `http://127.0.0.1:8081`. There must be no Firebase, Sentry, ads, analytics, App Store, `a.sandspiel.club` or `orb.farm` request.
 
-- [ ] **Step 6: Run final gate and commit**
+- [x] **Step 6: Run final gate and commit**
 
 Run `npm test`, `npm run build`, `git diff --check`, and `git status --short --branch`. Commit intentional files:
 
@@ -338,3 +338,11 @@ Run `npm test`, `npm run build`, `git diff --check`, and `git status --short --b
 git add -A
 git commit -m "build: standardize standalone npm workflow"
 ```
+
+## 实施记录
+
+- 当前实现提交：`b54a6e5`（包含 Vercel 输出目录修复）；产品分支已推送到 `Zes45-ux/sandspiel-zh`。
+- 最终验证：`npm test` 16/16 通过；`npm run build` 成功；`git diff --check` 通过；生产依赖审计为 0 个漏洞。
+- 画布、WebGL、WASM 物理与 `crate/src` 未修改；已验证 300 x 300 网格、材料映射、五档笔刷、暂停、重置、撤销、风和 SVG 粘贴仍在实现中。
+- manifest 的 `scope` 与 `start_url` 使用 `./`，这是对计划中 `/` 的有意调整，用于支持域名根目录及任意子路径部署。
+- Vercel 没有 Rust/Cargo，因此额外提交 `crate/pkg/` 预编译包和 `vercel.json`；Vercel 构建会跳过 wasm-pack，输出目录为 `dist/`。

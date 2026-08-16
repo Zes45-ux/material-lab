@@ -1,6 +1,5 @@
 /target
 **/*.rs.bk
-Cargo.lock
 wasm-pack.log
 **/pkg
 pkg/
@@ -11,5 +10,4 @@ dist
 crate/pkg
 crate/target
 crate/wasm-pack.log
-crate/Cargo.lock
 .firebase
