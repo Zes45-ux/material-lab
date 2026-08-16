@@ -152,3 +152,17 @@ test("menu and benchmark controls use their complete Chinese copy", () => {
   assert.match(benchmark, />\s*\{" "\}\s*重新测试\s*<\/button>/);
   assert.match(benchmark, /onClick=\{\(\) => this\.setState\(\{ show: false \}\)\}>关闭<\/button>/);
 });
+
+test("static shell is Chinese and has no remote runtime dependency", () => {
+  const html = read("index.html");
+  const manifest = JSON.parse(read("manifest.json"));
+  assert.match(html, /<html lang="zh-CN">/);
+  assert.match(html, /<title>像素炼金术<\/title>/);
+  assert.match(html, /一款可以自由绘制沙、水、植物和火焰的像素物理沙盒/);
+  assert.doesNotMatch(html, /https:\/\//);
+  assert.doesNotMatch(html, /adsbygoogle|googletagmanager|a\.sandspiel\.club|adslot_1/);
+  assert.equal(manifest.name, "像素炼金术");
+  assert.equal(manifest.short_name, "像素炼金术");
+  assert.equal(manifest.scope, "/");
+  assert.equal(manifest.start_url, "/");
+});
