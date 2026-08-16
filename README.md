@@ -11,7 +11,7 @@
 ## 环境要求
 
 - 支持 WebAssembly 的现代浏览器
-- Node.js 与 npm（仓库固定使用 `npm@12.0.1`）
+- Node.js `^20.17.0 || >=22.9.0` 与 npm（仓库固定使用 `npm@11.19.0`；当前 Node 24 可直接使用）
 - [Rust 与 rustup](https://rustup.rs/)
 - [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
 

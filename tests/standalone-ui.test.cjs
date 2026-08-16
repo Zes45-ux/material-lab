@@ -11,9 +11,13 @@ test("repository uses one reproducible npm workflow", () => {
   assert.equal(fs.existsSync(path.join(root, "pnpm-lock.yaml")), false);
   assert.equal(fs.existsSync(path.join(root, "yarn.lock")), false);
   const pkg = JSON.parse(read("package.json"));
-  assert.match(pkg.packageManager, /^npm@/);
+  assert.equal(pkg.packageManager, "npm@11.19.0");
+  assert.equal(pkg.engines.node, "^20.17.0 || >=22.9.0");
   assert.equal(pkg.scripts.test, "node --test tests/*.test.cjs");
   assert.equal(pkg.dependencies["@babel/runtime"], "^7.28.6");
+  const lock = read("package-lock.json");
+  assert.match(lock, /https:\/\/registry\.npmjs\.org\//);
+  assert.doesNotMatch(lock, /registry\.npmmirror\.com/);
 });
 
 test("webpack provides regl with CommonJS shader source strings", () => {

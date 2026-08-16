@@ -1,7 +1,10 @@
 {
   "name": "sandtable",
   "version": "1.0.0",
-  "packageManager": "npm@12.0.1",
+  "packageManager": "npm@11.19.0",
+  "engines": {
+    "node": "^20.17.0 || >=22.9.0"
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
