@@ -118,6 +118,31 @@ test("information page keeps fully translated material details and original refe
   }
 });
 
+test("information page keeps its five Chinese introductory paragraphs", () => {
+  const info = read("js/components/info.js");
+
+  assert.match(
+    info,
+    /<p>\s*欢迎光临，感谢你的到来！希望你享受探索这个小游戏的过程，并从中获得片刻宁静。\{" "\}\s*<\/p>/
+  );
+  assert.match(
+    info,
+    /<p>\s*成长过程中，这类“落沙”游戏曾带给我数小时的乐趣和想象力。我要特别感谢 ha55ii 的\{" "\}\s*<a href="https:\/\/dan-ball\.jp\/en\/javagame\/dust\/">Powder Game<\/a>，它是 Sandspiel 的主要灵感来源。\s*<\/p>/
+  );
+  assert.match(
+    info,
+    /<p>\s*如果你想进一步了解这款游戏的灵感、架构和历史，我写过一篇博客文章（中间部分会涉及一些技术细节）：&nbsp;\s*<a href="https:\/\/maxbittker\.com\/making-sandspiel">Making Sandspiel<\/a>。\s*<\/p>/
+  );
+  assert.match(
+    info,
+    /<p>\s*如果愿意，你可以在 GitHub 查看\{" "\}\s*<a href="https:\/\/github\.com\/maxbittker\/sandspiel">源代码<\/a>，或\{" "\}\s*<a href="https:\/\/github\.com\/maxbittker\/sandspiel\/issues">报告问题<\/a>；也欢迎在 Twitter 联系我，我会尽力回复！\s*<\/p>/
+  );
+  assert.match(
+    info,
+    /<p>\s*最后想说：如果你喜欢这个游戏，或在这里分享作品，你的意见对我很重要。我会尽力让 Sandspiel 成为一个友善、包容的游玩空间，拒绝霸凌、种族主义、跨性别歧视、同性恋歧视及任何其他形式的偏见。如果哪里出了问题，或我能提供帮助，欢迎通过 <a href="mailto:maxbittker@gmail\.com">maxbittker@gmail\.com<\/a> 或 <a href="https:\/\/twitter\.com\/maxbittker">Twitter 上的 @maxbittker<\/a> 联系我。\s*<\/p>/
+  );
+});
+
 test("menu and benchmark controls use their complete Chinese copy", () => {
   const menu = read("js/components/menu.js");
   const benchmark = read("js/components/benchmarkRunner.js");
