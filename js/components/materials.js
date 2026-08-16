@@ -1,17 +1,21 @@
 const MATERIAL_GROUPS = [
   {
+    key: "base",
     label: "基础材料",
     items: ["Empty", "Wall", "Sand", "Water", "Stone", "Ice", "Gas"],
   },
   {
+    key: "life",
     label: "生命材料",
     items: ["Wood", "Plant", "Fungus", "Seed", "Mite"],
   },
   {
+    key: "energy",
     label: "能量材料",
     items: ["Fire", "Lava", "Acid", "Dust", "Oil"],
   },
   {
+    key: "special",
     label: "特殊材料",
     items: ["Cloner", "Rocket"],
   },

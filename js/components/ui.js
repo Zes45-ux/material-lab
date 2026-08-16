@@ -67,7 +67,7 @@ const ElementButton = (name, selectedElement, setElement) => {
   );
 };
 
-const MaterialInspector = ({ name, tab, setTab }) => {
+const MaterialInspector = ({ name, tab, setTab, open, onClose }) => {
   const details = getMaterialDetails(name);
   const color = materialColorFor(name);
   const selectedID = name === "Wind" ? -1 : Species[name];
@@ -77,7 +77,13 @@ const MaterialInspector = ({ name, tab, setTab }) => {
       : color;
 
   return (
-    <aside className="material-inspector" aria-label="材料说明">
+    <aside
+      id="material-inspector"
+      className="material-inspector"
+      data-open={open ? "true" : "false"}
+      aria-label="材料说明"
+      aria-hidden={!open}
+    >
       <div className="inspector-heading">
         <div
           className="inspector-swatch"
@@ -92,6 +98,15 @@ const MaterialInspector = ({ name, tab, setTab }) => {
           <p className="inspector-code">{name}</p>
         </div>
       </div>
+
+      <button
+        type="button"
+        className="inspector-close"
+        onClick={onClose}
+        aria-label="收起材料说明"
+      >
+        ×
+      </button>
 
       <div className="inspector-tabs" role="tablist" aria-label="材料信息层级">
         <button
@@ -166,12 +181,26 @@ class Index extends React.Component {
       size: 2,
       selectedElement: Species.Water,
       inspectorTab: "intro",
+      inspectorOpen: false,
     };
 
     this.selectElement = this.selectElement.bind(this);
     this.togglePause = this.togglePause.bind(this);
     this.reset = this.reset.bind(this);
+    this.handleInspectorKeyDown = (event) => {
+      if (event.key === "Escape" && this.state.inspectorOpen) {
+        this.setState({ inspectorOpen: false });
+      }
+    };
     window.UI = this;
+  }
+
+  componentDidMount() {
+    window.addEventListener("keydown", this.handleInspectorKeyDown);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("keydown", this.handleInspectorKeyDown);
   }
 
   selectElement(selectedElement) {
@@ -235,7 +264,7 @@ class Index extends React.Component {
   }
 
   render() {
-    const { size, paused, selectedElement, inspectorTab } = this.state;
+    const { size, paused, selectedElement, inspectorTab, inspectorOpen } = this.state;
     const selectedName = speciesNameForId(selectedElement);
 
     return (
@@ -297,6 +326,17 @@ class Index extends React.Component {
           </nav>
         </header>
 
+        <button
+          type="button"
+          className="inspector-trigger"
+          aria-expanded={inspectorOpen}
+          aria-controls="material-inspector"
+          onClick={() => this.setState({ inspectorOpen: !inspectorOpen })}
+        >
+          <span aria-hidden="true">i</span>
+          <span>{selectedName}</span>
+        </button>
+
         <aside className="material-rail" aria-label="材料选择">
           <div className="panel-heading">
             <div>
@@ -327,7 +367,7 @@ class Index extends React.Component {
             </button>
 
             {MATERIAL_GROUPS.map((group) => (
-              <section className="material-group" key={group.label}>
+              <section className="material-group" data-family={group.key} key={group.key}>
                 <h2>{group.label}</h2>
                 <div className="material-grid">
                   {group.items.map((name) =>
@@ -372,6 +412,8 @@ class Index extends React.Component {
           name={selectedName}
           tab={inspectorTab}
           setTab={(tab) => this.setState({ inspectorTab: tab })}
+          open={inspectorOpen}
+          onClose={() => this.setState({ inspectorOpen: false })}
         />
       </React.Fragment>
     );
