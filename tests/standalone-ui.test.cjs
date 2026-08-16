@@ -165,22 +165,45 @@ test("static shell is Chinese and has no remote runtime dependency", () => {
   assert.doesNotMatch(html, /https:\/\//);
   assert.doesNotMatch(html, /\b(?:src|href)\s*=\s*["'](?:https?:)?\/\//i);
   assert.doesNotMatch(html, /adsbygoogle|googletagmanager|a\.sandspiel\.club|adslot_1/);
-  for (const id of ["background", "ui", "fps", "sand-canvas", "fluid-canvas"]) {
-    assert.equal((html.match(new RegExp(`id="${id}"`, "g")) || []).length, 1, `${id} must occur once`);
-  }
+  assert.match(
+    html,
+    /<body>\s*<div id="background">\s*<div id="ui"><\/div>\s*<div id="fps"><\/div>\s*<canvas id="sand-canvas"><\/canvas>\s*<canvas id="fluid-canvas"><\/canvas>\s*<\/div>\s*<\/body>/
+  );
   assert.equal(manifest.name, "像素炼金术");
   assert.equal(manifest.short_name, "像素炼金术");
   assert.equal(manifest.scope, "/");
   assert.equal(manifest.start_url, "/");
+  assert.deepEqual(
+    manifest.icons.map(({ sizes, src, type }) => ({ sizes, src, type })),
+    [
+      ["72", "assets/icon-72x72.png"], ["96", "assets/icon-96x96.png"],
+      ["128", "assets/icon-128x128.png"], ["144", "assets/icon-144x144.png"],
+      ["152", "assets/icon-152x152.png"], ["192", "assets/icon-192x192.png"],
+      ["384", "assets/icon-384x384.png"], ["512", "assets/icon-512x512.png"],
+    ].map(([size, src]) => ({ sizes: `${size}x${size}`, src, type: "image/png" }))
+  );
   for (const icon of manifest.icons) {
-    assert.match(icon.src, /^assets\//, `${icon.sizes} icon must be local`);
     assert.equal(fs.existsSync(path.join(root, icon.src)), true, `${icon.src} is missing`);
   }
 
-  assert.match(css, /canvas\s*,\s*img[\s\S]*?image-rendering:\s*pixelated/);
-  assert.match(css, /#sand-canvas\s*\{\s*z-index:\s*2/);
+  const canvasImageRule = css.match(/canvas\s*,\s*img\s*\{([^}]*)\}/);
+  const sandCanvasRule = css.match(/#sand-canvas\s*\{([^}]*)\}/);
+  assert.notEqual(canvasImageRule, null, "canvas image-rendering rule is missing");
+  assert.notEqual(sandCanvasRule, null, "sand canvas rule is missing");
+  assert.match(canvasImageRule[1], /image-rendering:\s*crisp-edges/);
+  assert.match(canvasImageRule[1], /image-rendering:\s*pixelated/);
+  assert.match(sandCanvasRule[1], /z-index:\s*2/);
   assert.doesNotMatch(css, /\.active button|button\.active|button:disabled|\binput\s*\{/);
   assert.doesNotMatch(layout, /adStyle|adSlot|pullTabContent/);
+  assert.match(layout, /let uiheight\s*=\s*50/);
+  assert.match(layout, /let screen_height\s*=\s*window\.innerHeight\s*-\s*uiheight/);
+  assert.match(layout, /if\s*\(screen_width\s*>\s*screen_height\)/);
+  assert.match(layout, /if\s*\(screen_width\s*-\s*window\.innerHeight\s*<\s*400\)/);
+  assert.match(layout, /canvasStyle\s*=\s*`height:\s*\$\{window\.innerHeight\}px;\s*margin:3px`/);
+  assert.match(layout, /uiStyle\s*=\s*`width:\s*\$\{\s*screen_width\s*-\s*window\.innerHeight\s*-\s*12\s*\}px;\s*margin:\s*2px;`/);
+  assert.match(layout, /canvasStyle\s*=\s*`\s*height:\s*\$\{window\.innerHeight\}px;\s*width:\s*\$\{window\.innerHeight\}px;\s*margin:0;\s*left:\s*auto;\s*right:\s*206px`/);
+  assert.match(layout, /uiStyle\s*=\s*`width:\s*200px;\s*margin:\s*2px;`/);
+  assert.match(layout, /canvasStyle\s*=\s*`width:\s*\$\{screen_width\}px;\s*bottom:3px;`/);
   assert.match(layout, /canvas\.style\s*=\s*canvasStyle/);
   assert.match(layout, /canvas2\.style\s*=\s*canvasStyle/);
 });
