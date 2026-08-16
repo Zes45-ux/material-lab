@@ -46,6 +46,10 @@ npm run start
 
 构建产物支持部署在域名根目录或任意子路径。普通静态服务器可直接访问或刷新 `info/` 和 `bench/`，因为构建会生成对应目录的 `index.html`；不要依赖后端 rewrite。
 
+### Vercel
+
+Vercel 构建机默认没有 Rust/Cargo。仓库已提交 `crate/pkg/` 中的预编译 WebAssembly 包；Vercel 会自动跳过 wasm-pack，只打包这个固定产物。Rust 代码变更后，请先在本地运行 `wasm-pack build --target bundler`，再提交更新后的 `crate/pkg/` 文件。
+
 ## 致谢与归属
 
 Sandspiel 由 [Max Bittker](https://maxbittker.com) 创作，是一款以 Rust（经 WASM）、WebGL 和 JavaScript 构建的落沙游戏。它的主要灵感来自 ha55ii 的 [Powder Game](https://dan-ball.jp/en/javagame/dust/)。原项目的设计与制作背景见 [Making Sandspiel](https://maxbittker.com/making-sandspiel)，源代码见 [maxbittker/sandspiel](https://github.com/maxbittker/sandspiel)。

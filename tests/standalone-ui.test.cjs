@@ -31,6 +31,24 @@ test("webpack provides regl with CommonJS shader source strings", () => {
   );
 });
 
+test("Vercel uses the checked-in wasm package without invoking Cargo", () => {
+  const previous = process.env.VERCEL;
+  process.env.VERCEL = "1";
+  const configPath = path.join(root, "webpack.config.js");
+  delete require.cache[require.resolve(configPath)];
+  const config = require(configPath)({}, { mode: "production" });
+  if (previous === undefined) delete process.env.VERCEL;
+  else process.env.VERCEL = previous;
+
+  assert.equal(fs.existsSync(path.join(root, "crate/pkg/package.json")), true);
+  assert.equal(fs.existsSync(path.join(root, "crate/pkg/sandtable_bg.wasm")), true);
+  assert.equal(
+    config.plugins.some((plugin) => plugin.constructor?.name === "WasmPackPlugin"),
+    false,
+    "Vercel must not invoke wasm-pack/Cargo"
+  );
+});
+
 test("community, cloud, ads and telemetry are absent", () => {
   const removed = [
     "functions", ".firebaserc", "firebase.json", "firestore.indexes.json",

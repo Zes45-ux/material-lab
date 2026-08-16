@@ -17,13 +17,16 @@ const assetFiles = [
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
+  // Vercel has no Rust toolchain. It consumes the checked-in wasm-pack output;
+  // local builds keep recompiling the crate so Rust changes remain visible.
+  const shouldBuildWasm = !process.env.VERCEL && process.env.SANDSPIEL_SKIP_WASM !== "1";
 
   const plugins = [
     new CleanWebpackPlugin(),
-    new WasmPackPlugin({
+    ...(shouldBuildWasm ? [new WasmPackPlugin({
       crateDirectory: path.resolve(__dirname, "crate"),
       extraArgs: "--target bundler",
-    }),
+    })] : []),
     new CopyWebpackPlugin({
       patterns: [
         "js/styles.css",
