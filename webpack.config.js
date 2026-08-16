@@ -17,9 +17,12 @@ const assetFiles = [
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
-  // Vercel has no Rust toolchain. It consumes the checked-in wasm-pack output;
-  // local builds keep recompiling the crate so Rust changes remain visible.
-  const shouldBuildWasm = !process.env.VERCEL && process.env.SANDSPIEL_SKIP_WASM !== "1";
+  // The checked-in wasm package makes ordinary and Vercel builds deterministic.
+  // Set SANDSPIEL_BUILD_WASM=1 when Rust code changes and a local toolchain is ready.
+  const shouldBuildWasm =
+    !process.env.VERCEL &&
+    process.env.SANDSPIEL_BUILD_WASM === "1" &&
+    process.env.SANDSPIEL_SKIP_WASM !== "1";
 
   const plugins = [
     new CleanWebpackPlugin(),

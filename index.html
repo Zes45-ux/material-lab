@@ -21,8 +21,12 @@
   </head>
   <body data-view="<%= htmlWebpackPlugin.options.view %>">
     <div id="background">
-      <div id="ui"></div><div id="fps"></div>
-      <canvas id="sand-canvas"></canvas><canvas id="fluid-canvas"></canvas>
+      <div id="ui"></div>
+      <div id="fps"></div>
+      <main id="canvas-stage" aria-label="沙粒实验画布">
+        <canvas id="sand-canvas"></canvas>
+        <canvas id="fluid-canvas"></canvas>
+      </main>
     </div>
   </body>
 </html>

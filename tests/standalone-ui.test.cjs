@@ -49,6 +49,22 @@ test("Vercel uses the checked-in wasm package without invoking Cargo", () => {
   );
 });
 
+test("default builds use checked-in wasm unless local compilation is explicitly enabled", () => {
+  const previous = process.env.SANDSPIEL_BUILD_WASM;
+  delete process.env.SANDSPIEL_BUILD_WASM;
+  const configPath = path.join(root, "webpack.config.js");
+  delete require.cache[require.resolve(configPath)];
+  const config = require(configPath)({}, { mode: "production" });
+  if (previous === undefined) delete process.env.SANDSPIEL_BUILD_WASM;
+  else process.env.SANDSPIEL_BUILD_WASM = previous;
+
+  assert.equal(
+    config.plugins.some((plugin) => plugin.constructor?.name === "WasmPackPlugin"),
+    false,
+    "default builds must use the checked-in wasm package"
+  );
+});
+
 test("Vercel serves the webpack dist output", () => {
   const vercel = JSON.parse(read("vercel.json"));
   assert.equal(vercel.buildCommand, "npm run build");
@@ -118,48 +134,67 @@ test("material guide data covers every material and only references known target
   }
 });
 
-test("material guide shares selection state with the toolbar", () => {
+test("material inspector shares selected material state with the rail", () => {
   const ui = read("js/components/ui.js");
 
-  assert.match(ui, /import materialInfo from "\.\.\/material-info\.json";/);
-  assert.match(ui, /const MaterialGuide = \(/);
+  assert.match(ui, /import \{ MATERIAL_GROUPS, getMaterialDetails \} from "\.\/materials";/);
+  assert.match(ui, /const MaterialInspector =/);
   assert.match(ui, /selectedElement/);
-  assert.match(ui, /onSelect/);
-  assert.match(ui, /<MaterialGuide[\s\S]*selectedElement=\{selectedElement\}/);
-  assert.match(ui, /selectElement\(selectedElement\)[\s\S]*this\.setState\(\{ selectedElement \}\)/);
-  assert.match(ui, /materialInfo\[name\]\.reactions/);
+  assert.match(ui, /selectedName/);
+  assert.match(ui, /<MaterialInspector[\s\S]*name=\{selectedName\}/);
+  assert.match(ui, /inspectorTab: "intro"/);
+  assert.match(ui, /setState\(\{ selectedElement: id, inspectorTab: "intro" \}\)/);
+  assert.match(ui, /details\.reactions/);
 });
 
-test("material guide has a responsive left panel and mobile drawer", () => {
+test("material rail and inspector use a responsive desktop and mobile layout", () => {
   const css = read("js/styles.css");
 
-  assert.match(css, /\.material-guide\s*\{/);
-  assert.match(css, /left:\s*0/);
+  assert.match(css, /\.material-rail\s*\{/);
+  assert.match(css, /\.material-inspector\s*\{/);
   assert.match(css, /overflow-y:\s*auto/);
-  assert.match(css, /@media\s*\(min-width:\s*1100px\)\s*and\s*\(orientation:\s*landscape\)/);
-  assert.match(css, /\.material-guide\.is-open/);
-  assert.match(css, /\.material-guide-launcher/);
+  assert.match(css, /@media\s*\(max-width:\s*767px\)/);
+  assert.match(css, /grid-template-columns/);
+  assert.match(css, /--rail-width/);
 });
 
-test("material buttons preserve Species selection and render mapped Chinese labels", () => {
+test("material lab shell centers the canvas and exposes a two-level inspector", () => {
+  const html = read("index.html");
+  const ui = read("js/components/ui.js");
+  const layout = read("js/layout.js");
+  const css = read("js/styles.css");
+
+  assert.match(html, /<main id="canvas-stage"[^>]*aria-label="沙粒实验画布"/);
+  assert.match(ui, /const MaterialInspector =/);
+  assert.match(ui, /className="material-rail"/);
+  assert.match(ui, /className="material-inspector"/);
+  assert.match(ui, /className="inspector-tab/);
+  assert.match(ui, />\s*简介\s*<\/button>/);
+  assert.match(ui, />\s*反应\s*<\/button>/);
+  assert.match(ui, /MATERIAL_GROUPS/);
+  assert.doesNotMatch(ui, /MaterialGuide|href="info\//);
+  assert.match(layout, /stage\.clientWidth/);
+  assert.match(css, /--rail-width/);
+  assert.match(css, /grid-template-columns/);
+  assert.match(css, /\.material-inspector/);
+});
+
+test("material buttons preserve Species selection and render grouped Chinese labels", () => {
   const ui = read("js/components/ui.js");
 
-  assert.match(ui, /import elementLabels from "\.\.\/element-labels\.json";/);
+  assert.match(ui, /import \{ MATERIAL_GROUPS, getMaterialDetails \} from "\.\/materials";/);
   assert.match(ui, /let elementID = Species\[name\];/);
-  assert.match(ui, /aria-label=\{elementLabels\[name\]\}/);
-  assert.match(ui, />\s*\{elementLabels\[name\]\}\s*<\/button>/);
-  assert.match(
-    ui,
-    /Object\.keys\(Species\)[\s\S]*?\.map\(\(n\) => ElementButton\(n, selectedElement, this\.selectElement\)\)/
-  );
+  assert.match(ui, /aria-label=\{details\.label\}/);
+  assert.match(ui, /MATERIAL_GROUPS\.map/);
+  assert.match(ui, /ElementButton\(name, selectedElement/);
 });
 
 test("sandbox controls bind Chinese text and accessible names to their controls", () => {
   const ui = read("js/components/ui.js");
 
   assert.match(ui, /window\.confirm\("确定要重置沙盒吗？"\)/);
-  assert.match(ui, /<button onClick=\{\(\) => this\.reset\(\)\}>重置<\/button>/);
-  assert.match(ui, /<a href="info\/" className="toolbar-link">说明<\/a>/);
+  assert.match(ui, /onClick=\{\(\) => this\.reset\(\)\}/);
+  assert.doesNotMatch(ui, /href="info\/"|>说明<\/a>/);
   assert.match(
     ui,
     /onClick=\{\(\) => this\.togglePause\(\)\}[\s\S]*?aria-label=\{paused \? "继续" : "暂停"\}[\s\S]*?title=\{paused \? "继续" : "暂停"\}/
@@ -167,7 +202,7 @@ test("sandbox controls bind Chinese text and accessible names to their controls"
   assert.match(ui, /let sizeMap = \[1, 3, 7, 19, 39\];/);
   assert.match(
     ui,
-    /sizeMap\.map\(\(v, i\) => \([\s\S]*?aria-label=\{`笔刷大小 \$\{i \+ 1\}`\}[\s\S]*?title=\{`笔刷大小 \$\{i \+ 1\}`\}/
+    /sizeMap\.map\(\(v, i\) => \([\s\S]*?aria-label=[^\n]*笔刷大小[\s\S]*?title=[^\n]*笔刷大小/
   );
   assert.match(
     ui,
@@ -175,7 +210,7 @@ test("sandbox controls bind Chinese text and accessible names to their controls"
   );
   assert.match(
     ui,
-    /className=\{-1 == selectedElement \? "selected" : ""\}[\s\S]*?onClick=\{\(\) => this\.selectElement\(-1\)\}[\s\S]*?>\s*风\s*<\/button>/
+    /selectedElement === -1\s*\?\s*"wind-option selected"\s*:\s*"wind-option"[\s\S]*?onClick=\{\(\) => this\.selectElement\(-1\)\}/
   );
 });
 
@@ -325,7 +360,7 @@ test("toolbar and menu use one semantic interactive element per action", () => {
 
   assert.doesNotMatch(ui, /<a[^>]*>\s*<button/);
   assert.doesNotMatch(menu, /<a[^>]*>\s*<button/);
-  assert.match(ui, /<a href="info\/" className="toolbar-link">说明<\/a>/);
+  assert.doesNotMatch(ui, /href="info\/"/);
   assert.match(menu, /<a href="\.\.\/" className="x"[^>]*>×<\/a>/);
 });
 
@@ -351,7 +386,7 @@ test("static shell is Chinese and has no remote runtime dependency", () => {
   assert.doesNotMatch(html, /adsbygoogle|googletagmanager|a\.sandspiel\.club|adslot_1/);
   assert.match(
     html,
-    /<body(?:\s+data-view="[^"]+")?>\s*<div id="background">\s*<div id="ui"><\/div>\s*<div id="fps"><\/div>\s*<canvas id="sand-canvas"><\/canvas>\s*<canvas id="fluid-canvas"><\/canvas>\s*<\/div>\s*<\/body>/
+    /<body(?:\s+data-view="[^"]+")?>\s*<div id="background">\s*<div id="ui"><\/div>\s*<div id="fps"><\/div>\s*<main id="canvas-stage"[^>]*>\s*<canvas id="sand-canvas"><\/canvas>\s*<canvas id="fluid-canvas"><\/canvas>\s*<\/main>\s*<\/div>\s*<\/body>/
   );
   assert.equal(manifest.name, "像素炼金术");
   assert.equal(manifest.short_name, "像素炼金术");
@@ -379,17 +414,11 @@ test("static shell is Chinese and has no remote runtime dependency", () => {
   assert.match(sandCanvasRule[1], /z-index:\s*2/);
   assert.doesNotMatch(css, /\.active button|button\.active|button:disabled|\binput\s*\{/);
   assert.doesNotMatch(layout, /adStyle|adSlot|pullTabContent/);
-  assert.match(layout, /let uiheight\s*=\s*50/);
-  assert.match(layout, /let screen_height\s*=\s*window\.innerHeight\s*-\s*uiheight/);
-  assert.match(layout, /if\s*\(screen_width\s*>\s*screen_height\)/);
-  assert.match(layout, /if\s*\(screen_width\s*-\s*window\.innerHeight\s*<\s*400\)/);
-  assert.match(layout, /canvasStyle\s*=\s*`height:\s*\$\{window\.innerHeight\}px;\s*margin:3px`/);
-  assert.match(layout, /uiStyle\s*=\s*`width:\s*\$\{\s*screen_width\s*-\s*window\.innerHeight\s*-\s*12\s*\}px;\s*margin:\s*2px;`/);
-  assert.match(layout, /canvasStyle\s*=\s*`\s*height:\s*\$\{window\.innerHeight\}px;\s*width:\s*\$\{window\.innerHeight\}px;\s*margin:0;\s*left:\s*auto;\s*right:\s*206px`/);
-  assert.match(layout, /uiStyle\s*=\s*`width:\s*200px;\s*margin:\s*2px;`/);
-  assert.match(layout, /canvasStyle\s*=\s*`width:\s*\$\{screen_width\}px;\s*bottom:3px;`/);
-  assert.match(layout, /canvas\.style\s*=\s*canvasStyle/);
-  assert.match(layout, /canvas2\.style\s*=\s*canvasStyle/);
+  assert.match(layout, /const stage = document\.getElementById\("canvas-stage"\)/);
+  assert.match(layout, /stage\.clientWidth/);
+  assert.match(layout, /target\.style\.left = "50%"/);
+  assert.match(layout, /target\.style\.top = "50%"/);
+  assert.match(layout, /window\.innerWidth < 768/);
 });
 
 test("runtime keeps only local Chinese FPS display and has no telemetry sink", () => {
