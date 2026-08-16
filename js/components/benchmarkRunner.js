@@ -4,7 +4,7 @@ import { runBenchmark } from "../benchmark";
 class BenchmarkRunner extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { lines: ["TESTING:"], show: true };
+    this.state = { lines: ["测试中："], show: true };
   }
   componentDidMount() {
     this.run();
@@ -35,10 +35,10 @@ class BenchmarkRunner extends React.Component {
             }}
           >
             {" "}
-            re-run
+            重新测试
           </button>
           {"    "}
-          <button onClick={() => this.setState({ show: false })}> close</button>
+          <button onClick={() => this.setState({ show: false })}>关闭</button>
         </span>
       </div>
     );

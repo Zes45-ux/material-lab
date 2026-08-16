@@ -31,3 +31,25 @@ test("community, cloud, ads and telemetry are absent", () => {
     assert.equal(deps[name], undefined, `${name} is still declared`);
   }
 });
+
+test("all material controls have approved Chinese labels", () => {
+  const labelPath = path.join(root, "js/element-labels.json");
+  assert.equal(fs.existsSync(labelPath), true, "Chinese label map is missing");
+  assert.deepEqual(JSON.parse(fs.readFileSync(labelPath, "utf8")), {
+    Empty: "清除", Wall: "墙", Sand: "沙", Water: "水", Stone: "石头",
+    Ice: "冰", Gas: "气体", Cloner: "复制器", Mite: "螨虫", Wood: "木头",
+    Plant: "植物", Fungus: "真菌", Seed: "种子", Fire: "火", Lava: "岩浆",
+    Acid: "酸液", Dust: "尘埃", Oil: "油", Rocket: "火箭",
+  });
+});
+
+test("remaining controls and pages use Chinese copy", () => {
+  const ui = read("js/components/ui.js");
+  const info = read("js/components/info.js");
+  for (const text of ["重置", "说明", "风", "确定要重置沙盒吗？", "暂停", "继续", "撤销"]) {
+    assert.equal(ui.includes(text), true, `missing UI text: ${text}`);
+  }
+  for (const text of ["像素炼金术（Sandspiel）", "材料说明", "由 Max Bittker 创作"]) {
+    assert.equal(info.includes(text), true, `missing info text: ${text}`);
+  }
+});

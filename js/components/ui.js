@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import * as wasm from "../../crate/pkg/sandtable_bg.wasm";
 import { Species } from "../../crate/pkg/sandtable";
+import elementLabels from "../element-labels.json";
 const memory = wasm.memory;
 
 import { height, universe, width, reset } from "../index.js";
@@ -43,10 +44,9 @@ const ElementButton = (name, selectedElement, setElement) => {
         background,
         backgroundColor: selected ? color.replace("0.25", "1.5") : color,
       }}
+      aria-label={elementLabels[name]}
     >
-      {"  "}
-      {name}
-      {"  "}
+      {elementLabels[name]}
     </button>
   );
 };
@@ -102,7 +102,7 @@ class Index extends React.Component {
   }
 
   reset() {
-    if (window.confirm("Are you sure you want to reset?")) {
+    if (window.confirm("确定要重置沙盒吗？")) {
       this.play();
       reset();
     }
@@ -145,6 +145,8 @@ class Index extends React.Component {
         <button
           onClick={() => this.togglePause()}
           className={paused ? "selected" : ""}
+          aria-label={paused ? "继续" : "暂停"}
+          title={paused ? "继续" : "暂停"}
         >
           {paused ? (
             <svg height="20" width="20" id="d" viewBox="0 0 300 300">
@@ -158,9 +160,9 @@ class Index extends React.Component {
           )}
         </button>
 
-        <button onClick={() => this.reset()}>Reset</button>
+        <button onClick={() => this.reset()}>重置</button>
         <Link to={{ pathname: "/info/" }}>
-          <button>Info</button>
+          <button>说明</button>
         </Link>
 
         {/* {paused && <button onClick={() => universe.tick()}>Tick</button>} */}
@@ -171,6 +173,8 @@ class Index extends React.Component {
               className={i == size ? "selected" : ""}
               onClick={(e) => this.setSize(e, i)}
               style={{ padding: "0px" }}
+              aria-label={`笔刷大小 ${i + 1}`}
+              title={`笔刷大小 ${i + 1}`}
             >
               <svg height="23" width="23" id="d" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r={3 + v} />
@@ -184,6 +188,8 @@ class Index extends React.Component {
             universe.pop_undo();
           }}
           style={{ fontSize: 35 }}
+          aria-label="撤销"
+          title="撤销"
         >
           ↜
         </button>
@@ -193,7 +199,7 @@ class Index extends React.Component {
             this.setState({ selectedElement: -1 });
           }}
         >
-          Wind
+          风
         </button>
         {Object.keys(Species)
           .filter((x) => !Number.isInteger(Number.parseInt(x)))
