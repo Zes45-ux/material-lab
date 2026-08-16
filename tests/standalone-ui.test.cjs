@@ -93,6 +93,54 @@ test("all material controls have approved Chinese labels", () => {
   });
 });
 
+test("material guide data covers every material and only references known targets", () => {
+  const labels = JSON.parse(read("js/element-labels.json"));
+  const infoPath = path.join(root, "js/material-info.json");
+  assert.equal(fs.existsSync(infoPath), true, "material guide data is missing");
+
+  const info = JSON.parse(read("js/material-info.json"));
+  assert.deepEqual(Object.keys(info).sort(), Object.keys(labels).sort());
+
+  for (const [name, entry] of Object.entries(info)) {
+    assert.equal(entry.name, labels[name], `${name} has no translated name`);
+    assert.equal(typeof entry.description, "string", `${name} has no description`);
+    assert.ok(entry.description.trim().length > 0, `${name} has an empty description`);
+    assert.ok(Array.isArray(entry.reactions), `${name} reactions must be an array`);
+    for (const relation of entry.reactions) {
+      assert.ok(Array.isArray(relation.with), `${name} reaction targets must be an array`);
+      assert.ok(relation.with.length > 0, `${name} has an empty reaction target list`);
+      for (const target of relation.with) {
+        assert.equal(labels[target] !== undefined, true, `${name} references unknown target ${target}`);
+      }
+      assert.equal(typeof relation.when, "string", `${name} reaction has no condition`);
+      assert.equal(typeof relation.result, "string", `${name} reaction has no result`);
+    }
+  }
+});
+
+test("material guide shares selection state with the toolbar", () => {
+  const ui = read("js/components/ui.js");
+
+  assert.match(ui, /import materialInfo from "\.\.\/material-info\.json";/);
+  assert.match(ui, /const MaterialGuide = \(/);
+  assert.match(ui, /selectedElement/);
+  assert.match(ui, /onSelect/);
+  assert.match(ui, /<MaterialGuide[\s\S]*selectedElement=\{selectedElement\}/);
+  assert.match(ui, /selectElement\(selectedElement\)[\s\S]*this\.setState\(\{ selectedElement \}\)/);
+  assert.match(ui, /materialInfo\[name\]\.reactions/);
+});
+
+test("material guide has a responsive left panel and mobile drawer", () => {
+  const css = read("js/styles.css");
+
+  assert.match(css, /\.material-guide\s*\{/);
+  assert.match(css, /left:\s*0/);
+  assert.match(css, /overflow-y:\s*auto/);
+  assert.match(css, /@media\s*\(min-width:\s*1100px\)\s*and\s*\(orientation:\s*landscape\)/);
+  assert.match(css, /\.material-guide\.is-open/);
+  assert.match(css, /\.material-guide-launcher/);
+});
+
 test("material buttons preserve Species selection and render mapped Chinese labels", () => {
   const ui = read("js/components/ui.js");
 
@@ -102,7 +150,7 @@ test("material buttons preserve Species selection and render mapped Chinese labe
   assert.match(ui, />\s*\{elementLabels\[name\]\}\s*<\/button>/);
   assert.match(
     ui,
-    /Object\.keys\(Species\)[\s\S]*?\.map\(\(n\) =>\s*ElementButton\(n, selectedElement, \(id\) =>\s*this\.setState\(\{ selectedElement: id \}\)\s*\)\s*\)/
+    /Object\.keys\(Species\)[\s\S]*?\.map\(\(n\) => ElementButton\(n, selectedElement, this\.selectElement\)\)/
   );
 });
 
@@ -111,7 +159,7 @@ test("sandbox controls bind Chinese text and accessible names to their controls"
 
   assert.match(ui, /window\.confirm\("确定要重置沙盒吗？"\)/);
   assert.match(ui, /<button onClick=\{\(\) => this\.reset\(\)\}>重置<\/button>/);
-  assert.match(ui, /<a href="info\/">\s*<button>说明<\/button>/);
+  assert.match(ui, /<a href="info\/" className="toolbar-link">说明<\/a>/);
   assert.match(
     ui,
     /onClick=\{\(\) => this\.togglePause\(\)\}[\s\S]*?aria-label=\{paused \? "继续" : "暂停"\}[\s\S]*?title=\{paused \? "继续" : "暂停"\}/
@@ -127,7 +175,7 @@ test("sandbox controls bind Chinese text and accessible names to their controls"
   );
   assert.match(
     ui,
-    /className=\{-1 == selectedElement \? "selected" : ""\}[\s\S]*?onClick=\{\(\) => \{[\s\S]*?selectedElement: -1[\s\S]*?\}\}[\s\S]*?>\s*风\s*<\/button>/
+    /className=\{-1 == selectedElement \? "selected" : ""\}[\s\S]*?onClick=\{\(\) => this\.selectElement\(-1\)\}[\s\S]*?>\s*风\s*<\/button>/
   );
 });
 
@@ -196,10 +244,97 @@ test("menu and benchmark controls use their complete Chinese copy", () => {
   const menu = read("js/components/menu.js");
   const benchmark = read("js/components/benchmarkRunner.js");
 
-  assert.match(menu, /<button aria-label="关闭" title="关闭">×<\/button>/);
+  assert.match(menu, /<a href="\.\.\/" className="x"[^>]*aria-label="关闭"[^>]*>×<\/a>/);
   assert.match(benchmark, /this\.state = \{ lines: \["测试中："\], show: true \};/);
   assert.match(benchmark, />\s*\{" "\}\s*重新测试\s*<\/button>/);
   assert.match(benchmark, /onClick=\{\(\) => this\.setState\(\{ show: false \}\)\}>关闭<\/button>/);
+});
+
+test("Rust simulation guards generation arithmetic and documents the supported toolchain", () => {
+  const lib = read("crate/src/lib.rs");
+  const cargo = read("crate/Cargo.toml");
+  const ignored = read(".gitignore");
+  const toolchainPath = path.join(root, "rust-toolchain.toml");
+
+  assert.doesNotMatch(lib, /cell\.clock\s*-\s*api\.universe\.generation/);
+  assert.match(lib, /cell\.clock\s*==\s*api\.universe\.generation/);
+  assert.match(cargo, /edition\s*=\s*"2021"/);
+  assert.equal(fs.existsSync(path.join(root, "crate", "Cargo.lock")), true);
+  assert.equal(fs.existsSync(toolchainPath), true);
+  assert.match(read("rust-toolchain.toml"), /channel\s*=\s*"[^"]+"/);
+  assert.doesNotMatch(ignored, /(?:^|\r?\n)\s*(?:crate\/)?Cargo\.lock\s*(?:\r?\n|$)/);
+});
+
+test("Rust enum storage never relies on transmute for untrusted bytes", () => {
+  const species = read("crate/src/species.rs");
+
+  assert.doesNotMatch(species, /transmute/);
+  assert.match(species, /pub fn from_u8\(value: u8\) -> Option<Self>/);
+  assert.match(species, /_\s*=>\s*None/);
+});
+
+test("benchmark, renderer, and fluid simulations expose cleanup hooks", () => {
+  const benchmark = read("js/benchmark.js");
+  const runner = read("js/components/benchmarkRunner.js");
+  const render = read("js/render.js");
+  const fluid = read("js/fluid.js");
+
+  assert.match(benchmark, /destroyBenchmarkWorld|world\.destroy/);
+  assert.match(runner, /runBenchmark/);
+  assert.match(render, /destroy/);
+  assert.match(fluid, /function destroy\(\)/);
+  assert.match(fluid, /deleteTexture/);
+  assert.match(fluid, /deleteFramebuffer/);
+  assert.match(fluid, /deleteProgram/);
+});
+
+test("SVG import bounds and sanitizes input and always releases Blob URLs", () => {
+  const svg = read("js/convertSVG.js");
+
+  assert.match(svg, /MAX_SVG_INPUT_BYTES/);
+  assert.match(svg, /MAX_SVG_NODE_COUNT/);
+  assert.match(svg, /querySelectorAll\("\*"\)/);
+  assert.match(svg, /script|foreignObject|iframe/);
+  assert.equal(svg.includes("url\\s*\\("), true);
+  assert.match(svg, /URL\.revokeObjectURL/);
+});
+
+test("development server binds locally and does not accept arbitrary Host headers", () => {
+  const pkg = JSON.parse(read("package.json"));
+  const config = read("webpack.config.js");
+
+  assert.match(pkg.scripts.start, /--host\s+127\.0\.0\.1/);
+  assert.doesNotMatch(pkg.scripts.start, /0\.0\.0\.0/);
+  assert.match(config, /allowedHosts:\s*\[\s*"localhost",\s*"127\.0\.0\.1",\s*"\[::1\]"\s*\]/);
+  assert.doesNotMatch(config, /allowedHosts:\s*"all"/);
+});
+
+test("fluid upload path avoids reallocating per-frame textures and scales pressure work", () => {
+  const fluid = read("js/fluid.js");
+
+  assert.ok((fluid.match(/texSubImage2D/g) || []).length >= 2);
+  assert.match(fluid, /texSubImage2D\([\s\S]*?burnsData/);
+  assert.match(fluid, /texSubImage2D\([\s\S]*?cellsData/);
+  assert.match(fluid, /defaultPressureIterations/);
+  assert.match(fluid, /PRESSURE_ITERATIONS:\s*defaultPressureIterations/);
+});
+
+test("toolbar and menu use one semantic interactive element per action", () => {
+  const ui = read("js/components/ui.js");
+  const menu = read("js/components/menu.js");
+
+  assert.doesNotMatch(ui, /<a[^>]*>\s*<button/);
+  assert.doesNotMatch(menu, /<a[^>]*>\s*<button/);
+  assert.match(ui, /<a href="info\/" className="toolbar-link">说明<\/a>/);
+  assert.match(menu, /<a href="\.\.\/" className="x"[^>]*>×<\/a>/);
+});
+
+test("dependency fixes remove the audited vulnerable development chains", () => {
+  const pkg = JSON.parse(read("package.json"));
+
+  assert.equal(pkg.devDependencies["glslify-loader"], "^2.0.0");
+  assert.equal(pkg.devDependencies["copy-webpack-plugin"], "^14.0.0");
+  assert.equal(pkg.devDependencies["webpack-dev-server"], "^6.0.0");
 });
 
 test("static shell is Chinese and has no remote runtime dependency", () => {

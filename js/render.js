@@ -18,6 +18,7 @@ let startWebGL = ({ canvas, universe, isSnapshot = false }) => {
   let cell_pointer = universe.cells();
   let cells = new Uint8Array(memory.buffer, cell_pointer, width * height * 4);
   const dataTexture = regl.texture({ width, height, data: cells });
+  let destroyed = false;
 
   let drawSand = regl({
     frag: fsh,
@@ -55,10 +56,24 @@ let startWebGL = ({ canvas, universe, isSnapshot = false }) => {
     count: 3,
   });
 
-  return () => {
+  const render = () => {
+    if (destroyed) {
+      return;
+    }
     regl.poll();
     drawSand();
   };
+
+  render.destroy = () => {
+    if (destroyed) {
+      return;
+    }
+    destroyed = true;
+    dataTexture.destroy();
+    regl.destroy();
+  };
+
+  return render;
 };
 
 let snapshot = (universe) => {
@@ -66,9 +81,12 @@ let snapshot = (universe) => {
   canvas.width = universe.width() / 2;
   canvas.height = universe.height() / 2;
   let render = startWebGL({ universe, canvas, isSnapshot: true });
-  render();
-
-  return canvas.toDataURL("image/png");
+  try {
+    render();
+    return canvas.toDataURL("image/png");
+  } finally {
+    render.destroy();
+  }
 };
 
 let pallette = () => {
@@ -84,7 +102,8 @@ let pallette = () => {
   species.forEach((id) => universe.paint(id, 0, 1, id));
 
   let render = startWebGL({ universe, canvas, isSnapshot: true });
-  render();
+  try {
+    render();
   let ctx = canvas.getContext("webgl");
   let data = new Uint8Array(range * 4);
   ctx.readPixels(0, 0, 1, range, ctx.RGBA, ctx.UNSIGNED_BYTE, data);
@@ -96,7 +115,11 @@ let pallette = () => {
     }, 0.25)`;
     colors[id] = color;
   });
-  return colors;
+    return colors;
+  } finally {
+    render.destroy();
+    universe.free();
+  }
 };
 
 export { startWebGL, snapshot, pallette };

@@ -1,0 +1,363 @@
+{
+  "Empty": {
+    "name": "清除",
+    "category": "工具",
+    "description": "擦除画布上的任意材料。",
+    "reactions": []
+  },
+  "Wall": {
+    "name": "墙",
+    "category": "基础",
+    "description": "固定不动，用来阻挡材料和流动。",
+    "reactions": []
+  },
+  "Sand": {
+    "name": "沙",
+    "category": "固体",
+    "description": "受重力下落，会堆积成沙丘，也会让位给流体。",
+    "reactions": [
+      {
+        "with": ["Water", "Gas", "Oil", "Acid"],
+        "when": "与流体相邻并下落时",
+        "result": "沙会占据下方位置，流体被挤到沙原来的位置。"
+      }
+    ]
+  },
+  "Water": {
+    "name": "水",
+    "category": "流体",
+    "description": "会流动、灭火，并能参与冻结和植物生长。",
+    "reactions": [
+      {
+        "with": ["Fire"],
+        "when": "接触火",
+        "result": "火会熄灭。"
+      },
+      {
+        "with": ["Lava"],
+        "when": "接触岩浆",
+        "result": "岩浆会变成石头，接触位置的水会消失。"
+      },
+      {
+        "with": ["Oil"],
+        "when": "与油重叠或相邻流动",
+        "result": "水会挤开油并从油下方流过。"
+      },
+      {
+        "with": ["Ice"],
+        "when": "冰在水旁更新时",
+        "result": "水有机会被冻成冰。"
+      }
+    ]
+  },
+  "Stone": {
+    "name": "石头",
+    "category": "固体",
+    "description": "坚硬而沉重，可以支撑结构；高压下会碎成沙。",
+    "reactions": [
+      {
+        "with": ["Water", "Gas", "Oil", "Acid"],
+        "when": "与流体相邻并下落时",
+        "result": "石头会让位给流体，流体移动到石头的位置。"
+      }
+    ]
+  },
+  "Ice": {
+    "name": "冰",
+    "category": "固体",
+    "description": "可以冻结附近的水，遇到热量会融化成水。",
+    "reactions": [
+      {
+        "with": ["Water"],
+        "when": "随机更新到水旁时",
+        "result": "有机会把附近的水变成冰。"
+      },
+      {
+        "with": ["Fire", "Lava"],
+        "when": "接触热源时",
+        "result": "冰会融化成水。"
+      },
+      {
+        "with": ["Mite"],
+        "when": "螨虫在冰面移动时",
+        "result": "螨虫可以在冰上滑行。"
+      }
+    ]
+  },
+  "Gas": {
+    "name": "气体",
+    "category": "流体",
+    "description": "轻盈易散，遇到火会被点燃并传播火焰。",
+    "reactions": [
+      {
+        "with": ["Fire"],
+        "when": "火接触气体时",
+        "result": "气体会被点燃，火焰可能向周围传播。"
+      },
+      {
+        "with": ["Gas"],
+        "when": "气体分子相邻时",
+        "result": "气体会聚合并继续扩散。"
+      }
+    ]
+  },
+  "Cloner": {
+    "name": "复制器",
+    "category": "工具",
+    "description": "记住接触到的第一种可复制材料，并持续生成它的副本。",
+    "reactions": [
+      {
+        "with": ["Sand", "Water", "Stone", "Ice", "Gas", "Mite", "Wood", "Plant", "Fungus", "Seed", "Fire", "Lava", "Acid", "Dust", "Oil", "Rocket"],
+        "when": "首次接触可复制材料时",
+        "result": "复制器会记录该材料，并随机在空位生成副本。"
+      }
+    ]
+  },
+  "Mite": {
+    "name": "螨虫",
+    "category": "生物",
+    "description": "会移动和跳跃，偏爱尘埃，也会啃食植物、木头和种子。",
+    "reactions": [
+      {
+        "with": ["Dust"],
+        "when": "附近出现尘埃时",
+        "result": "螨虫有机会吃掉尘埃或移动到尘埃的位置。"
+      },
+      {
+        "with": ["Plant", "Wood", "Seed"],
+        "when": "靠近植物、木头或种子时",
+        "result": "螨虫有机会啃食材料并移动过去。"
+      },
+      {
+        "with": ["Fire", "Lava", "Water", "Oil"],
+        "when": "接触这些材料时",
+        "result": "螨虫会消失。"
+      },
+      {
+        "with": ["Ice"],
+        "when": "在冰面上移动时",
+        "result": "螨虫可以滑行。"
+      }
+    ]
+  },
+  "Wood": {
+    "name": "木头",
+    "category": "固体",
+    "description": "坚固但可燃，也能成为植物和真菌扩散的载体。",
+    "reactions": [
+      {
+        "with": ["Fire", "Lava"],
+        "when": "接触火或岩浆时",
+        "result": "木头会进入燃烧状态，并逐渐产生火焰。"
+      },
+      {
+        "with": ["Water"],
+        "when": "燃烧中的木头接触水时",
+        "result": "燃烧状态会被削弱或熄灭。"
+      },
+      {
+        "with": ["Mite", "Plant", "Fungus"],
+        "when": "生物在木头附近更新时",
+        "result": "螨虫会啃食木头，植物和真菌可以利用木头扩散。"
+      }
+    ]
+  },
+  "Plant": {
+    "name": "植物",
+    "category": "生物",
+    "description": "在潮湿环境中生长，会繁殖并与木头、真菌和种子相互影响。",
+    "reactions": [
+      {
+        "with": ["Water"],
+        "when": "植物附近有水时",
+        "result": "植物会恢复生长状态，并有机会向周围繁殖。"
+      },
+      {
+        "with": ["Wood"],
+        "when": "植物接触木头时",
+        "result": "植物有机会在空位中继续生长。"
+      },
+      {
+        "with": ["Fire", "Lava"],
+        "when": "接触火或岩浆时",
+        "result": "植物会进入燃烧状态。"
+      },
+      {
+        "with": ["Mite", "Fungus", "Seed"],
+        "when": "这些生物在植物附近更新时",
+        "result": "螨虫会啃食植物，真菌和种子会与植物争夺生长空间。"
+      }
+    ]
+  },
+  "Fungus": {
+    "name": "真菌",
+    "category": "生物",
+    "description": "会向周围扩散，在潮湿或有木头的环境中更容易形成群落。",
+    "reactions": [
+      {
+        "with": ["Wood"],
+        "when": "木头包围真菌的生长位置时",
+        "result": "真菌有机会在木头附近扩散。"
+      },
+      {
+        "with": ["Water"],
+        "when": "真菌接触水时",
+        "result": "真菌会恢复到更容易扩散的状态。"
+      },
+      {
+        "with": ["Fire", "Lava"],
+        "when": "接触火或岩浆时",
+        "result": "真菌会进入燃烧状态。"
+      },
+      {
+        "with": ["Sand", "Stone", "Ice", "Plant", "Seed", "Dust", "Oil", "Acid"],
+        "when": "周围存在非空的其他材料时",
+        "result": "真菌可能向空位蔓延；冰和火会阻止这类扩散。"
+      }
+    ]
+  },
+  "Seed": {
+    "name": "种子",
+    "category": "生物",
+    "description": "落在沙、植物或真菌上后会生长，成熟后可以长出新的植物。",
+    "reactions": [
+      {
+        "with": ["Sand", "Plant", "Fungus"],
+        "when": "落在这些材料上时",
+        "result": "种子会开始生长。"
+      },
+      {
+        "with": ["Water"],
+        "when": "成熟种子附近有水时",
+        "result": "有机会生成新的种子。"
+      },
+      {
+        "with": ["Fire", "Lava"],
+        "when": "接触火或岩浆时",
+        "result": "种子会被点燃并变成短暂的火焰。"
+      }
+    ]
+  },
+  "Fire": {
+    "name": "火",
+    "category": "能量",
+    "description": "会燃烧、上升并逐渐衰减，是许多材料反应的触发因素。",
+    "reactions": [
+      {
+        "with": ["Water"],
+        "when": "接触水时",
+        "result": "火会熄灭。"
+      },
+      {
+        "with": ["Gas", "Dust"],
+        "when": "接触气体或尘埃时",
+        "result": "火焰可能向相邻位置传播。"
+      },
+      {
+        "with": ["Oil", "Wood", "Plant", "Fungus", "Seed"],
+        "when": "接触可燃材料时",
+        "result": "材料会进入燃烧或被点燃状态。"
+      },
+      {
+        "with": ["Ice"],
+        "when": "接触冰时",
+        "result": "冰会融化成水。"
+      }
+    ]
+  },
+  "Lava": {
+    "name": "岩浆",
+    "category": "能量",
+    "description": "沉重而炽热，会点燃可燃材料，并与水、冰产生转化。",
+    "reactions": [
+      {
+        "with": ["Water"],
+        "when": "接触水时",
+        "result": "岩浆会变成石头。"
+      },
+      {
+        "with": ["Ice"],
+        "when": "接触冰时",
+        "result": "冰会融化成水。"
+      },
+      {
+        "with": ["Gas", "Dust"],
+        "when": "接触气体或尘埃时",
+        "result": "会产生火焰。"
+      },
+      {
+        "with": ["Oil", "Wood", "Plant", "Fungus", "Seed"],
+        "when": "接触可燃材料时",
+        "result": "材料会被点燃。"
+      }
+    ]
+  },
+  "Acid": {
+    "name": "酸液",
+    "category": "流体",
+    "description": "会流动并腐蚀大多数材料；墙和酸液本身不会被它替换。",
+    "reactions": [
+      {
+        "with": ["Sand", "Water", "Stone", "Ice", "Gas", "Cloner", "Mite", "Wood", "Plant", "Fungus", "Seed", "Fire", "Lava", "Dust", "Oil", "Rocket"],
+        "when": "在被阻挡且邻近其他材料时",
+        "result": "酸液会替换目标位置，目标材料被腐蚀。"
+      }
+    ]
+  },
+  "Dust": {
+    "name": "尘埃",
+    "category": "固体",
+    "description": "轻盈易飘散，受到高压时会爆发成火焰。",
+    "reactions": [
+      {
+        "with": ["Water"],
+        "when": "下方或相邻有水时",
+        "result": "尘埃会让位给水并随流体移动。"
+      },
+      {
+        "with": ["Fire"],
+        "when": "火接触尘埃时",
+        "result": "尘埃会帮助火焰传播。"
+      }
+    ]
+  },
+  "Oil": {
+    "name": "油",
+    "category": "流体",
+    "description": "会缓慢流动，遇火或岩浆会燃烧并产生烟雾。",
+    "reactions": [
+      {
+        "with": ["Fire", "Lava"],
+        "when": "接触火或岩浆时",
+        "result": "油会进入燃烧状态，周期性产生火焰和烟雾。"
+      },
+      {
+        "with": ["Water"],
+        "when": "与水相邻流动时",
+        "result": "水会挤开油，油的流动状态会重新分散。"
+      },
+      {
+        "with": ["Oil"],
+        "when": "燃烧中的油接触其他油时",
+        "result": "燃烧状态可能向相邻油滴传播。"
+      }
+    ]
+  },
+  "Rocket": {
+    "name": "火箭",
+    "category": "工具",
+    "description": "会记住接触到的材料，升空后生成该材料的复制品。",
+    "reactions": [
+      {
+        "with": ["Sand", "Water", "Stone", "Ice", "Gas", "Mite", "Wood", "Plant", "Fungus", "Seed", "Fire", "Lava", "Acid", "Dust", "Oil"],
+        "when": "发射前接触可复制材料时",
+        "result": "火箭会记住该材料，发射后沿路径生成它的副本。"
+      },
+      {
+        "with": ["Fire"],
+        "when": "飞行路径遇到火时",
+        "result": "火箭可以穿过火并继续复制。"
+      }
+    ]
+  }
+}

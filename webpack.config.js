@@ -85,7 +85,8 @@ module.exports = (env, argv) => {
     },
     devServer: {
       static: dist,
-      allowedHosts: "all",
+      host: "127.0.0.1",
+      allowedHosts: ["localhost", "127.0.0.1", "[::1]"],
       historyApiFallback: true,
     },
     experiments: {

@@ -19,11 +19,14 @@ function setup() {
 
   let fluid = startFluid({ universe });
   let render = startWebGL({ canvas, universe });
-  window.f = fluid;
-  window.u = universe;
-  window.r = render;
 
   return { universe, fluid, render };
+}
+
+function destroyBenchmarkWorld({ universe, fluid, render }) {
+  fluid.destroy();
+  render.destroy();
+  universe.free();
 }
 
 function trial(m,{ universe, fluid, render }  ) {
@@ -62,7 +65,8 @@ function runTest(n, m, log) {
   let fluidMax = 0;
   log(`运行 ${n} 轮测试，每轮 ${m} 次`);
   let world = setup();
-  for (let i = 0; i < n; i++) {
+  try {
+    for (let i = 0; i < n; i++) {
     let [delta, cpuTime, fluidTime] = trial(m, world);
     min = Math.min(delta, min);
     max = Math.max(delta, max);
@@ -79,8 +83,8 @@ function runTest(n, m, log) {
     let trialResult = `第 ${i + 1} 轮：${(delta / m).toPrecision(3)} 毫秒；CPU ${(
       cpuTime / m
     ).toPrecision(3)} 毫秒；流体 ${(fluidTime / m).toPrecision(3)} 毫秒`;
-    log(trialResult);
-  }
+      log(trialResult);
+    }
   let avg = sum / n;
   let dev = (max - min) / 2;
   let cDev = (cpuMax - cpuMin) / 2;
@@ -91,7 +95,10 @@ function runTest(n, m, log) {
     fluidSum / m
   ).toPrecision(3)}±${(fDev / m).toPrecision(2)} 毫秒
   `;
-  log(resultString);
+    log(resultString);
+  } finally {
+    destroyBenchmarkWorld(world);
+  }
 }
 function runBenchmark(addLogLine) {
   window.paused = true;
