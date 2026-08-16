@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
 import * as wasm from "../../crate/pkg/sandtable_bg.wasm";
 import { Species } from "../../crate/pkg/sandtable";
@@ -63,22 +62,6 @@ class Index extends React.Component {
       selectedElement: Species.Water,
     };
     window.UI = this;
-    //if we start in the background, pause;
-    if (
-      this.props.location.pathname !== "/" &&
-      this.props.location.pathname !== "/school"
-    ) {
-      window.setTimeout(() => this.pause(), 50);
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (
-      this.props.location.pathname !== "/" &&
-      prevProps.location.pathname == "/"
-    ) {
-      this.pause();
-    }
   }
 
   togglePause() {
@@ -161,9 +144,9 @@ class Index extends React.Component {
         </button>
 
         <button onClick={() => this.reset()}>重置</button>
-        <Link to={{ pathname: "/info/" }}>
+        <a href="info/">
           <button>说明</button>
-        </Link>
+        </a>
 
         {/* {paused && <button onClick={() => universe.tick()}>Tick</button>} */}
         <span className="sizes">

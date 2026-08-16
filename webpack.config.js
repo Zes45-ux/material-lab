@@ -8,6 +8,13 @@ const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 const { GenerateSW } = require("workbox-webpack-plugin");
 
+const assetFiles = [
+  "favicon-16x16.png", "favicon-32x32.png",
+  "icon-72x72.png", "icon-96x96.png", "icon-128x128.png",
+  "icon-144x144.png", "icon-152x152.png", "icon-192x192.png",
+  "icon-384x384.png", "icon-512x512.png",
+];
+
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
 
@@ -21,10 +28,22 @@ module.exports = (env, argv) => {
       patterns: [
         "js/styles.css",
         "manifest.json",
-        { from: "assets/*" },
+        ...assetFiles.map((file) => ({ from: `assets/${file}`, to: `assets/${file}` })),
       ],
     }),
-    new HtmlWebpackPlugin({ template: "index.html" }),
+    new HtmlWebpackPlugin({ template: "index.html", assetPrefix: "" }),
+    new HtmlWebpackPlugin({
+      template: "index.html",
+      filename: "info/index.html",
+      publicPath: "../",
+      assetPrefix: "../",
+    }),
+    new HtmlWebpackPlugin({
+      template: "index.html",
+      filename: "bench/index.html",
+      publicPath: "../",
+      assetPrefix: "../",
+    }),
   ];
 
   // Only add service worker in production to avoid watch mode warnings
@@ -57,7 +76,7 @@ module.exports = (env, argv) => {
     output: {
       path: dist,
       filename: "[name].[contenthash].js",
-      publicPath: "/",
+      publicPath: "auto",
     },
     devServer: {
       static: dist,

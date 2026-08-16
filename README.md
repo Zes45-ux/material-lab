@@ -44,6 +44,8 @@ npm run build
 
 依赖通过根目录的 `package-lock.json` 固定，统一使用 npm；请不要改用 pnpm 或 Yarn。生产构建会由 webpack 重新编译 Rust/WASM 和前端资源，输出的 `dist/index.html`、JavaScript bundle、WASM 和本地资源可由任意静态文件服务器托管。
 
+构建产物支持部署在域名根目录或任意子路径。普通静态服务器可直接访问或刷新 `info/` 和 `bench/`，因为构建会生成对应目录的 `index.html`；不要依赖后端 rewrite。
+
 ## 致谢与归属
 
 Sandspiel 由 [Max Bittker](https://maxbittker.com) 创作，是一款以 Rust（经 WASM）、WebGL 和 JavaScript 构建的落沙游戏。它的主要灵感来自 ha55ii 的 [Powder Game](https://dan-ball.jp/en/javagame/dust/)。原项目的设计与制作背景见 [Making Sandspiel](https://maxbittker.com/making-sandspiel)，源代码见 [maxbittker/sandspiel](https://github.com/maxbittker/sandspiel)。

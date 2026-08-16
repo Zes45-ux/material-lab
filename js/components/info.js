@@ -29,7 +29,7 @@ const Info = () => {
       </p>
       <br />
       <p>
-        最后想说：如果你喜欢这个游戏，或在这里分享作品，你的意见对我很重要。我会尽力让 Sandspiel 成为一个友善、包容的游玩空间，拒绝霸凌、种族主义、跨性别歧视、同性恋歧视及任何其他形式的偏见。如果哪里出了问题，或我能提供帮助，欢迎通过 <a href="mailto:maxbittker@gmail.com">maxbittker@gmail.com</a> 或 <a href="https://twitter.com/maxbittker">Twitter 上的 @maxbittker</a> 联系我。
+        最后想说：如果你喜欢这个本地沙盒，欢迎把它当作一段安静的探索时间。我会尽力让 Sandspiel 成为一个友善、包容的游玩空间，拒绝霸凌、种族主义、跨性别歧视、同性恋歧视及任何其他形式的偏见。如果哪里出了问题，或我能提供帮助，欢迎通过 <a href="mailto:maxbittker@gmail.com">maxbittker@gmail.com</a> 或 <a href="https://twitter.com/maxbittker">Twitter 上的 @maxbittker</a> 联系我。
       </p>
       <br />
       <hr />

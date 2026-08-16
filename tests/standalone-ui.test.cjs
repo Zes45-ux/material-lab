@@ -84,7 +84,7 @@ test("sandbox controls bind Chinese text and accessible names to their controls"
 
   assert.match(ui, /window\.confirm\("确定要重置沙盒吗？"\)/);
   assert.match(ui, /<button onClick=\{\(\) => this\.reset\(\)\}>重置<\/button>/);
-  assert.match(ui, /<Link to=\{\{ pathname: "\/info\/" \}\}>\s*<button>说明<\/button>/);
+  assert.match(ui, /<a href="info\/">\s*<button>说明<\/button>/);
   assert.match(
     ui,
     /onClick=\{\(\) => this\.togglePause\(\)\}[\s\S]*?aria-label=\{paused \? "继续" : "暂停"\}[\s\S]*?title=\{paused \? "继续" : "暂停"\}/
@@ -161,7 +161,7 @@ test("information page keeps its five Chinese introductory paragraphs", () => {
   );
   assert.match(
     info,
-    /<p>\s*最后想说：如果你喜欢这个游戏，或在这里分享作品，你的意见对我很重要。我会尽力让 Sandspiel 成为一个友善、包容的游玩空间，拒绝霸凌、种族主义、跨性别歧视、同性恋歧视及任何其他形式的偏见。如果哪里出了问题，或我能提供帮助，欢迎通过 <a href="mailto:maxbittker@gmail\.com">maxbittker@gmail\.com<\/a> 或 <a href="https:\/\/twitter\.com\/maxbittker">Twitter 上的 @maxbittker<\/a> 联系我。\s*<\/p>/
+    /<p>\s*最后想说：如果你喜欢这个本地沙盒，欢迎把它当作一段安静的探索时间。/
   );
 });
 
@@ -193,8 +193,8 @@ test("static shell is Chinese and has no remote runtime dependency", () => {
   );
   assert.equal(manifest.name, "像素炼金术");
   assert.equal(manifest.short_name, "像素炼金术");
-  assert.equal(manifest.scope, "/");
-  assert.equal(manifest.start_url, "/");
+  assert.equal(manifest.scope, "./");
+  assert.equal(manifest.start_url, "./");
   assert.deepEqual(
     manifest.icons.map(({ sizes, src, type }) => ({ sizes, src, type })),
     [
@@ -228,4 +228,58 @@ test("static shell is Chinese and has no remote runtime dependency", () => {
   assert.match(layout, /canvasStyle\s*=\s*`width:\s*\$\{screen_width\}px;\s*bottom:3px;`/);
   assert.match(layout, /canvas\.style\s*=\s*canvasStyle/);
   assert.match(layout, /canvas2\.style\s*=\s*canvasStyle/);
+});
+
+test("runtime keeps only local Chinese FPS display and has no telemetry sink", () => {
+  const runtimeFiles = fs.readdirSync(path.join(root, "js"), { recursive: true })
+    .filter((file) => file.endsWith(".js"))
+    .map((file) => fs.readFileSync(path.join(root, "js", file), "utf8"))
+    .join("\n");
+  for (const token of ["dataLayer", "gtag", "sending fps", "google-analytics"]) {
+    assert.equal(runtimeFiles.includes(token), false, `${token} remains in runtime source`);
+  }
+  const fps = read("js/fps.js");
+  assert.match(fps, /this\.fps\.textContent = `帧率：\$\{Math\.round\(mean\)\}`;/);
+});
+
+test("benchmark results and standalone information copy are fully Chinese", () => {
+  const benchmark = read("js/benchmark.js");
+  const info = read("js/components/info.js");
+  for (const token of ["Running", "trials", "reps", "ms cpu", "ms fluid", "avg:"]) {
+    assert.equal(benchmark.includes(token), false, `${token} remains in benchmark output`);
+  }
+  assert.match(benchmark, /运行 \$\{n\} 轮测试，每轮 \$\{m\} 次/);
+  assert.match(benchmark, /平均：/);
+  assert.doesNotMatch(info, /在这里分享作品|分享作品/);
+});
+
+test("static output supports direct retained routes and subpath asset resolution", () => {
+  const config = read("webpack.config.js");
+  const html = read("index.html");
+  const app = read("js/app.js");
+  const index = read("js/index.js");
+  assert.match(config, /publicPath: "auto"/);
+  assert.match(config, /filename: "info\/index\.html"/);
+  assert.match(config, /filename: "bench\/index\.html"/);
+  assert.match(html, /htmlWebpackPlugin\.options\.assetPrefix/);
+  assert.match(app, /location\.pathname/);
+  assert.doesNotMatch(app, /BrowserRouter|RouterDOM\[|react-router-dom/);
+  assert.doesNotMatch(read("js\/components\/ui.js"), /props\.location/);
+  assert.match(index, /__webpack_public_path__/);
+  assert.match(index, /endsWith\("\/bench"\)/);
+  assert.match(index, /document\.readyState === "complete"/);
+});
+
+test("production packaging has an explicit local asset allowlist and no dead deploy dependencies", () => {
+  const config = read("webpack.config.js");
+  const pkg = JSON.parse(read("package.json"));
+  assert.doesNotMatch(config, /from: "assets\/\*"/);
+  for (const asset of ["ads.txt", "App_Store_Badge.svg.png", "price.png", "tab.png", "site.webmanifest", "html_code.html", "SSStudio ColorLined Big.svg"]) {
+    assert.equal(fs.existsSync(path.join(root, "assets", asset)), false, `${asset} remains`);
+  }
+  for (const dependency of ["react-youtube", "http-server", "gh-pages"]) {
+    assert.equal(pkg.dependencies?.[dependency], undefined, `${dependency} remains in dependencies`);
+    assert.equal(pkg.devDependencies?.[dependency], undefined, `${dependency} remains in devDependencies`);
+  }
+  assert.equal(pkg.scripts.deploy, undefined);
 });

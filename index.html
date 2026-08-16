@@ -11,16 +11,13 @@
     />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="msapplication-starturl" content="/" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
-    <link rel="mask-icon" href="/assets/safari-pinned-tab.svg" color="#ccbcbc" />
+    <link rel="icon" type="image/png" sizes="32x32" href="<%= htmlWebpackPlugin.options.assetPrefix %>assets/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="<%= htmlWebpackPlugin.options.assetPrefix %>assets/favicon-16x16.png" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="theme-color" content="#ccbcbc" />
     <title>像素炼金术</title>
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="stylesheet" type="text/css" href="/styles.css" />
+    <link rel="manifest" href="<%= htmlWebpackPlugin.options.assetPrefix %>manifest.json" />
+    <link rel="stylesheet" type="text/css" href="<%= htmlWebpackPlugin.options.assetPrefix %>styles.css" />
   </head>
   <body>
     <div id="background">

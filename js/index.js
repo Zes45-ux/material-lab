@@ -8,7 +8,7 @@ import {} from "./app";
 import { startFluid } from "./fluid";
 import {} from "./layout";
 
-const isBench = window.location.pathname === "/bench";
+const isBench = window.location.pathname.replace(/\/+$/, "").endsWith("/bench");
 if (window.safari) {
   history.pushState(null, null, location.href);
   window.onpopstate = function (event) {
@@ -39,17 +39,22 @@ if (mobileAndTabletcheck()) {
 }
 
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
+  const registerServiceWorker = () => {
     navigator.serviceWorker
-      .register("/service-worker.js")
+      .register(new URL("service-worker.js", __webpack_public_path__))
       .then((registration) => {
         console.log("SW registered: ", registration);
-        fetch("index.html"); // refresh cache (?)
       })
       .catch((registrationError) => {
         console.log("SW registration failed: ", registrationError);
       });
-  });
+  };
+
+  if (document.readyState === "complete") {
+    registerServiceWorker();
+  } else {
+    window.addEventListener("load", registerServiceWorker, { once: true });
+  }
 }
 
 let n = 300;
