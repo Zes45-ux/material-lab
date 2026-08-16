@@ -567,7 +567,11 @@ class Index extends React.Component {
               </span>
             </button>
             {MATERIAL_GROUPS.map((group) => (
-              <section className="material-group" key={group.label}>
+              <section
+                className="material-group"
+                data-family={group.key}
+                key={group.key}
+              >
                 <h2>{group.label}</h2>
                 <div className="material-grid">
                   {group.items.map((name) =>

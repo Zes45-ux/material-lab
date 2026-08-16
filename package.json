@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack --mode=production",
     "start": "webpack-dev-server --host 0.0.0.0",
+    "test": "node --test tests/*.test.cjs",
     "deploy": "webpack --mode=production && gh-pages -d dist"
   },
   "repository": {
