@@ -2,126 +2,156 @@ import React from "react";
 
 import * as wasm from "../../crate/pkg/sandtable_bg.wasm";
 import { Species } from "../../crate/pkg/sandtable";
-import elementLabels from "../element-labels.json";
-import materialInfo from "../material-info.json";
 const memory = wasm.memory;
 
 import { height, universe, width, reset } from "../index.js";
 import { pallette } from "../render.js";
 import { svgToImageData, rgbaToSpecies } from "../convertSVG";
+import { MATERIAL_GROUPS, getMaterialDetails } from "./materials";
 
 window.species = Species;
-let pallette_data = pallette();
+const palletteData = pallette();
 
-const MaterialGuide = ({ selectedElement, onSelect, open, onToggle }) => (
-  <React.Fragment>
-    <button
-      className="material-guide-launcher"
-      onClick={onToggle}
-      aria-expanded={open}
-      aria-controls="material-guide"
-    >
-      {open ? "关闭材料" : "材料百科"}
-    </button>
-    <aside id="material-guide" className={`material-guide ${open ? "is-open" : ""}`} aria-label="材料百科">
-      <div className="material-guide__header">
-        <h2>材料百科</h2>
-        <button
-          className="material-guide__toggle"
-          onClick={onToggle}
-          aria-label={open ? "收起材料百科" : "展开材料百科"}
-          title={open ? "收起材料百科" : "展开材料百科"}
-        >
-          {open ? "收起" : "展开"}
-        </button>
-      </div>
-      <div className="material-guide__list">
-        {Object.keys(elementLabels).map((name) => {
-          const elementID = Species[name];
-          const selected = elementID === selectedElement;
-          const color = pallette_data[elementID] || "rgba(0, 0, 0, 0.15)";
-          return (
-            <section className="material-guide__entry" key={name}>
-              <button
-                className={`material-guide__material ${selected ? "selected" : ""}`}
-                onClick={() => onSelect(elementID)}
-                aria-pressed={selected}
-              >
-                <span
-                  className="material-guide__swatch"
-                  style={{ backgroundColor: color }}
-                  aria-hidden="true"
-                />
-                <span>{elementLabels[name]}</span>
-              </button>
-              <p className="material-guide__description">{materialInfo[name].description}</p>
-              {materialInfo[name].reactions.length > 0 ? (
-                <ul className="material-guide__reactions">
-                  {materialInfo[name].reactions.map((relation, index) => (
-                    <li className="material-guide__reaction" key={`${name}-${index}`}>
-                      <span className="material-guide__condition">{relation.when}</span>
-                      <span className="material-guide__result">{relation.result}</span>
-                      <div className="material-guide__targets">
-                        {relation.with.map((target) => (
-                          <button
-                            className="material-guide__target"
-                            key={target}
-                            onClick={() => onSelect(Species[target])}
-                            title={`查看${elementLabels[target]}材料`}
-                          >
-                            {elementLabels[target]}
-                          </button>
-                        ))}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="material-guide__empty">暂无直接反应记录。</p>
-              )}
-            </section>
-          );
-        })}
-      </div>
-    </aside>
-  </React.Fragment>
-);
+const materialColorFor = (name) => {
+  if (name === "Wind") return "#c65d3b";
+  return (palletteData[Species[name]] || "rgba(128, 128, 128, 0.35)").replace(
+    /,\s*0\.25\)/,
+    ", 0.86)"
+  );
+};
+
+const speciesNameForId = (elementID) => {
+  if (elementID === -1) return "Wind";
+  return (
+    Object.keys(Species).find(
+      (name) =>
+        !Number.isInteger(Number.parseInt(name)) &&
+        Species[name] === elementID
+    ) || "Water"
+  );
+};
 
 const ElementButton = (name, selectedElement, setElement) => {
   let elementID = Species[name];
+  const details = getMaterialDetails(name);
+  const color = materialColorFor(name);
+  const selected = elementID === selectedElement;
+  let background = "transparent";
 
-  let color = pallette_data[elementID];
-  let selected = elementID == selectedElement;
-
-  let background = "inherit";
-  if (elementID == 14) {
-    background = `linear-gradient(45deg, 
-    rgba(202, 121, 125, 0.25), 
-    rgba(169, 120, 200, 0.25), 
-    rgba(117, 118, 195, 0.25), 
-    rgba(117, 196, 193, 0.25), 
-    rgba(122, 203, 168, 0.25), 
-    rgba(185, 195, 117, 0.25), 
-    rgba(204, 186, 122, 0.25))`;
-    if (selected) {
-      background = background.replace(/0.25/g, "1.0");
-    }
+  if (elementID === 14) {
+    background =
+      "linear-gradient(135deg, #d56f76, #a878c8 32%, #7576c3 55%, #79c4b9 75%, #b9c375)";
   }
+
   return (
     <button
-      className={selected ? "selected" : ""}
+      type="button"
+      className={selected ? "material-option selected" : "material-option"}
       key={name}
-      onClick={() => {
-        setElement(elementID);
-      }}
+      aria-pressed={selected}
+      aria-label={details.label}
+      title={details.label + "，" + details.intro}
+      onClick={() => setElement(elementID)}
       style={{
-        background,
-        backgroundColor: selected ? color.replace("0.25", "1.5") : color,
+        "--material-color": color,
+        "--material-background":
+          background === "transparent" ? color : background,
       }}
-      aria-label={elementLabels[name]}
     >
-      {elementLabels[name]}
+      <span className="material-swatch" aria-hidden="true" />
+      <span className="material-option-copy">
+        <span className="material-option-label">{details.label}</span>
+        <span className="material-option-code">{name}</span>
+      </span>
     </button>
+  );
+};
+
+const MaterialInspector = ({ name, tab, setTab }) => {
+  const details = getMaterialDetails(name);
+  const color = materialColorFor(name);
+  const selectedID = name === "Wind" ? -1 : Species[name];
+  const swatchBackground =
+    selectedID === 14
+      ? "linear-gradient(135deg, #d56f76, #a878c8 32%, #7576c3 55%, #79c4b9 75%, #b9c375)"
+      : color;
+
+  return (
+    <aside className="material-inspector" aria-label="材料说明">
+      <div className="inspector-heading">
+        <div
+          className="inspector-swatch"
+          aria-hidden="true"
+          style={{ background: swatchBackground }}
+        >
+          <span>{details.label.slice(0, 1)}</span>
+        </div>
+        <div>
+          <p className="panel-kicker">当前材料</p>
+          <h2>{details.label}</h2>
+          <p className="inspector-code">{name}</p>
+        </div>
+      </div>
+
+      <div className="inspector-tabs" role="tablist" aria-label="材料信息层级">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "intro"}
+          className={tab === "intro" ? "inspector-tab active" : "inspector-tab"}
+          onClick={() => setTab("intro")}
+        >
+          简介
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "reactions"}
+          className={
+            tab === "reactions" ? "inspector-tab active" : "inspector-tab"
+          }
+          onClick={() => setTab("reactions")}
+        >
+          反应
+        </button>
+      </div>
+
+      <div className="inspector-content" role="tabpanel">
+        {tab === "intro" ? (
+          <div className="intro-content">
+            <p className="material-intro">{details.intro}</p>
+            <div className="inspector-note">
+              <span className="note-mark" aria-hidden="true" />
+              <p>{details.note}</p>
+            </div>
+            <div className="material-facts">
+              <span>类别</span>
+              <strong>{details.family}</strong>
+            </div>
+          </div>
+        ) : (
+          <div className="reaction-content">
+            <p className="reaction-lede">
+              选择一个材料，查看它在画布中的主要变化。
+            </p>
+            <div className="reaction-list">
+              {details.reactions.map((reaction, index) => (
+                <article
+                  className="reaction-item"
+                  key={reaction.material + "-" + index}
+                >
+                  <div className="reaction-material">{reaction.material}</div>
+                  <div className="reaction-arrow" aria-hidden="true">
+                    +
+                  </div>
+                  <div className="reaction-result">{reaction.result}</div>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </aside>
   );
 };
 
@@ -135,22 +165,17 @@ class Index extends React.Component {
       paused: false,
       size: 2,
       selectedElement: Species.Water,
-      materialGuideOpen:
-        window.innerWidth >= 1100 && window.innerWidth > window.innerHeight,
+      inspectorTab: "intro",
     };
+
     this.selectElement = this.selectElement.bind(this);
-    this.toggleMaterialGuide = this.toggleMaterialGuide.bind(this);
+    this.togglePause = this.togglePause.bind(this);
+    this.reset = this.reset.bind(this);
     window.UI = this;
   }
 
   selectElement(selectedElement) {
     this.setState({ selectedElement });
-  }
-
-  toggleMaterialGuide() {
-    this.setState(({ materialGuideOpen }) => ({
-      materialGuideOpen: !materialGuideOpen,
-    }));
   }
 
   togglePause() {
@@ -182,7 +207,6 @@ class Index extends React.Component {
 
   async loadSVG(svgString) {
     const imgData = await svgToImageData(svgString);
-
     const cellsData = new Uint8Array(
       memory.buffer,
       universe.cells(),
@@ -204,82 +228,151 @@ class Index extends React.Component {
       cellsData[i + 2] = 0;
       cellsData[i + 3] = 0;
     }
+
     universe.flush_undos();
     universe.push_undo();
-
     this.pause();
   }
 
   render() {
-    let { size, paused, selectedElement, materialGuideOpen } = this.state;
+    const { size, paused, selectedElement, inspectorTab } = this.state;
+    const selectedName = speciesNameForId(selectedElement);
+
     return (
       <React.Fragment>
-        <MaterialGuide
-          selectedElement={selectedElement}
-          onSelect={this.selectElement}
-          open={materialGuideOpen}
-          onToggle={this.toggleMaterialGuide}
-        />
-        <div className="toolbar">
-          <button
-            onClick={() => this.togglePause()}
-            className={paused ? "selected" : ""}
-            aria-label={paused ? "继续" : "暂停"}
-            title={paused ? "继续" : "暂停"}
-          >
-            {paused ? (
-              <svg height="20" width="20" id="d" viewBox="0 0 300 300">
-                <polygon id="play" points="0,0 , 300,150 0,300" />
-              </svg>
-            ) : (
-              <svg height="20" width="20" id="d" viewBox="0 0 300 300">
-                <polygon id="bar2" points="0,0 110,0 110,300 0,300" />
-                <polygon id="bar1" points="190,0 300,0 300,300 190,300" />
-              </svg>
-            )}
-          </button>
+        <header className="topbar">
+          <div className="brand-lockup">
+            <span className="brand-mark" aria-hidden="true">
+              s
+            </span>
+            <div>
+              <strong>sandspiel</strong>
+              <span>材料实验台</span>
+            </div>
+          </div>
 
-          <button onClick={() => this.reset()}>重置</button>
-          <a href="info/" className="toolbar-link">说明</a>
+          <div className="canvas-status" aria-live="polite">
+            <span
+              className={paused ? "status-pip paused" : "status-pip"}
+              aria-hidden="true"
+            />
+            {paused ? "已暂停" : "运行中"}
+          </div>
 
-          {/* {paused && <button onClick={() => universe.tick()}>Tick</button>} */}
-          <span className="sizes">
-            {sizeMap.map((v, i) => (
-              <button
-                key={i}
-                className={i == size ? "selected" : ""}
-                onClick={(e) => this.setSize(e, i)}
-                style={{ padding: "0px" }}
-                aria-label={`笔刷大小 ${i + 1}`}
-                title={`笔刷大小 ${i + 1}`}
-              >
-                <svg height="23" width="23" id="d" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r={3 + v} />
-                </svg>
-              </button>
+          <nav className="topbar-actions" aria-label="画布操作">
+            <button
+              type="button"
+              className={paused ? "topbar-button is-active" : "topbar-button"}
+              onClick={() => this.togglePause()}
+              aria-label={paused ? "继续" : "暂停"}
+              title={paused ? "继续" : "暂停"}
+            >
+              <span
+                className={
+                  paused ? "control-glyph play-glyph" : "control-glyph pause-glyph"
+                }
+                aria-hidden="true"
+              />
+              <span>{paused ? "继续" : "暂停"}</span>
+            </button>
+            <button
+              type="button"
+              className="topbar-button"
+              onClick={() => this.reset()}
+            >
+              重置
+            </button>
+            <button
+              type="button"
+              className="topbar-button icon-only"
+              onClick={() => {
+                reset();
+                universe.pop_undo();
+              }}
+              aria-label="撤销"
+              title="撤销"
+            >
+              ↶
+            </button>
+          </nav>
+        </header>
+
+        <aside className="material-rail" aria-label="材料选择">
+          <div className="panel-heading">
+            <div>
+              <p className="panel-kicker">材料工具</p>
+              <h1>选择材料</h1>
+            </div>
+            <span className="material-count">19 种</span>
+          </div>
+
+          <div className="material-rail-scroll">
+            <button
+              type="button"
+              className={
+                selectedElement === -1
+                  ? "wind-option selected"
+                  : "wind-option"
+              }
+              aria-pressed={selectedElement === -1}
+              onClick={() => this.selectElement(-1)}
+            >
+              <span className="wind-glyph" aria-hidden="true">
+                ↝
+              </span>
+              <span>
+                <strong>风</strong>
+                <small>推动轻质材料</small>
+              </span>
+            </button>
+
+            {MATERIAL_GROUPS.map((group) => (
+              <section className="material-group" key={group.label}>
+                <h2>{group.label}</h2>
+                <div className="material-grid">
+                  {group.items.map((name) =>
+                    ElementButton(name, selectedElement, (id) =>
+                      this.setState({ selectedElement: id, inspectorTab: "intro" })
+                    )
+                  )}
+                </div>
+              </section>
             ))}
-          </span>
-          <button
-            onClick={() => {
-              reset();
-              universe.pop_undo();
-            }}
-            style={{ fontSize: 35 }}
-            aria-label="撤销"
-            title="撤销"
-          >
-            ↜
-          </button>
-          <button
-            className={-1 == selectedElement ? "selected" : ""}
-            onClick={() => this.selectElement(-1)}
-          >
-            风
-          </button>
-          {Object.keys(Species)
-            .filter((x) => !Number.isInteger(Number.parseInt(x)))
-            .map((n) => ElementButton(n, selectedElement, this.selectElement))}
-        </div>
+          </div>
+
+          <div className="brush-control">
+            <div className="brush-heading">
+              <span>笔刷大小</span>
+              <output>{sizeMap[size]} px</output>
+            </div>
+            <div className="brush-size-grid" role="group" aria-label="笔刷大小">
+              {sizeMap.map((v, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  className={i === size ? "brush-size selected" : "brush-size"}
+                  onClick={(event) => this.setSize(event, i)}
+                  aria-label={"笔刷大小 " + (i + 1)}
+                  title={"笔刷大小 " + (i + 1)}
+                  aria-pressed={i === size}
+                >
+                  <span
+                    style={{
+                      width: Math.max(4, Math.min(22, 4 + v / 2)) + "px",
+                      height: Math.max(4, Math.min(22, 4 + v / 2)) + "px",
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        <MaterialInspector
+          name={selectedName}
+          tab={inspectorTab}
+          setTab={(tab) => this.setState({ inspectorTab: tab })}
+        />
       </React.Fragment>
     );
   }

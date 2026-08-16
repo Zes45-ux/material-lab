@@ -29,9 +29,6 @@ wasm-pack --version
 在仓库根目录按以下顺序执行。首次或 Rust 代码变化后，先生成 WebAssembly 包：
 
 ```powershell
-cd crate
-wasm-pack build --target bundler
-cd ..
 npm install
 npm test
 npm run build
@@ -39,6 +36,14 @@ npm run start
 ```
 
 `npm test` 运行源码契约与临时生产构建产物的自动化检查；`npm run build` 会生成可部署的 `dist/` 静态文件。最后执行的 `npm run start` 会持续启动本地开发服务器；如需在它运行期间再次测试或构建，请另开一个终端。
+
+仓库已经提交了 `crate/pkg/` 中的预编译 WASM，因此普通构建默认直接使用这份产物，不要求本机安装 Rust 链接器。修改 Rust 代码后，再运行以下命令更新 WASM：
+
+```powershell
+$env:SANDSPIEL_BUILD_WASM = "1"
+npm run build
+Remove-Item Env:SANDSPIEL_BUILD_WASM
+```
 
 ## 构建与部署说明
 
