@@ -33,6 +33,9 @@ test("Rust registers gunpowder as an additive species with fuse and explosion be
   assert.match(lib, /pub fn advance_gunpowder_fuses/);
   assert.match(lib, /pub fn tick_with_elapsed/);
   assert.match(index, /universe\.tick_with_elapsed\(elapsedMs\)/);
+  assert.match(index, /performance\.now\(\)/);
+  assert.match(index, /elapsedRenderMs\(now, lastRenderTime\)/);
+  assert.doesNotMatch(index, /Math\.min\(Math\.max\(now - lastRenderTime, 0\), 100\)/);
   assert.match(species, /pressure\s*>\s*120/);
   assert.match(species, /pressure\s*:\s*200/);
   assert.match(species, /rb\s*>\s*1/);

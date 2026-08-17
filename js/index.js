@@ -8,6 +8,7 @@ import {} from "./app";
 import { startFluid } from "./fluid";
 import { pageView } from "./page-view";
 import {} from "./layout";
+import { elapsedRenderMs } from "./render-time";
 
 const isBench = pageView === "bench";
 if (window.safari) {
@@ -87,8 +88,8 @@ if (!isBench) {
   drawSand = () => {};
 }
 const renderLoop = () => {
-  const now = Date.now();
-  const elapsedMs = Math.min(Math.max(now - lastRenderTime, 0), 100);
+  const now = performance.now();
+  const elapsedMs = elapsedRenderMs(now, lastRenderTime);
   lastRenderTime = now;
   if (!window.paused) {
     fps.render(); // new
@@ -100,7 +101,7 @@ const renderLoop = () => {
   window.animationId = requestAnimationFrame(renderLoop);
 };
 
-let lastRenderTime = Date.now();
+let lastRenderTime = performance.now();
 
 if (!isBench) {
   renderLoop();
