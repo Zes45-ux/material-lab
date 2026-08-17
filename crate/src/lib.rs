@@ -442,7 +442,7 @@ impl Universe {
 mod tests {
     use rand::RngCore;
 
-    use super::{Cell, SandApi, Species, Universe};
+    use super::{Cell, SandApi, Species, Universe, Wind};
 
     fn fill_neighbors(universe: &mut Universe, x: i32, y: i32, species: Species) {
         for dx in -1..=1 {
@@ -690,13 +690,29 @@ mod tests {
     fn gunpowder_water_quench_works_through_a_full_tick() {
         let mut universe = Universe::new(5, 5);
         let index = universe.get_index(2, 2);
-        fill_neighbors(&mut universe, 2, 2, Species::Wall);
+        for x in 0..5 {
+            for y in 0..5 {
+                let cell_index = universe.get_index(x, y);
+                universe.cells[cell_index] = Cell {
+                    species: Species::Wall,
+                    ra: 0,
+                    rb: 0,
+                    clock: 0,
+                };
+            }
+        }
         let water_index = universe.get_index(1, 2);
         universe.cells[water_index] = Cell {
             species: Species::Water,
             ra: 0,
             rb: 0,
             clock: 0,
+        };
+        universe.winds[water_index] = Wind {
+            dx: 126,
+            dy: 126,
+            pressure: 0,
+            density: 0,
         };
         universe.cells[index] = Cell {
             species: Species::Gunpowder,

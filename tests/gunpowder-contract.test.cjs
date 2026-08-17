@@ -61,12 +61,11 @@ test("gunpowder quenches through a deterministic eight-way water helper", () => 
   const species = read("crate/src/species.rs");
 
   assert.match(species, /let sample = api\.get\(sx, sy\);/);
-  assert.match(species, /fn has_adjacent_water/);
+  const helper = species.match(/fn has_adjacent_water[\s\S]*?\r?\n}\r?\n/);
+  assert.ok(helper, "deterministic water helper is missing");
+  assert.match(helper[0], /fn has_adjacent_water/);
   assert.match(species, /has_adjacent_water\(&mut api\)/);
-  assert.doesNotMatch(
-    species,
-    /fn has_adjacent_water[\s\S]*rand_(?:vec|vec_8|int)/
-  );
+  assert.doesNotMatch(helper[0], /rand_(?:vec|vec_8|int)/);
 });
 
 test("shader adds a dedicated pixel branch driven by fuse state", () => {
