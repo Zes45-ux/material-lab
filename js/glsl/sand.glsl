@@ -130,7 +130,7 @@ void main() {
     saturation = 0.7 * (data.g + 0.4) + data.b * 0.2;
     lightness = 0.9 * (data.g + 0.9);
   } else if (type == 20) { // gunpowder
-    float fuse = clamp(data.b * 255.0 / 8.0, 0.0, 1.0);
+    float fuse = clamp(data.b * 255.0 / 250.0, 0.0, 1.0);
     hue = 0.06 - fuse * 0.05;
     saturation = 0.35 + fuse * 0.55;
     lightness = 0.22 + data.g * 0.18 + fuse * (0.28 + noise * 0.12);

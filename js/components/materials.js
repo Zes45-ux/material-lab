@@ -187,11 +187,11 @@ const MATERIAL_DETAILS = {
   Dust: {
     label: "粉尘",
     family: "能量材料",
-    intro: "轻盈而易燃的颗粒材料，会漂浮、沉降并在高压下爆炸。",
-    note: "粉尘可以制造快速而明亮的连锁变化。",
+    intro: "轻盈易飘散的助燃颗粒，可被火焰点燃并帮助火焰向相邻位置传播；承受高压时立即转为火焰。",
+    note: "适合扩散火势；没有引信，也不产生火药式强冲击。",
     reactions: [
-      { material: "火", result: "粉尘爆燃" },
-      { material: "高压", result: "粉尘转化为火" },
+      { material: "火", result: "粉尘帮助火焰向相邻位置传播" },
+      { material: "高压", result: "粉尘立即转为火焰并产生较弱压力" },
       { material: "水", result: "粉尘被水置换" },
     ],
   },
@@ -209,12 +209,12 @@ const MATERIAL_DETAILS = {
   Gunpowder: {
     label: "火药",
     family: "能量材料",
-    intro: "会沉降的可燃颗粒，点燃后进入短暂引信并产生链式爆炸。",
-    note: "水可以熄灭尚未结束的引信；爆炸会产生火焰和压力。",
+    intro: "会沉降的可燃颗粒，点燃后进入约 5 秒的短引信并产生强压力爆炸。",
+    note: "适合布置延时爆破；普通引信可被相邻水格熄灭；最后一 tick 或压力超过 120 时不可阻止爆炸。",
     reactions: [
-      { material: "火 / 熔岩", result: "点燃引信并开始倒计时" },
-      { material: "水", result: "引信阶段被熄灭并恢复为惰性颗粒" },
-      { material: "尘埃 / 石头 / 冰", result: "爆炸压力产生联动" },
+      { material: "火 / 熔岩", result: "点燃短引信并开始倒计时" },
+      { material: "水", result: "八方向相邻水格可熄灭 rb=250..2 的普通引信" },
+      { material: "粉尘 / 石头 / 冰", result: "爆炸压力产生联动" },
       { material: "酸", result: "被酸腐蚀" },
     ],
   },

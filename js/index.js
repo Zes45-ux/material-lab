@@ -8,6 +8,7 @@ import {} from "./app";
 import { startFluid } from "./fluid";
 import { pageView } from "./page-view";
 import {} from "./layout";
+import { elapsedRenderMs } from "./render-time";
 
 const isBench = pageView === "bench";
 if (window.safari) {
@@ -87,15 +88,20 @@ if (!isBench) {
   drawSand = () => {};
 }
 const renderLoop = () => {
+  const now = performance.now();
+  const elapsedMs = elapsedRenderMs(now, lastRenderTime);
+  lastRenderTime = now;
   if (!window.paused) {
     fps.render(); // new
-    universe.tick();
+    universe.tick_with_elapsed(elapsedMs);
     fluid.update();
   }
   drawSand();
 
   window.animationId = requestAnimationFrame(renderLoop);
 };
+
+let lastRenderTime = performance.now();
 
 if (!isBench) {
   renderLoop();
