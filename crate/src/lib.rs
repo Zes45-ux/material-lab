@@ -246,8 +246,8 @@ impl Universe {
         let steps = if elapsed_ms > 0.0 {
             self.gunpowder_fuse_elapsed_ms =
                 (self.gunpowder_fuse_elapsed_ms + elapsed_ms).min(10_000.0);
-            let steps = (self.gunpowder_fuse_elapsed_ms / species::GUNPOWDER_FUSE_STEP_MS).floor()
-                as u32;
+            let steps =
+                (self.gunpowder_fuse_elapsed_ms / species::GUNPOWDER_FUSE_STEP_MS).floor() as u32;
             self.gunpowder_fuse_elapsed_ms -= steps as f32 * species::GUNPOWDER_FUSE_STEP_MS;
             steps
         } else {
@@ -541,9 +541,14 @@ mod tests {
     }
 
     const WATER_NEIGHBORS: [(i32, i32); 8] = [
-        (-1, -1), (0, -1), (1, -1),
-        (-1,  0),          (1,  0),
-        (-1,  1), (0,  1), (1,  1),
+        (-1, -1),
+        (0, -1),
+        (1, -1),
+        (-1, 0),
+        (1, 0),
+        (-1, 1),
+        (0, 1),
+        (1, 1),
     ];
 
     fn find_species(universe: &Universe, species: Species) -> usize {
@@ -1005,7 +1010,10 @@ mod tests {
             );
 
             let gunpowder_index = find_species(&universe, Species::Gunpowder);
-            assert_eq!(universe.cells[gunpowder_index].rb, 0, "water at ({dx}, {dy})");
+            assert_eq!(
+                universe.cells[gunpowder_index].rb, 0,
+                "water at ({dx}, {dy})"
+            );
         }
     }
 

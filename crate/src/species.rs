@@ -449,9 +449,14 @@ pub(crate) const GUNPOWDER_FUSE_TICKS: u8 = 250;
 pub(crate) const GUNPOWDER_FUSE_STEP_MS: f32 = 20.0;
 
 const GUNPOWDER_WATER_NEIGHBORS: [(i32, i32); 8] = [
-    (-1, -1), (0, -1), (1, -1),
-    (-1,  0),          (1,  0),
-    (-1,  1), (0,  1), (1,  1),
+    (-1, -1),
+    (0, -1),
+    (1, -1),
+    (-1, 0),
+    (1, 0),
+    (-1, 1),
+    (0, 1),
+    (1, 1),
 ];
 
 fn has_adjacent_water(api: &mut SandApi) -> bool {
