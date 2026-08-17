@@ -381,6 +381,7 @@ impl Universe {
             Species::Sand => 30,
             Species::Mite => 30,
             Species::Rocket => 30,
+            Species::Gunpowder => 30,
 
             Species::Dust => 10,
             Species::Fire => 5,
@@ -420,7 +421,8 @@ impl Universe {
                     || cell.species == Species::Mite
                     || cell.species == Species::Dust
                     || cell.species == Species::Oil
-                    || cell.species == Species::Rocket)
+                    || cell.species == Species::Rocket
+                    || cell.species == Species::Gunpowder)
             {
                 dy = -2;
             }
@@ -438,7 +440,36 @@ impl Universe {
 
 #[cfg(test)]
 mod tests {
-    use super::{Species, Universe};
+    use rand::SeedableRng;
+
+    use super::{Cell, SandApi, Species, Universe};
+
+    const RNG_SEED: u64 = 0x734f6b89de5f83cc;
+
+    fn fill_neighbors(universe: &mut Universe, x: i32, y: i32, species: Species) {
+        for dx in -1..=1 {
+            for dy in -1..=1 {
+                if dx != 0 || dy != 0 {
+                    let index = universe.get_index(x + dx, y + dy);
+                    universe.cells[index] = Cell {
+                        species,
+                        ra: 0,
+                        rb: 0,
+                        clock: 0,
+                    };
+                }
+            }
+        }
+    }
+
+    fn next_gunpowder_sample(universe: &mut Universe, x: i32, y: i32) -> (i32, i32) {
+        let sample = {
+            let mut api = SandApi { universe, x, y };
+            api.rand_vec()
+        };
+        universe.rng = rand_xoshiro::SplitMix64::seed_from_u64(RNG_SEED);
+        sample
+    }
 
     #[test]
     fn empty_universe_can_tick_without_panicking() {
@@ -459,5 +490,207 @@ mod tests {
 
         assert_eq!(universe.get_cell(1, 0).species, Species::Empty);
         assert_eq!(universe.get_cell(1, 1).species, Species::Sand);
+    }
+
+    #[test]
+    fn gunpowder_moves_into_an_empty_cell_on_tick() {
+        let mut universe = Universe::new(3, 3);
+        universe.paint(1, 0, 1, Species::Gunpowder);
+
+        universe.tick();
+
+        assert_eq!(universe.get_cell(1, 0).species, Species::Empty);
+        assert_eq!(universe.get_cell(1, 1).species, Species::Gunpowder);
+    }
+
+    #[test]
+    fn gunpowder_uses_the_original_two_cell_upward_wind_move() {
+        let mut universe = Universe::new(5, 5);
+        let index = universe.get_index(2, 2);
+        universe.cells[index] = Cell {
+            species: Species::Gunpowder,
+            ra: 100,
+            rb: 0,
+            clock: 0,
+        };
+
+        let cell = universe.cells[index];
+        Universe::blow_wind(
+            cell,
+            super::Wind {
+                dx: 0,
+                dy: 126,
+                pressure: 0,
+                density: 0,
+            },
+            SandApi {
+                universe: &mut universe,
+                x: 2,
+                y: 2,
+            },
+        );
+
+        assert_eq!(universe.get_cell(2, 2).species, Species::Empty);
+        assert_eq!(universe.get_cell(2, 1).species, Species::Empty);
+        assert_eq!(universe.get_cell(2, 0).species, Species::Gunpowder);
+    }
+
+    #[test]
+    fn gunpowder_ignites_near_fire() {
+        let mut universe = Universe::new(5, 5);
+        let index = universe.get_index(2, 2);
+        fill_neighbors(&mut universe, 2, 2, Species::Fire);
+        universe.cells[index] = Cell {
+            species: Species::Gunpowder,
+            ra: 100,
+            rb: 0,
+            clock: 0,
+        };
+
+        let cell = universe.cells[index];
+        super::species::update_gunpowder(
+            cell,
+            SandApi {
+                universe: &mut universe,
+                x: 2,
+                y: 2,
+            },
+        );
+
+        assert_eq!(universe.cells[index].species, Species::Gunpowder);
+        assert_eq!(universe.cells[index].rb, 8);
+    }
+
+    #[test]
+    fn gunpowder_water_quenches_before_final_tick() {
+        let mut universe = Universe::new(5, 5);
+        let index = universe.get_index(2, 2);
+        fill_neighbors(&mut universe, 2, 2, Species::Wall);
+        let sample = next_gunpowder_sample(&mut universe, 2, 2);
+        let water_index = universe.get_index(2 + sample.0, 2 + sample.1);
+        universe.cells[water_index] = Cell {
+            species: Species::Water,
+            ra: 0,
+            rb: 0,
+            clock: 0,
+        };
+        universe.cells[index] = Cell {
+            species: Species::Gunpowder,
+            ra: 100,
+            rb: 4,
+            clock: 0,
+        };
+
+        let cell = universe.cells[index];
+        super::species::update_gunpowder(
+            cell,
+            SandApi {
+                universe: &mut universe,
+                x: 2,
+                y: 2,
+            },
+        );
+
+        let gunpowder_index = if universe.cells[index].species == Species::Gunpowder {
+            index
+        } else {
+            universe.get_index(2, 3)
+        };
+        assert_eq!(universe.cells[gunpowder_index].species, Species::Gunpowder);
+        assert_eq!(universe.cells[gunpowder_index].rb, 0);
+    }
+
+    #[test]
+    fn gunpowder_water_quench_uses_only_the_sampled_neighbor() {
+        let mut universe = Universe::new(5, 5);
+        let index = universe.get_index(2, 2);
+        fill_neighbors(&mut universe, 2, 2, Species::Wall);
+        let sample = next_gunpowder_sample(&mut universe, 2, 2);
+        let water = if sample == (-1, -1) { (1, 1) } else { (-1, -1) };
+        let water_index = universe.get_index(2 + water.0, 2 + water.1);
+        universe.cells[water_index] = Cell {
+            species: Species::Water,
+            ra: 0,
+            rb: 0,
+            clock: 0,
+        };
+        universe.cells[index] = Cell {
+            species: Species::Gunpowder,
+            ra: 100,
+            rb: 4,
+            clock: 0,
+        };
+
+        let cell = universe.cells[index];
+        super::species::update_gunpowder(
+            cell,
+            SandApi {
+                universe: &mut universe,
+                x: 2,
+                y: 2,
+            },
+        );
+
+        assert_eq!(universe.cells[index].rb, 3);
+    }
+
+    #[test]
+    fn gunpowder_explodes_on_final_fuse_tick() {
+        let mut universe = Universe::new(5, 5);
+        let index = universe.get_index(2, 2);
+        fill_neighbors(&mut universe, 2, 2, Species::Wall);
+        universe.cells[index] = Cell {
+            species: Species::Gunpowder,
+            ra: 100,
+            rb: 1,
+            clock: 0,
+        };
+
+        let cell = universe.cells[index];
+        super::species::update_gunpowder(
+            cell,
+            SandApi {
+                universe: &mut universe,
+                x: 2,
+                y: 2,
+            },
+        );
+
+        assert_eq!(universe.cells[index].species, Species::Fire);
+        assert_eq!(universe.burns[index].pressure, 200);
+    }
+
+    #[test]
+    fn gunpowder_pressure_explosion_wins_over_water_quench() {
+        let mut universe = Universe::new(5, 5);
+        let index = universe.get_index(2, 2);
+        fill_neighbors(&mut universe, 2, 2, Species::Wall);
+        let water_index = universe.get_index(1, 2);
+        universe.cells[water_index] = Cell {
+            species: Species::Water,
+            ra: 0,
+            rb: 0,
+            clock: 0,
+        };
+        universe.winds[index].pressure = 121;
+        universe.cells[index] = Cell {
+            species: Species::Gunpowder,
+            ra: 100,
+            rb: 4,
+            clock: 0,
+        };
+
+        let cell = universe.cells[index];
+        super::species::update_gunpowder(
+            cell,
+            SandApi {
+                universe: &mut universe,
+                x: 2,
+                y: 2,
+            },
+        );
+
+        assert_eq!(universe.cells[index].species, Species::Fire);
+        assert_eq!(universe.burns[index].pressure, 200);
     }
 }

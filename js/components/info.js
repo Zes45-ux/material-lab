@@ -3,7 +3,7 @@ import React from "react";
 const Info = () => {
   return (
     <div className="Info">
-      <h1>像素炼金术（Sandspiel）</h1>
+      <h1>Material Lab</h1>
       <p aria-label="由 Max Bittker 创作">
         由 <a href="https://maxbittker.com">Max Bittker</a> 创作
       </p>
@@ -69,6 +69,8 @@ const Info = () => {
       漂亮，但有危险的爆炸性。
       <h4>油</h4>
       点燃后会产生烟雾。
+      <h4>火药</h4>
+      会沉降；被火或岩浆点燃后进入引信，遇水可熄灭，并在压力或倒计时结束时爆炸。
       <h4>火箭</h4>
       会爆炸成它接触到的第一种材料的复制品。
       <h4>清除</h4>

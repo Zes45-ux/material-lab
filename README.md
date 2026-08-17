@@ -1,21 +1,21 @@
-<meta charset="utf-8"/>
+# Material Lab
 
-# 像素炼金术（Sandspiel）
+Material Lab is a standalone falling-sand sandbox for exploring pixel materials and physical reactions, built with Rust/WASM, WebGL, and JavaScript.
 
-一个完全本地运行的像素物理沙盒。用画笔放置沙、水、植物、火焰等材料，观察它们在 WebGL 画布中的反应；也可以暂停、撤销、重置或使用风吹动材料。
+Draw with sand, water, plants, fire, and other materials on a pixel canvas. Pause the simulation, undo a change, reset the scene, or use wind to see how materials interact.
 
-本项目不需要账号、云端后端或社区服务。构建产物可直接作为静态网站部署；游戏运行时不会连接 Firebase、遥测、广告或 Sandspiel 社区服务。
+The project runs locally without an account, cloud backend, community service, advertising, or telemetry. The production build is a static site that can be deployed to any static file host.
 
-![像素炼金术截图](Screenshot.png)
+![Material Lab screenshot](Screenshot.png)
 
-## 环境要求
+## Requirements
 
-- 支持 WebAssembly 的现代浏览器
-- Node.js `^20.17.0 || >=22.9.0` 与 npm（仓库固定使用 `npm@11.19.0`；当前 Node 24 可直接使用）
-- [Rust 与 rustup](https://rustup.rs/)
+- A modern browser with WebAssembly support
+- Node.js `^20.17.0 || >=22.9.0` and npm (`npm@11.19.0` is pinned by the repository)
+- [Rust and rustup](https://rustup.rs/)
 - [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
 
-建议先确认工具可用：
+Check the toolchain before starting:
 
 ```powershell
 node --version
@@ -24,9 +24,9 @@ rustup --version
 wasm-pack --version
 ```
 
-## 本地运行
+## Run locally
 
-在仓库根目录按以下顺序执行。首次或 Rust 代码变化后，先生成 WebAssembly 包：
+From the repository root:
 
 ```powershell
 npm install
@@ -35,32 +35,38 @@ npm run build
 npm run start
 ```
 
-`npm test` 运行源码契约与临时生产构建产物的自动化检查；`npm run build` 会生成可部署的 `dist/` 静态文件。最后执行的 `npm run start` 会持续启动本地开发服务器；如需在它运行期间再次测试或构建，请另开一个终端。
+The test command runs source contracts and a temporary production-build check. The build command writes deployable static files to `dist/`. The start command keeps a local development server running; use another terminal for additional commands while it is active.
 
-仓库已经提交了 `crate/pkg/` 中的预编译 WASM，因此普通构建默认直接使用这份产物，不要求本机安装 Rust 链接器。修改 Rust 代码后，再运行以下命令更新 WASM：
+The repository includes a precompiled WebAssembly package in `crate/pkg/`, so the default build does not require a local Rust linker. After changing Rust code, rebuild the package before building the web app:
 
 ```powershell
-$env:SANDSPIEL_BUILD_WASM = "1"
+wasm-pack build --target bundler
 npm run build
-Remove-Item Env:SANDSPIEL_BUILD_WASM
 ```
 
-## 构建与部署说明
+## Build and deploy
 
-依赖通过根目录的 `package-lock.json` 固定，统一使用 npm；请不要改用 pnpm 或 Yarn。生产构建会由 webpack 重新编译 Rust/WASM 和前端资源，输出的 `dist/index.html`、JavaScript bundle、WASM 和本地资源可由任意静态文件服务器托管。
+The committed `package-lock.json` is the canonical dependency lockfile; use npm rather than pnpm or Yarn. Webpack compiles the front end and packages the checked-in Rust/WASM output into `dist/`. The generated `index.html`, JavaScript bundle, WebAssembly, and local assets can be served by any static file server.
 
-构建产物支持部署在域名根目录或任意子路径。普通静态服务器可直接访问或刷新 `info/` 和 `bench/`，因为构建会生成对应目录的 `index.html`；不要依赖后端 rewrite。
+The build works at a domain root or under a subpath. It generates `index.html` entries for the `info/` and `bench/` routes, so a static server does not need backend rewrite rules for those paths.
 
 ### Vercel
 
-Vercel 构建机默认没有 Rust/Cargo。仓库已提交 `crate/pkg/` 中的预编译 WebAssembly 包；Vercel 会自动跳过 wasm-pack，只打包这个固定产物。Rust 代码变更后，请先在本地运行 `wasm-pack build --target bundler`，再提交更新后的 `crate/pkg/` 文件。
+Vercel build machines do not need Rust for the default deployment because `crate/pkg/` contains the precompiled WebAssembly package. If Rust code changes, run `wasm-pack build --target bundler` locally and commit the updated `crate/pkg/` files before deploying.
 
-## 致谢与归属
+## Architecture
 
-Sandspiel 由 [Max Bittker](https://maxbittker.com) 创作，是一款以 Rust（经 WASM）、WebGL 和 JavaScript 构建的落沙游戏。它的主要灵感来自 ha55ii 的 [Powder Game](https://dan-ball.jp/en/javagame/dust/)。原项目的设计与制作背景见 [Making Sandspiel](https://maxbittker.com/making-sandspiel)，源代码见 [maxbittker/sandspiel](https://github.com/maxbittker/sandspiel)。
+- `crate/` contains the Rust simulation and WebAssembly package.
+- `js/` contains the React controls, WebGL renderer, fluid simulation, material data, and shaders.
+- `webpack.config.js` builds the static application and copies the local assets.
+- `tests/` contains source contracts and production packaging checks.
 
-流体模拟代码改编自 [PavelDoGreat/WebGL-Fluid-Simulation](https://github.com/PavelDoGreat/WebGL-Fluid-Simulation)。
+## Attribution
 
-## 许可证
+Material Lab is derived from [Sandspiel](https://github.com/maxbittker/sandspiel), created by [Max Bittker](https://maxbittker.com). Sandspiel is a falling-sand game built with Rust/WASM, WebGL, and JavaScript, inspired in part by ha55ii's [Powder Game](https://dan-ball.jp/en/javagame/dust/). See [Making Sandspiel](https://maxbittker.com/making-sandspiel) for the original design and development background.
 
-本项目采用 [MIT License](LICENSE)，版权归 Max Bittker（2018）。使用、复制或分发时请保留许可证和版权声明。
+The fluid simulation is adapted from [PavelDoGreat/WebGL-Fluid-Simulation](https://github.com/PavelDoGreat/WebGL-Fluid-Simulation).
+
+## License
+
+This project uses the [MIT License](LICENSE). Preserve the license and copyright notices when using, copying, or distributing the project.

@@ -12,7 +12,7 @@ const MATERIAL_GROUPS = [
   {
     key: "energy",
     label: "能量材料",
-    items: ["Fire", "Lava", "Acid", "Dust", "Oil"],
+    items: ["Fire", "Lava", "Acid", "Dust", "Oil", "Gunpowder"],
   },
   {
     key: "special",
@@ -204,6 +204,18 @@ const MATERIAL_DETAILS = {
       { material: "火 / 熔岩", result: "油燃烧并产生热流" },
       { material: "水", result: "油浮在水面" },
       { material: "沙 / 石头", result: "被固体材料置换" },
+    ],
+  },
+  Gunpowder: {
+    label: "火药",
+    family: "能量材料",
+    intro: "会沉降的可燃颗粒，点燃后进入短暂引信并产生链式爆炸。",
+    note: "水可以熄灭尚未结束的引信；爆炸会产生火焰和压力。",
+    reactions: [
+      { material: "火 / 熔岩", result: "点燃引信并开始倒计时" },
+      { material: "水", result: "引信阶段被熄灭并恢复为惰性颗粒" },
+      { material: "尘埃 / 石头 / 冰", result: "爆炸压力产生联动" },
+      { material: "酸", result: "被酸腐蚀" },
     ],
   },
   Cloner: {
