@@ -27,10 +27,13 @@ test("Rust registers gunpowder as an additive species with fuse and explosion be
   assert.match(species, /Species::Gunpowder\s*=>\s*update_gunpowder/);
   assert.match(species, /fn update_gunpowder/);
   assert.match(species, /pressure\s*>\s*120/);
+  assert.match(species, /pressure\s*:\s*200/);
   assert.match(species, /rb\s*>\s*1/);
   assert.match(species, /rb\s*==\s*1/);
+  assert.match(species, /rb\s*:\s*8/);
   assert.match(species, /Species::Water/);
   assert.match(species, /Species::Fire/);
+  assert.match(species, /Species::Lava/);
 });
 
 test("checked-in wasm bindings expose the new species to the browser", () => {
@@ -80,6 +83,12 @@ test("front-end registries and guides expose gunpowder as firepowder", () => {
   assert.equal(labels.Gunpowder, "火药");
   assert.ok(info.Gunpowder);
   assert.ok(info.Gunpowder.reactions.some((reaction) => reaction.with.includes("Water")));
+  for (const material of ["Fire", "Lava", "Dust", "Stone", "Ice"]) {
+    assert.ok(
+      info.Gunpowder.reactions.some((reaction) => reaction.with.includes(material)),
+      `missing Gunpowder reaction for ${material}`
+    );
+  }
   assert.match(materials, /items:\s*\[[^\]]*"Gunpowder"/s);
   assert.match(materials, /Gunpowder:\s*\{/);
   assert.match(infoPage, /<h4>火药<\/h4>/);

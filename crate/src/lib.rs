@@ -440,11 +440,9 @@ impl Universe {
 
 #[cfg(test)]
 mod tests {
-    use rand::SeedableRng;
+    use rand::RngCore;
 
     use super::{Cell, SandApi, Species, Universe};
-
-    const RNG_SEED: u64 = 0x734f6b89de5f83cc;
 
     fn fill_neighbors(universe: &mut Universe, x: i32, y: i32, species: Species) {
         for dx in -1..=1 {
@@ -463,12 +461,25 @@ mod tests {
     }
 
     fn next_gunpowder_sample(universe: &mut Universe, x: i32, y: i32) -> (i32, i32) {
+        let saved_rng = universe.rng.clone();
         let sample = {
             let mut api = SandApi { universe, x, y };
             api.rand_vec()
         };
-        universe.rng = rand_xoshiro::SplitMix64::seed_from_u64(RNG_SEED);
+        universe.rng = saved_rng;
         sample
+    }
+
+    #[test]
+    fn gunpowder_sample_preserves_existing_rng_sequence() {
+        let mut universe = Universe::new(5, 5);
+        let _ = universe.rng.next_u64();
+        let mut expected_rng = universe.rng.clone();
+        let expected_next = expected_rng.next_u64();
+
+        let _sample = next_gunpowder_sample(&mut universe, 2, 2);
+
+        assert_eq!(universe.rng.next_u64(), expected_next);
     }
 
     #[test]

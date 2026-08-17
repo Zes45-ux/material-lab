@@ -46,6 +46,7 @@ it as a Chinese edition.
 - Run the existing automated test suite.
 - Run a production build if the local toolchain is available.
 - Search product-facing files for `sandspiel-zh`, `standalone-zh`, `中文版`,
-  and `独立中文版`; historical documents may retain these terms by design.
+  `独立中文版`, and `像素炼金术`; historical documents may retain these terms
+  by design.
 - Confirm the GitHub remote points to `Zes45-ux/material-lab` and the working
   tree is clean apart from the intended implementation commit(s).
