@@ -583,7 +583,57 @@ mod tests {
         );
 
         assert_eq!(universe.cells[index].species, Species::Gunpowder);
-        assert_eq!(universe.cells[index].rb, 8);
+        assert_eq!(universe.cells[index].rb, 90);
+    }
+
+    #[test]
+    fn gunpowder_keeps_a_playable_fuse_window_before_exploding() {
+        let mut universe = Universe::new(5, 5);
+        let index = universe.get_index(2, 2);
+        fill_neighbors(&mut universe, 2, 2, Species::Fire);
+        universe.cells[index] = Cell {
+            species: Species::Gunpowder,
+            ra: 100,
+            rb: 0,
+            clock: 0,
+        };
+
+        let cell = universe.cells[index];
+        super::species::update_gunpowder(
+            cell,
+            SandApi {
+                universe: &mut universe,
+                x: 2,
+                y: 2,
+            },
+        );
+        assert_eq!(universe.cells[index].rb, 90);
+
+        fill_neighbors(&mut universe, 2, 2, Species::Wall);
+        for expected_rb in (1..90).rev() {
+            let cell = universe.cells[index];
+            super::species::update_gunpowder(
+                cell,
+                SandApi {
+                    universe: &mut universe,
+                    x: 2,
+                    y: 2,
+                },
+            );
+            assert_eq!(universe.cells[index].species, Species::Gunpowder);
+            assert_eq!(universe.cells[index].rb, expected_rb);
+        }
+
+        let cell = universe.cells[index];
+        super::species::update_gunpowder(
+            cell,
+            SandApi {
+                universe: &mut universe,
+                x: 2,
+                y: 2,
+            },
+        );
+        assert_eq!(universe.cells[index].species, Species::Fire);
     }
 
     #[test]

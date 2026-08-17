@@ -209,11 +209,11 @@ const MATERIAL_DETAILS = {
   Gunpowder: {
     label: "火药",
     family: "能量材料",
-    intro: "会沉降的可燃颗粒，点燃后进入短引信并产生强压力爆炸。",
+    intro: "会沉降的可燃颗粒，点燃后进入约 90 tick 的短引信并产生强压力爆炸。",
     note: "适合布置延时爆破；普通引信可被相邻水格熄灭；最后一 tick 或压力超过 120 时不可阻止爆炸。",
     reactions: [
       { material: "火 / 熔岩", result: "点燃短引信并开始倒计时" },
-      { material: "水", result: "八方向相邻水格可熄灭 rb=8..2 的普通引信" },
+      { material: "水", result: "八方向相邻水格可熄灭 rb=90..2 的普通引信" },
       { material: "粉尘 / 石头 / 冰", result: "爆炸压力产生联动" },
       { material: "酸", result: "被酸腐蚀" },
     ],

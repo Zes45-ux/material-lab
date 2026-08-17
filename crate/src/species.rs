@@ -405,6 +405,8 @@ fn explode_gunpowder(cell: Cell, mut api: SandApi) {
     });
 }
 
+const GUNPOWDER_FUSE_TICKS: u8 = 90;
+
 const GUNPOWDER_WATER_NEIGHBORS: [(i32, i32); 8] = [
     (-1, -1), (0, -1), (1, -1),
     (-1,  0),          (1,  0),
@@ -437,7 +439,7 @@ pub fn update_gunpowder(cell: Cell, mut api: SandApi) {
         new_cell = Cell {
             species: Species::Gunpowder,
             ra: cell.ra,
-            rb: 8,
+            rb: GUNPOWDER_FUSE_TICKS,
             clock: 0,
         };
     }
