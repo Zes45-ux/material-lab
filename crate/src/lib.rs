@@ -425,6 +425,7 @@ impl Universe {
             Species::Mite => 30,
             Species::Rocket => 30,
             Species::Gunpowder => 30,
+            Species::Snow => 30,
 
             Species::Dust => 10,
             Species::Fire => 5,
@@ -465,7 +466,8 @@ impl Universe {
                     || cell.species == Species::Dust
                     || cell.species == Species::Oil
                     || cell.species == Species::Rocket
-                    || cell.species == Species::Gunpowder)
+                    || cell.species == Species::Gunpowder
+                    || cell.species == Species::Snow)
             {
                 dy = -2;
             }
@@ -784,6 +786,76 @@ mod tests {
         assert_eq!(universe.get_cell(2, 2).species, Species::Empty);
         assert_eq!(universe.get_cell(2, 1).species, Species::Empty);
         assert_eq!(universe.get_cell(2, 0).species, Species::Gunpowder);
+    }
+
+    #[test]
+    fn snow_uses_sand_wind_threshold_and_two_cell_lift() {
+        let mut at_threshold = Universe::new(5, 5);
+        let index = at_threshold.get_index(2, 2);
+        at_threshold.cells[index] = Cell {
+            species: Species::Snow,
+            ra: 100,
+            rb: 0,
+            clock: 0,
+        };
+        let cell = at_threshold.cells[index];
+        Universe::blow_wind(
+            cell,
+            super::Wind {
+                dx: 126,
+                dy: 156,
+                pressure: 0,
+                density: 0,
+            },
+            SandApi {
+                universe: &mut at_threshold,
+                x: 2,
+                y: 2,
+            },
+        );
+        assert_eq!(at_threshold.get_cell(2, 2).species, Species::Snow);
+        assert_eq!(at_threshold.get_cell(3, 2).species, Species::Empty);
+
+        let mut above_threshold = Universe::new(5, 5);
+        let index = above_threshold.get_index(2, 2);
+        above_threshold.cells[index] = cell;
+        Universe::blow_wind(
+            cell,
+            super::Wind {
+                dx: 126,
+                dy: 157,
+                pressure: 0,
+                density: 0,
+            },
+            SandApi {
+                universe: &mut above_threshold,
+                x: 2,
+                y: 2,
+            },
+        );
+        assert_eq!(above_threshold.get_cell(2, 2).species, Species::Empty);
+        assert_eq!(above_threshold.get_cell(3, 2).species, Species::Snow);
+
+        let mut upward = Universe::new(5, 5);
+        let index = upward.get_index(2, 2);
+        upward.cells[index] = cell;
+        Universe::blow_wind(
+            cell,
+            super::Wind {
+                dx: 95,
+                dy: 126,
+                pressure: 0,
+                density: 0,
+            },
+            SandApi {
+                universe: &mut upward,
+                x: 2,
+                y: 2,
+            },
+        );
+        assert_eq!(upward.get_cell(2, 2).species, Species::Empty);
+        assert_eq!(upward.get_cell(2, 1).species, Species::Empty);
+        assert_eq!(upward.get_cell(2, 0).species, Species::Snow);
     }
 
     #[test]

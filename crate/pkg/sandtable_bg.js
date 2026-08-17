@@ -13,7 +13,7 @@ export class Cell {
 if (Symbol.dispose) Cell.prototype[Symbol.dispose] = Cell.prototype.free;
 
 /**
- * @enum {0 | 1 | 2 | 3 | 13 | 9 | 4 | 5 | 15 | 7 | 11 | 18 | 19 | 6 | 8 | 12 | 14 | 16 | 17 | 20}
+ * @enum {0 | 1 | 2 | 3 | 13 | 9 | 4 | 5 | 15 | 7 | 11 | 18 | 19 | 6 | 8 | 12 | 14 | 16 | 17 | 20 | 21}
  */
 export const Species = Object.freeze({
     Empty: 0, "0": "Empty",
@@ -36,6 +36,7 @@ export const Species = Object.freeze({
     Oil: 16, "16": "Oil",
     Rocket: 17, "17": "Rocket",
     Gunpowder: 20, "20": "Gunpowder",
+    Snow: 21, "21": "Snow",
 });
 
 export class Universe {
