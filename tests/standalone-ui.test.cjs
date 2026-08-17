@@ -23,6 +23,16 @@ test("repository uses one reproducible npm workflow", () => {
   assert.doesNotMatch(lock, /registry\.npmmirror\.com/);
 });
 
+test("checked-in wasm package is visible to version control", () => {
+  assert.equal(fs.existsSync(path.join(root, "crate/pkg/.gitignore")), false);
+  const result = spawnSync(
+    "git",
+    ["check-ignore", "--no-index", "crate/pkg/sandtable_bg.wasm"],
+    { cwd: root, encoding: "utf8" }
+  );
+  assert.notEqual(result.status, 0, result.stdout || result.stderr);
+});
+
 test("project metadata uses the Material Lab identity", () => {
   const pkg = JSON.parse(read("package.json"));
   const lock = JSON.parse(read("package-lock.json"));
@@ -465,7 +475,7 @@ test("production build emits marked static entries for root and colliding base p
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "sandspiel-static-test-"));
   const result = spawnSync(process.execPath, [webpackCli, "--mode=production"], {
     cwd: root,
-    env: { ...process.env, SANDSPIEL_DIST_DIR: output },
+    env: { ...process.env, SANDSPIEL_SKIP_WASM: "1", SANDSPIEL_DIST_DIR: output },
     encoding: "utf8",
   });
   assert.equal(result.status, 0, result.stderr || result.stdout);

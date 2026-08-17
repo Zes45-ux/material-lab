@@ -1,13 +1,10 @@
 /target
 **/*.rs.bk
 wasm-pack.log
-**/pkg
-pkg/
 bin/
 node_modules
 .worktrees/
 dist
-crate/pkg
 crate/target
 crate/wasm-pack.log
 .firebase
