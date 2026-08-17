@@ -405,6 +405,21 @@ fn explode_gunpowder(cell: Cell, mut api: SandApi) {
     });
 }
 
+const GUNPOWDER_WATER_NEIGHBORS: [(i32, i32); 8] = [
+    (-1, -1), (0, -1), (1, -1),
+    (-1,  0),          (1,  0),
+    (-1,  1), (0,  1), (1,  1),
+];
+
+fn has_adjacent_water(api: &mut SandApi) -> bool {
+    for &(dx, dy) in &GUNPOWDER_WATER_NEIGHBORS {
+        if api.get(dx, dy).species == Species::Water {
+            return true;
+        }
+    }
+    false
+}
+
 pub fn update_gunpowder(cell: Cell, mut api: SandApi) {
     let rb = cell.rb;
     let fluid = api.get_fluid();
@@ -428,7 +443,7 @@ pub fn update_gunpowder(cell: Cell, mut api: SandApi) {
     }
 
     if rb > 1 {
-        if sample.species == Species::Water {
+        if has_adjacent_water(&mut api) {
             new_cell = Cell {
                 species: Species::Gunpowder,
                 ra: cell.ra,
