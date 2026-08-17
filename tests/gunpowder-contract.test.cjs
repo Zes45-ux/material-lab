@@ -57,12 +57,16 @@ test("gunpowder uses the same light-material wind tier without changing legacy t
   );
 });
 
-test("gunpowder quenches from the same sampled neighbor used by original burning materials", () => {
+test("gunpowder quenches through a deterministic eight-way water helper", () => {
   const species = read("crate/src/species.rs");
 
   assert.match(species, /let sample = api\.get\(sx, sy\);/);
-  assert.match(species, /sample\.species\s*==\s*Species::Water/);
-  assert.doesNotMatch(species, /fn has_water_neighbor/);
+  assert.match(species, /fn has_adjacent_water/);
+  assert.match(species, /has_adjacent_water\(&mut api\)/);
+  assert.doesNotMatch(
+    species,
+    /fn has_adjacent_water[\s\S]*rand_(?:vec|vec_8|int)/
+  );
 });
 
 test("shader adds a dedicated pixel branch driven by fuse state", () => {

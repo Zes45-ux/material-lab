@@ -470,6 +470,20 @@ mod tests {
         sample
     }
 
+    const WATER_NEIGHBORS: [(i32, i32); 8] = [
+        (-1, -1), (0, -1), (1, -1),
+        (-1,  0),          (1,  0),
+        (-1,  1), (0,  1), (1,  1),
+    ];
+
+    fn find_species(universe: &Universe, species: Species) -> usize {
+        universe
+            .cells
+            .iter()
+            .position(|cell| cell.species == species)
+            .expect("expected species to remain in the test universe")
+    }
+
     #[test]
     fn gunpowder_sample_preserves_existing_rng_sequence() {
         let mut universe = Universe::new(5, 5);
@@ -612,19 +626,45 @@ mod tests {
     }
 
     #[test]
-    fn gunpowder_water_quench_uses_only_the_sampled_neighbor() {
+    fn gunpowder_water_quenches_from_any_adjacent_cell() {
+        for (dx, dy) in WATER_NEIGHBORS {
+            let mut universe = Universe::new(5, 5);
+            let index = universe.get_index(2, 2);
+            fill_neighbors(&mut universe, 2, 2, Species::Wall);
+            let water_index = universe.get_index(2 + dx, 2 + dy);
+            universe.cells[water_index] = Cell {
+                species: Species::Water,
+                ra: 0,
+                rb: 0,
+                clock: 0,
+            };
+            universe.cells[index] = Cell {
+                species: Species::Gunpowder,
+                ra: 100,
+                rb: 4,
+                clock: 0,
+            };
+
+            let cell = universe.cells[index];
+            super::species::update_gunpowder(
+                cell,
+                SandApi {
+                    universe: &mut universe,
+                    x: 2,
+                    y: 2,
+                },
+            );
+
+            let gunpowder_index = find_species(&universe, Species::Gunpowder);
+            assert_eq!(universe.cells[gunpowder_index].rb, 0, "water at ({dx}, {dy})");
+        }
+    }
+
+    #[test]
+    fn gunpowder_counts_down_without_adjacent_water() {
         let mut universe = Universe::new(5, 5);
         let index = universe.get_index(2, 2);
         fill_neighbors(&mut universe, 2, 2, Species::Wall);
-        let sample = next_gunpowder_sample(&mut universe, 2, 2);
-        let water = if sample == (-1, -1) { (1, 1) } else { (-1, -1) };
-        let water_index = universe.get_index(2 + water.0, 2 + water.1);
-        universe.cells[water_index] = Cell {
-            species: Species::Water,
-            ra: 0,
-            rb: 0,
-            clock: 0,
-        };
         universe.cells[index] = Cell {
             species: Species::Gunpowder,
             ra: 100,
@@ -642,7 +682,33 @@ mod tests {
             },
         );
 
-        assert_eq!(universe.cells[index].rb, 3);
+        let gunpowder_index = find_species(&universe, Species::Gunpowder);
+        assert_eq!(universe.cells[gunpowder_index].rb, 3);
+    }
+
+    #[test]
+    fn gunpowder_water_quench_works_through_a_full_tick() {
+        let mut universe = Universe::new(5, 5);
+        let index = universe.get_index(2, 2);
+        fill_neighbors(&mut universe, 2, 2, Species::Wall);
+        let water_index = universe.get_index(1, 2);
+        universe.cells[water_index] = Cell {
+            species: Species::Water,
+            ra: 0,
+            rb: 0,
+            clock: 0,
+        };
+        universe.cells[index] = Cell {
+            species: Species::Gunpowder,
+            ra: 100,
+            rb: 4,
+            clock: 0,
+        };
+
+        universe.tick();
+
+        let gunpowder_index = find_species(&universe, Species::Gunpowder);
+        assert_eq!(universe.cells[gunpowder_index].rb, 0);
     }
 
     #[test]
@@ -650,6 +716,13 @@ mod tests {
         let mut universe = Universe::new(5, 5);
         let index = universe.get_index(2, 2);
         fill_neighbors(&mut universe, 2, 2, Species::Wall);
+        let water_index = universe.get_index(1, 2);
+        universe.cells[water_index] = Cell {
+            species: Species::Water,
+            ra: 0,
+            rb: 0,
+            clock: 0,
+        };
         universe.cells[index] = Cell {
             species: Species::Gunpowder,
             ra: 100,
