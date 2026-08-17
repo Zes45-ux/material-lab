@@ -29,6 +29,7 @@ pub enum Species {
     Dust = 14,
     Oil = 16,
     Rocket = 17,
+    Gunpowder = 20,
 }
 
 impl Species {
@@ -53,6 +54,7 @@ impl Species {
             14 => Some(Species::Dust),
             16 => Some(Species::Oil),
             17 => Some(Species::Rocket),
+            20 => Some(Species::Gunpowder),
             _ => None,
         }
     }
@@ -68,6 +70,7 @@ impl Species {
             Species::Gas => update_gas(cell, api),
             Species::Cloner => update_cloner(cell, api),
             Species::Rocket => update_rocket(cell, api),
+            Species::Gunpowder => update_gunpowder(cell, api),
             Species::Fire => update_fire(cell, api),
             Species::Wood => update_wood(cell, api),
             Species::Lava => update_lava(cell, api),
@@ -378,6 +381,112 @@ pub fn update_oil(cell: Cell, mut api: SandApi) {
     } else if api.get(-dx, 0).species == Species::Empty {
         api.set(0, 0, EMPTY_CELL);
         api.set(-dx, 0, new_cell);
+    } else {
+        api.set(0, 0, new_cell);
+    }
+}
+
+fn has_water_neighbor(api: &mut SandApi) -> bool {
+    for dx in -1..=1 {
+        for dy in -1..=1 {
+            if (dx != 0 || dy != 0) && api.get(dx, dy).species == Species::Water {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn explode_gunpowder(cell: Cell, mut api: SandApi) {
+    api.set(
+        0,
+        0,
+        Cell {
+            species: Species::Fire,
+            ra: 150 + (cell.ra / 10),
+            rb: 0,
+            clock: 0,
+        },
+    );
+    api.set_fluid(Wind {
+        dx: 0,
+        dy: 10,
+        pressure: 200,
+        density: 60,
+    });
+}
+
+pub fn update_gunpowder(cell: Cell, mut api: SandApi) {
+    let rb = cell.rb;
+    let fluid = api.get_fluid();
+
+    if fluid.pressure > 120 {
+        explode_gunpowder(cell, api);
+        return;
+    }
+
+    let (sx, sy) = api.rand_vec();
+    let sample = api.get(sx, sy);
+    let mut new_cell = cell;
+
+    if rb == 0 && (sample.species == Species::Fire || sample.species == Species::Lava) {
+        new_cell = Cell {
+            species: Species::Gunpowder,
+            ra: cell.ra,
+            rb: 8,
+            clock: 0,
+        };
+    }
+
+    if rb > 1 {
+        if has_water_neighbor(&mut api) {
+            new_cell = Cell {
+                species: Species::Gunpowder,
+                ra: cell.ra,
+                rb: 0,
+                clock: 0,
+            };
+        } else {
+            new_cell = Cell {
+                species: Species::Gunpowder,
+                ra: cell.ra,
+                rb: rb - 1,
+                clock: 0,
+            };
+            if rb.is_multiple_of(2) && sample.species == Species::Empty {
+                let ra = 20 + api.rand_int(30) as u8;
+                api.set(
+                    sx,
+                    sy,
+                    Cell {
+                        species: Species::Fire,
+                        ra,
+                        rb: 0,
+                        clock: 0,
+                    },
+                );
+            }
+        }
+    } else if rb == 1 {
+        explode_gunpowder(cell, api);
+        return;
+    }
+
+    let dx = api.rand_dir_2();
+    let below = api.get(0, 1);
+    if below.species == Species::Empty {
+        api.set(0, 0, EMPTY_CELL);
+        api.set(0, 1, new_cell);
+    } else if api.get(dx, 1).species == Species::Empty {
+        api.set(0, 0, EMPTY_CELL);
+        api.set(dx, 1, new_cell);
+    } else if below.species == Species::Water
+        || below.species == Species::Gas
+        || below.species == Species::Oil
+        || below.species == Species::Acid
+    {
+        api.set(0, 0, below);
+        api.set(0, 1, new_cell);
     } else {
         api.set(0, 0, new_cell);
     }
@@ -1310,7 +1419,7 @@ mod tests {
     fn from_u8_accepts_only_declared_species_values() {
         assert_eq!(Species::from_u8(2), Some(Species::Sand));
         assert_eq!(Species::from_u8(10), None);
-        assert_eq!(Species::from_u8(20), None);
+        assert_eq!(Species::from_u8(20), Some(Species::Gunpowder));
         assert_eq!(Species::from_u8(u8::MAX), None);
     }
 }

@@ -27,6 +27,7 @@ export enum Species {
     Dust = 14,
     Oil = 16,
     Rocket = 17,
+    Gunpowder = 20,
 }
 
 export class Universe {

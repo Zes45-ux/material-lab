@@ -343,6 +343,33 @@
       }
     ]
   },
+  "Gunpowder": {
+    "name": "火药",
+    "category": "能量",
+    "description": "会沉降的可燃颗粒，点燃后进入引信并在压力或倒计时结束时爆炸。",
+    "reactions": [
+      {
+        "with": ["Fire", "Lava"],
+        "when": "邻近点燃源时",
+        "result": "火药进入引信倒计时。"
+      },
+      {
+        "with": ["Water"],
+        "when": "引信阶段接触水时",
+        "result": "尚未到最后一 tick 的引信会熄灭。"
+      },
+      {
+        "with": ["Dust", "Stone", "Ice"],
+        "when": "爆炸产生压力时",
+        "result": "通过原版压力和流体通道产生联动。"
+      },
+      {
+        "with": ["Acid"],
+        "when": "被酸腐蚀时",
+        "result": "火药被腐蚀并清除。"
+      }
+    ]
+  },
   "Rocket": {
     "name": "火箭",
     "category": "工具",

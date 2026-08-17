@@ -343,7 +343,7 @@ class Index extends React.Component {
               <p className="panel-kicker">材料工具</p>
               <h1>选择材料</h1>
             </div>
-            <span className="material-count">19 种</span>
+            <span className="material-count">20 种</span>
           </div>
 
           <div className="material-rail-scroll">
