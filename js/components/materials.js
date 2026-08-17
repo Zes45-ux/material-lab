@@ -2,7 +2,7 @@ const MATERIAL_GROUPS = [
   {
     key: "base",
     label: "基础材料",
-    items: ["Empty", "Wall", "Sand", "Water", "Stone", "Ice", "Gas"],
+    items: ["Empty", "Wall", "Sand", "Snow", "Water", "Stone", "Ice", "Gas"],
   },
   {
     key: "life",
@@ -49,6 +49,17 @@ const MATERIAL_DETAILS = {
     reactions: [
       { material: "水", result: "沙下沉，水被顶起" },
       { material: "气体 / 油 / 酸", result: "沙下沉并发生置换" },
+    ],
+  },
+  Snow: {
+    label: "雪",
+    family: "基础材料",
+    intro: "像沙一样下落、滑落和堆积的寒冷颗粒。",
+    note: "持续接触火或熔岩时会逐步融化成水。",
+    reactions: [
+      { material: "火 / 熔岩", result: "随机采样到热源时融化为水" },
+      { material: "水 / 气体 / 油 / 酸", result: "雪下沉并置换下方流体" },
+      { material: "风", result: "按沙的风力档位被吹动" },
     ],
   },
   Water: {
