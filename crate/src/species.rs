@@ -115,7 +115,7 @@ pub fn update_sand(cell: Cell, mut api: SandApi) {
 }
 
 pub fn update_snow(cell: Cell, mut api: SandApi) {
-    let (hx, hy) = api.rand_vec();
+    let (hx, hy) = api.rand_vec_8();
     let heat = api.get(hx, hy);
     if heat.species == Species::Fire || heat.species == Species::Lava {
         api.set(

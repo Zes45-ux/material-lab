@@ -30,7 +30,7 @@ test("Rust registers Snow and keeps its behavior local", () => {
   assert.match(source, /Snow\s*=\s*21/);
   assert.match(source, /21\s*=>\s*Some\(Species::Snow\)/);
   assert.match(source, /Species::Snow\s*=>\s*update_snow/);
-  assert.match(snow, /api\.rand_vec\(\)/);
+  assert.match(snow, /api\.rand_vec_8\(\)/);
   assert.match(snow, /api\.rand_dir_2\(\)/);
   for (const species of ["Water", "Gas", "Oil", "Acid", "Fire", "Lava"]) {
     assert.match(snow, new RegExp(`Species::${species}`));
@@ -49,7 +49,20 @@ test("Chinese material surfaces expose Snow", () => {
   assert.equal(labels.Snow, "雪");
   assert.ok(info.Snow.reactions.some((item) => item.with.includes("Fire")));
   assert.ok(info.Snow.reactions.some((item) => item.with.includes("Lava")));
+  for (const source of ["Fire", "Lava"]) {
+    assert.ok(
+      info[source].reactions.some((item) => item.with.includes("Snow")),
+      `${source} metadata must reference Snow`
+    );
+  }
   assert.match(read("js/components/materials.js"), /"Sand",\s*"Snow"/);
+  const materials = read("js/components/materials.js");
+  for (const source of ["Fire", "Lava"]) {
+    const start = materials.indexOf(`  ${source}: {`);
+    const end = materials.indexOf("\n  },", start);
+    assert.notEqual(start, -1, `${source} details are missing`);
+    assert.match(materials.slice(start, end), /material: "雪"/);
+  }
   assert.match(read("js/components/info.js"), /<h4>雪<\/h4>/);
   assert.match(read("js/components/ui.js"), /21\s*种/);
 });

@@ -170,6 +170,7 @@ const MATERIAL_DETAILS = {
     note: "火焰会自然衰减，适合测试连锁反应。",
     reactions: [
       { material: "水", result: "火熄灭" },
+      { material: "雪", result: "雪融化成水" },
       { material: "木头 / 植物 / 油", result: "材料被点燃" },
       { material: "气体 / 粉尘", result: "火焰扩散" },
     ],
@@ -181,6 +182,7 @@ const MATERIAL_DETAILS = {
     note: "熔岩遇水会迅速冷却，留下石头。",
     reactions: [
       { material: "水", result: "熔岩冷却为石头" },
+      { material: "雪", result: "雪融化成水" },
       { material: "气体 / 粉尘", result: "产生火焰" },
       { material: "木头 / 植物 / 油", result: "材料被点燃" },
     ],

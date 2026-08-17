@@ -519,25 +519,10 @@ mod tests {
         let saved_rng = universe.rng.clone();
         let choices = {
             let mut api = SandApi { universe, x, y };
-            (api.rand_vec(), api.rand_dir_2())
+            (api.rand_vec_8(), api.rand_dir_2())
         };
         universe.rng = saved_rng;
         choices
-    }
-
-    fn advance_to_neighbor_snow_sample(
-        universe: &mut Universe,
-        x: i32,
-        y: i32,
-    ) -> ((i32, i32), i32) {
-        for _ in 0..32 {
-            let choices = next_snow_choices(universe, x, y);
-            if choices.0 != (0, 0) {
-                return choices;
-            }
-            let _ = universe.rng.next_u64();
-        }
-        panic!("expected a non-center snow sample within 32 RNG advances");
     }
 
     const WATER_NEIGHBORS: [(i32, i32); 8] = [
@@ -671,7 +656,7 @@ mod tests {
         for heat in [Species::Fire, Species::Lava] {
             let mut universe = Universe::new(5, 5);
             fill_neighbors(&mut universe, 2, 2, Species::Wall);
-            let ((hx, hy), _) = advance_to_neighbor_snow_sample(&mut universe, 2, 2);
+            let ((hx, hy), _) = next_snow_choices(&mut universe, 2, 2);
             let center = universe.get_index(2, 2);
             let heat_index = universe.get_index(2 + hx, 2 + hy);
             universe.cells[center] = Cell {
@@ -717,7 +702,7 @@ mod tests {
         ];
         let mut universe = Universe::new(5, 5);
         fill_neighbors(&mut universe, 2, 2, Species::Wall);
-        let ((hx, hy), _) = advance_to_neighbor_snow_sample(&mut universe, 2, 2);
+        let ((hx, hy), _) = next_snow_choices(&mut universe, 2, 2);
         let other = NEIGHBORS
             .into_iter()
             .find(|offset| *offset != (hx, hy))
