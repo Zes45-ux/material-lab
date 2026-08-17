@@ -8,7 +8,7 @@
 
 - `rb = 0`：火药为惰性颗粒，沿用沙的沉降/置换路径。
 - 惰性火药抽样到 Fire 或 Lava 时进入 `rb = 8` 的引信状态。
-- `rb = 8..2`：每 tick 倒计时并产生短暂火花；引信阶段邻接 Water 时清除引信，保留为惰性火药。
+- `rb = 8..2`：每 tick 倒计时并产生短暂火花；引信阶段沿用 Oil/Wood 的随机邻格采样，抽样到 Water 时清除引信，保留为惰性火药。
 - `rb = 1`：爆炸为 Fire，并写入高压 Wind；压力 `> 120` 时直接爆炸，压力判定优先于水的熄灭判定。
 - 爆炸只通过新增函数写入本格 Fire 和流体压力，不修改原有 Dust 的压力逻辑。
 - 火药的风阈值为 `30`，与 Sand/Mite/Rocket 同档；原有阈值不改。
@@ -24,8 +24,8 @@
 
 ### 修改
 
-- `crate/src/species.rs`：加入 `Species::Gunpowder = 20`、安全 `from_u8` 映射、更新分支、引信/水/压力/爆炸逻辑及 Rust 单元测试。
-- `crate/src/lib.rs`：只增加 `Gunpowder => 30` 风阈值及火药风移动回归测试所需的最小断言。
+- `crate/src/species.rs`：加入 `Species::Gunpowder = 20`、安全 `from_u8` 映射、更新分支、引信/随机水采样/压力/爆炸逻辑及 Rust 单元测试。
+- `crate/src/lib.rs`：只增加 `Gunpowder => 30` 风阈值、原版上抛两格名单及火药风移动回归测试所需的最小断言。
 - `js/glsl/sand.glsl`：追加 `type == 20` 的像素表现分支。
 - `js/components/materials.js`：将火药加入能量材料分组和材料检查器说明。
 - `js/material-info.json`：加入火药的中文说明和可验证反应关系。
@@ -64,7 +64,7 @@ cargo test --manifest-path crate/Cargo.toml
 
 如果终端没有 Rust 工具链，保留测试代码并记录环境阻塞；不得把未编译状态描述为 Rust 已通过。
 
-随后按设计追加 `Gunpowder` 枚举、映射、update 分支、确定性八邻域水熄灭检查、压力优先爆炸、引信递减、火花和沙式移动。只新增代码，不重排或改写既有材料函数。
+随后按设计追加 `Gunpowder` 枚举、映射、update 分支、与 Oil/Wood 一致的随机邻格水熄灭检查、压力优先爆炸、引信递减、火花和沙式移动。只新增代码，不重排或改写既有材料函数。
 
 ### 3. 实现前端材料登记和说明
 

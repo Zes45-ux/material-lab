@@ -386,17 +386,6 @@ pub fn update_oil(cell: Cell, mut api: SandApi) {
     }
 }
 
-fn has_water_neighbor(api: &mut SandApi) -> bool {
-    for dx in -1..=1 {
-        for dy in -1..=1 {
-            if (dx != 0 || dy != 0) && api.get(dx, dy).species == Species::Water {
-                return true;
-            }
-        }
-    }
-    false
-}
-
 fn explode_gunpowder(cell: Cell, mut api: SandApi) {
     api.set(
         0,
@@ -439,7 +428,7 @@ pub fn update_gunpowder(cell: Cell, mut api: SandApi) {
     }
 
     if rb > 1 {
-        if has_water_neighbor(&mut api) {
+        if sample.species == Species::Water {
             new_cell = Cell {
                 species: Species::Gunpowder,
                 ra: cell.ra,

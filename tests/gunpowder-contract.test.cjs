@@ -48,6 +48,18 @@ test("gunpowder uses the same light-material wind tier without changing legacy t
   assert.match(lib, /Species::Sand\s*=>\s*30/);
   assert.match(lib, /Species::Mite\s*=>\s*30/);
   assert.match(lib, /Species::Rocket\s*=>\s*30/);
+  assert.match(
+    lib,
+    /cell\.species\s*==\s*Species::Rocket[\s\S]*cell\.species\s*==\s*Species::Gunpowder/
+  );
+});
+
+test("gunpowder quenches from the same sampled neighbor used by original burning materials", () => {
+  const species = read("crate/src/species.rs");
+
+  assert.match(species, /let sample = api\.get\(sx, sy\);/);
+  assert.match(species, /sample\.species\s*==\s*Species::Water/);
+  assert.doesNotMatch(species, /fn has_water_neighbor/);
 });
 
 test("shader adds a dedicated pixel branch driven by fuse state", () => {
