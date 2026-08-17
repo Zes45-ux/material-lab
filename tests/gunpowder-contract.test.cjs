@@ -83,9 +83,18 @@ test("front-end registries and guides expose gunpowder as firepowder", () => {
   const infoPage = read("js/components/info.js");
   const ui = read("js/components/ui.js");
 
+  assert.equal(labels.Dust, "粉尘");
   assert.equal(labels.Gunpowder, "火药");
+  assert.match(info.Dust.description, /轻盈易飘散的助燃颗粒/);
+  assert.doesNotMatch(info.Dust.description, /爆炸|爆燃/);
   assert.ok(info.Gunpowder);
+  assert.match(info.Gunpowder.description, /短引信/);
   assert.ok(info.Gunpowder.reactions.some((reaction) => reaction.with.includes("Water")));
+  const waterReaction = info.Gunpowder.reactions.find((reaction) => reaction.with.includes("Water"));
+  assert.match(waterReaction.when, /相邻水格/);
+  assert.match(waterReaction.result, /rb=8\.\.2/);
+  assert.match(info.Gunpowder.description, /最后一 tick/);
+  assert.match(info.Gunpowder.description, /压力超过 120/);
   for (const material of ["Fire", "Lava", "Dust", "Stone", "Ice"]) {
     assert.ok(
       info.Gunpowder.reactions.some((reaction) => reaction.with.includes(material)),
@@ -94,6 +103,19 @@ test("front-end registries and guides expose gunpowder as firepowder", () => {
   }
   assert.match(materials, /items:\s*\[[^\]]*"Gunpowder"/s);
   assert.match(materials, /Gunpowder:\s*\{/);
+  const dustBlock = materials.match(/Dust:\s*\{[\s\S]*?\r?\n  \},\r?\n  Oil:/);
+  const gunpowderBlock = materials.match(/Gunpowder:\s*\{[\s\S]*?\r?\n  \},\r?\n  Cloner:/);
+  assert.ok(dustBlock, "Dust material block is missing");
+  assert.ok(gunpowderBlock, "Gunpowder material block is missing");
+  assert.match(dustBlock[0], /轻盈易飘散的助燃颗粒/);
+  assert.doesNotMatch(dustBlock[0], /爆炸|爆燃/);
+  assert.match(gunpowderBlock[0], /短引信/);
+  assert.match(gunpowderBlock[0], /最后一 tick/);
+  assert.match(gunpowderBlock[0], /压力超过 120/);
   assert.match(infoPage, /<h4>火药<\/h4>/);
+  assert.match(infoPage, /<h4>粉尘<\/h4>/);
+  assert.match(infoPage, /普通引信可被相邻水格熄灭/);
+  assert.match(infoPage, /最后一 tick 仍爆炸/);
+  assert.match(infoPage, /压力超过 120 时直接引爆/);
   assert.match(ui, /20\s*种/);
 });
