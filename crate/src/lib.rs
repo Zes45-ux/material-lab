@@ -513,6 +513,31 @@ mod tests {
         sample
     }
 
+    fn next_snow_choices(universe: &mut Universe, x: i32, y: i32) -> ((i32, i32), i32) {
+        let saved_rng = universe.rng.clone();
+        let choices = {
+            let mut api = SandApi { universe, x, y };
+            (api.rand_vec(), api.rand_dir_2())
+        };
+        universe.rng = saved_rng;
+        choices
+    }
+
+    fn advance_to_neighbor_snow_sample(
+        universe: &mut Universe,
+        x: i32,
+        y: i32,
+    ) -> ((i32, i32), i32) {
+        for _ in 0..32 {
+            let choices = next_snow_choices(universe, x, y);
+            if choices.0 != (0, 0) {
+                return choices;
+            }
+            let _ = universe.rng.next_u64();
+        }
+        panic!("expected a non-center snow sample within 32 RNG advances");
+    }
+
     const WATER_NEIGHBORS: [(i32, i32); 8] = [
         (-1, -1), (0, -1), (1, -1),
         (-1,  0),          (1,  0),
@@ -558,6 +583,164 @@ mod tests {
 
         assert_eq!(universe.get_cell(1, 0).species, Species::Empty);
         assert_eq!(universe.get_cell(1, 1).species, Species::Sand);
+    }
+
+    #[test]
+    fn snow_moves_down_like_sand_on_tick() {
+        let mut universe = Universe::new(3, 3);
+        universe.paint(1, 0, 1, Species::Snow);
+
+        universe.tick();
+
+        assert_eq!(universe.get_cell(1, 0).species, Species::Empty);
+        assert_eq!(universe.get_cell(1, 1).species, Species::Snow);
+    }
+
+    #[test]
+    fn snow_uses_its_sampled_diagonal_when_below_is_blocked() {
+        let mut universe = Universe::new(5, 5);
+        fill_neighbors(&mut universe, 2, 2, Species::Wall);
+        let (_, dx) = next_snow_choices(&mut universe, 2, 2);
+        let target = universe.get_index(2 + dx, 3);
+        universe.cells[target] = super::EMPTY_CELL;
+        let center = universe.get_index(2, 2);
+        universe.cells[center] = Cell {
+            species: Species::Snow,
+            ra: 100,
+            rb: 0,
+            clock: 0,
+        };
+        let cell = universe.cells[center];
+
+        super::species::update_snow(
+            cell,
+            SandApi {
+                universe: &mut universe,
+                x: 2,
+                y: 2,
+            },
+        );
+
+        assert_eq!(universe.cells[target].species, Species::Snow);
+    }
+
+    #[test]
+    fn snow_displaces_each_original_sand_fluid() {
+        for fluid in [Species::Water, Species::Gas, Species::Oil, Species::Acid] {
+            let mut universe = Universe::new(5, 5);
+            fill_neighbors(&mut universe, 2, 2, Species::Wall);
+            let center = universe.get_index(2, 2);
+            let below = universe.get_index(2, 3);
+            universe.cells[center] = Cell {
+                species: Species::Snow,
+                ra: 100,
+                rb: 0,
+                clock: 0,
+            };
+            universe.cells[below] = Cell {
+                species: fluid,
+                ra: 80,
+                rb: 0,
+                clock: 0,
+            };
+            let cell = universe.cells[center];
+
+            super::species::update_snow(
+                cell,
+                SandApi {
+                    universe: &mut universe,
+                    x: 2,
+                    y: 2,
+                },
+            );
+
+            assert_eq!(universe.cells[center].species, fluid);
+            assert_eq!(universe.cells[below].species, Species::Snow);
+        }
+    }
+
+    #[test]
+    fn snow_melts_when_its_sampled_cell_is_fire_or_lava() {
+        for heat in [Species::Fire, Species::Lava] {
+            let mut universe = Universe::new(5, 5);
+            fill_neighbors(&mut universe, 2, 2, Species::Wall);
+            let ((hx, hy), _) = advance_to_neighbor_snow_sample(&mut universe, 2, 2);
+            let center = universe.get_index(2, 2);
+            let heat_index = universe.get_index(2 + hx, 2 + hy);
+            universe.cells[center] = Cell {
+                species: Species::Snow,
+                ra: 100,
+                rb: 0,
+                clock: 0,
+            };
+            universe.cells[heat_index] = Cell {
+                species: heat,
+                ra: 100,
+                rb: 0,
+                clock: 0,
+            };
+            let cell = universe.cells[center];
+
+            super::species::update_snow(
+                cell,
+                SandApi {
+                    universe: &mut universe,
+                    x: 2,
+                    y: 2,
+                },
+            );
+
+            assert_eq!(universe.cells[center].species, Species::Water);
+            assert_eq!(universe.cells[center].ra, 100);
+            assert_eq!(universe.cells[center].rb, 0);
+        }
+    }
+
+    #[test]
+    fn snow_does_not_melt_from_an_unsampled_hot_neighbor() {
+        const NEIGHBORS: [(i32, i32); 8] = [
+            (-1, -1),
+            (0, -1),
+            (1, -1),
+            (-1, 0),
+            (1, 0),
+            (-1, 1),
+            (0, 1),
+            (1, 1),
+        ];
+        let mut universe = Universe::new(5, 5);
+        fill_neighbors(&mut universe, 2, 2, Species::Wall);
+        let ((hx, hy), _) = advance_to_neighbor_snow_sample(&mut universe, 2, 2);
+        let other = NEIGHBORS
+            .into_iter()
+            .find(|offset| *offset != (hx, hy))
+            .unwrap();
+        let center = universe.get_index(2, 2);
+        let heat_index = universe.get_index(2 + other.0, 2 + other.1);
+        universe.cells[center] = Cell {
+            species: Species::Snow,
+            ra: 100,
+            rb: 0,
+            clock: 0,
+        };
+        universe.cells[heat_index] = Cell {
+            species: Species::Fire,
+            ra: 100,
+            rb: 0,
+            clock: 0,
+        };
+        let cell = universe.cells[center];
+
+        super::species::update_snow(
+            cell,
+            SandApi {
+                universe: &mut universe,
+                x: 2,
+                y: 2,
+            },
+        );
+
+        assert_eq!(universe.cells[center].species, Species::Snow);
     }
 
     #[test]
