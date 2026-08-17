@@ -87,15 +87,20 @@ if (!isBench) {
   drawSand = () => {};
 }
 const renderLoop = () => {
+  const now = Date.now();
+  const elapsedMs = Math.min(Math.max(now - lastRenderTime, 0), 100);
+  lastRenderTime = now;
   if (!window.paused) {
     fps.render(); // new
-    universe.tick();
+    universe.tick_with_elapsed(elapsedMs);
     fluid.update();
   }
   drawSand();
 
   window.animationId = requestAnimationFrame(renderLoop);
 };
+
+let lastRenderTime = Date.now();
 
 if (!isBench) {
   renderLoop();

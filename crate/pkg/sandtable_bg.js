@@ -56,6 +56,12 @@ export class Universe {
         wasm.__wbg_universe_free(ptr, 0);
     }
     /**
+     * @param {number} elapsed_ms
+     */
+    advance_gunpowder_fuses(elapsed_ms) {
+        wasm.universe_advance_gunpowder_fuses(this.__wbg_ptr, elapsed_ms);
+    }
+    /**
      * @returns {number}
      */
     burns() {
@@ -108,6 +114,12 @@ export class Universe {
     }
     tick() {
         wasm.universe_tick(this.__wbg_ptr);
+    }
+    /**
+     * @param {number} elapsed_ms
+     */
+    tick_with_elapsed(elapsed_ms) {
+        wasm.universe_tick_with_elapsed(this.__wbg_ptr, elapsed_ms);
     }
     /**
      * @returns {number}

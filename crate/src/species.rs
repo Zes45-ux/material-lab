@@ -405,7 +405,8 @@ fn explode_gunpowder(cell: Cell, mut api: SandApi) {
     });
 }
 
-const GUNPOWDER_FUSE_TICKS: u8 = 90;
+pub(crate) const GUNPOWDER_FUSE_TICKS: u8 = 250;
+pub(crate) const GUNPOWDER_FUSE_STEP_MS: f32 = 20.0;
 
 const GUNPOWDER_WATER_NEIGHBORS: [(i32, i32); 8] = [
     (-1, -1), (0, -1), (1, -1),
@@ -420,6 +421,71 @@ fn has_adjacent_water(api: &mut SandApi) -> bool {
         }
     }
     false
+}
+
+pub(crate) fn advance_gunpowder_fuse(cell: Cell, steps: u32, mut api: SandApi) {
+    if cell.species != Species::Gunpowder || cell.rb <= 1 {
+        return;
+    }
+
+    if api.get_fluid().pressure > 120 {
+        return;
+    }
+
+    if has_adjacent_water(&mut api) {
+        api.set(
+            0,
+            0,
+            Cell {
+                species: Species::Gunpowder,
+                ra: cell.ra,
+                rb: 0,
+                clock: 0,
+            },
+        );
+        return;
+    }
+
+    if steps == 0 {
+        return;
+    }
+
+    let mut rb = cell.rb;
+    for _ in 0..steps {
+        if rb <= 1 {
+            break;
+        }
+
+        if rb.is_multiple_of(2) {
+            let (sx, sy) = api.rand_vec();
+            if api.get(sx, sy).species == Species::Empty {
+                let ra = 20 + api.rand_int(30) as u8;
+                api.set(
+                    sx,
+                    sy,
+                    Cell {
+                        species: Species::Fire,
+                        ra,
+                        rb: 0,
+                        clock: 0,
+                    },
+                );
+            }
+        }
+
+        rb -= 1;
+    }
+
+    api.set(
+        0,
+        0,
+        Cell {
+            species: Species::Gunpowder,
+            ra: cell.ra,
+            rb,
+            clock: 0,
+        },
+    );
 }
 
 pub fn update_gunpowder(cell: Cell, mut api: SandApi) {
@@ -452,26 +518,6 @@ pub fn update_gunpowder(cell: Cell, mut api: SandApi) {
                 rb: 0,
                 clock: 0,
             };
-        } else {
-            new_cell = Cell {
-                species: Species::Gunpowder,
-                ra: cell.ra,
-                rb: rb - 1,
-                clock: 0,
-            };
-            if rb.is_multiple_of(2) && sample.species == Species::Empty {
-                let ra = 20 + api.rand_int(30) as u8;
-                api.set(
-                    sx,
-                    sy,
-                    Cell {
-                        species: Species::Fire,
-                        ra,
-                        rb: 0,
-                        clock: 0,
-                    },
-                );
-            }
         }
     } else if rb == 1 {
         explode_gunpowder(cell, api);

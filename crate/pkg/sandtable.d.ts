@@ -34,6 +34,7 @@ export class Universe {
     private constructor();
     free(): void;
     [Symbol.dispose](): void;
+    advance_gunpowder_fuses(elapsed_ms: number): void;
     burns(): number;
     cells(): number;
     flush_undos(): void;
@@ -44,6 +45,7 @@ export class Universe {
     push_undo(): void;
     reset(): void;
     tick(): void;
+    tick_with_elapsed(elapsed_ms: number): void;
     width(): number;
     winds(): number;
 }

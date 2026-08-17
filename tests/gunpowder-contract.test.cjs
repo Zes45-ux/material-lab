@@ -21,12 +21,18 @@ test("gunpowder has a local standalone registry entry without consuming legacy i
 
 test("Rust registers gunpowder as an additive species with fuse and explosion behavior", () => {
   const species = read("crate/src/species.rs");
+  const lib = read("crate/src/lib.rs");
+  const index = read("js/index.js");
 
   assert.match(species, /Gunpowder\s*=\s*20/);
   assert.match(species, /20\s*=>\s*Some\(Species::Gunpowder\)/);
   assert.match(species, /Species::Gunpowder\s*=>\s*update_gunpowder/);
   assert.match(species, /fn update_gunpowder/);
-  assert.match(species, /GUNPOWDER_FUSE_TICKS\s*:\s*u8\s*=\s*90/);
+  assert.match(species, /GUNPOWDER_FUSE_TICKS\s*:\s*u8\s*=\s*250/);
+  assert.match(species, /GUNPOWDER_FUSE_STEP_MS\s*:\s*f32\s*=\s*20\.0/);
+  assert.match(lib, /pub fn advance_gunpowder_fuses/);
+  assert.match(lib, /pub fn tick_with_elapsed/);
+  assert.match(index, /universe\.tick_with_elapsed\(elapsedMs\)/);
   assert.match(species, /pressure\s*>\s*120/);
   assert.match(species, /pressure\s*:\s*200/);
   assert.match(species, /rb\s*>\s*1/);
@@ -73,7 +79,7 @@ test("shader adds a dedicated pixel branch driven by fuse state", () => {
   const shader = read("js/glsl/sand.glsl");
 
   assert.match(shader, /type\s*==\s*20/);
-  assert.match(shader, /data\.b\s*\*\s*255\.0\s*\/\s*90\.0/);
+  assert.match(shader, /data\.b\s*\*\s*255\.0\s*\/\s*250\.0/);
   assert.match(shader, /gunpowder/i);
 });
 
@@ -93,8 +99,8 @@ test("front-end registries and guides expose gunpowder as firepowder", () => {
   assert.ok(info.Gunpowder.reactions.some((reaction) => reaction.with.includes("Water")));
   const waterReaction = info.Gunpowder.reactions.find((reaction) => reaction.with.includes("Water"));
   assert.match(waterReaction.when, /相邻水格/);
-  assert.match(info.Gunpowder.description, /约 90 tick 的短引信/);
-  assert.match(waterReaction.result, /rb=90\.\.2/);
+  assert.match(info.Gunpowder.description, /约 5 秒的短引信/);
+  assert.match(waterReaction.result, /rb=250\.\.2/);
   assert.match(info.Gunpowder.description, /最后一 tick/);
   assert.match(info.Gunpowder.description, /压力超过 120/);
   for (const material of ["Fire", "Lava", "Dust", "Stone", "Ice"]) {
@@ -111,7 +117,7 @@ test("front-end registries and guides expose gunpowder as firepowder", () => {
   assert.ok(gunpowderBlock, "Gunpowder material block is missing");
   assert.match(dustBlock[0], /轻盈易飘散的助燃颗粒/);
   assert.doesNotMatch(dustBlock[0], /爆炸|爆燃/);
-  assert.match(gunpowderBlock[0], /约 90 tick 的短引信/);
+  assert.match(gunpowderBlock[0], /约 5 秒的短引信/);
   assert.match(gunpowderBlock[0], /最后一 tick/);
   assert.match(gunpowderBlock[0], /压力超过 120/);
   assert.match(infoPage, /<h4>火药<\/h4>/);

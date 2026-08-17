@@ -4,17 +4,17 @@
 
 **Goal:** 在保持 Sandspiel 原版落沙机制和像素风格的前提下，让粉尘保持轻质助燃定位，让火药成为可布置、可拆除的短引信强压力爆破材料。
 
-**Architecture:** 只在 `update_gunpowder` 内增加无随机数的八方向水接触检查，并复用现有 `Cell.rb` 引信、随机点燃/火花、颗粒移动和 `burns -> GPU -> winds` 压力通道。粉尘运行时代码、公共流体逻辑和旧 shader 分支保持原样；前端统一 Dust 的中文名为“粉尘”，同步两种材料的角色文案和契约测试。
+**Architecture:** 在 `update_gunpowder` 内增加无随机数的八方向水接触检查，并用 `Universe::tick_with_elapsed` 按实际经过时间推进 `Cell.rb` 引信；随机点燃/火花、颗粒移动和 `burns -> GPU -> winds` 压力通道保持原有手感。粉尘运行时代码、公共流体逻辑和旧 shader 分支保持原样；前端统一 Dust 的中文名为“粉尘”，同步两种材料的角色文案和契约测试。
 
 **Tech Stack:** Rust/WASM simulation, `wasm-bindgen`, Node.js `node:test`, WebGL/GLSL, Webpack, JSON/React-style material metadata.
 
 ## Global Constraints
 
 - 粉尘保持原版运行时行为，不修改 `update_dust`、压力阈值 120、压力输出 80/5、风力阈值 10 或火焰传播规则。
-- 火药保持 `Species::Gunpowder = 20`、引信起点 `rb = 90`（约 0.5–1.5 秒，随帧率而变）、压力阈值 `> 120`、爆炸 `pressure = 200`、`density = 60`、`dy = 10` 和风力阈值 30。
-- 普通引信 `rb = 90..2` 检查固定八方向水格；`rb = 1` 和压力 `> 120` 不接受水灭，压力判断优先。
+- 火药保持 `Species::Gunpowder = 20`、引信起点 `rb = 250`（每步 20ms，约 5 秒）、压力阈值 `> 120`、爆炸 `pressure = 200`、`density = 60`、`dy = 10` 和风力阈值 30。
+- 普通引信 `rb = 250..2` 检查固定八方向水格；`rb = 1` 和压力 `> 120` 不接受水灭，压力判断优先。
 - 水接触 helper 只能调用现有 `SandApi::get`，不得新增随机 API 调用；没有相邻水的场景保持原有随机调用顺序。
-- 不修改 `Fire`、`Lava`、`Water`、`Dust` 或其他旧材料的 update 函数、tick 顺序、Cell/Wind 布局、PNG 存档、公共 fluid 管线。
+- 不修改 `Fire`、`Lava`、`Water`、`Dust` 或其他旧材料的 update 函数、Cell/Wind 布局、PNG 存档、公共 fluid 管线；只在 tick 入口增加火药实际时间推进。
 - 不增加温度、湿度、伤害值、爆炸半径、粒子系统、光晕、屏幕震动、贴图动画或高分辨率特效。
 - 全站 Dust 统一显示为“粉尘”；火药文案必须说明普通引信可被相邻水格熄灭，但最后一 tick 和高压不可阻止。
 - Rust 源码变更后，只有成功运行 `wasm-pack build --target bundler` 才能声称浏览器 WASM 已同步。
@@ -31,7 +31,7 @@
 **Interfaces:**
 
 - Consumes: 当前 `Universe` 测试辅助函数、`update_gunpowder(cell, SandApi)` 和既有压力/引信测试。
-- Produces: 八方向行为测试、无水倒计时测试、最后一 tick/高压优先测试、完整 `Universe::tick()` 测试，以及要求 `has_adjacent_water` 无 RNG 的静态契约。
+- Produces: 八方向行为测试、实际时间引信测试、流体移动前水灭测试、最后一 tick/高压优先测试、完整 `Universe::tick_with_elapsed()` 测试，以及要求 `has_adjacent_water` 无 RNG 的静态契约。
 
 - [x] **Step 1: 添加失败的八方向行为测试。**
 
@@ -175,11 +175,11 @@ fn has_adjacent_water(api: &mut SandApi) -> bool {
 
 - [x] **Step 2: 在火药状态机中保持判断顺序。**
 
-保留 `get_fluid().pressure > 120` 为第一条运行时分支；随后保留一次 `rand_vec` 采样用于 `Fire/Lava` 点燃和偶数 tick 火花。仅在 `rb > 1` 分支调用 `has_adjacent_water(&mut api)`，命中时生成 `rb = 0` 的 Gunpowder，不消耗火花倒计时。
+保留 `get_fluid().pressure > 120` 为第一条运行时分支；随后保留一次 `rand_vec` 采样用于 `Fire/Lava` 点燃。`advance_gunpowder_fuses` 按累计实际时间每 20ms 推进一步，在流体 update 前调用同一个水检查，并在偶数倒计时步生成单格火花；命中水时生成 `rb = 0` 的 Gunpowder，不消耗引信。
 
 - [x] **Step 3: 保持最后一 tick 和移动路径。**
 
-让 `rb == 1` 直接调用 `explode_gunpowder`，不调用水 helper；水灭后的 `new_cell` 继续经过现有 Empty、斜落、Water/Gas/Oil/Acid 置换分支。不得修改 `update_dust`、`update_water`、公共 tick 顺序或 `explode_gunpowder` 参数。
+让 `rb == 1` 直接调用 `explode_gunpowder`，不调用水 helper；水灭后的 `new_cell` 继续经过现有 Empty、斜落、Water/Gas/Oil/Acid 置换分支。不得修改 `update_dust`、`update_water` 或 `explode_gunpowder` 参数；tick 的原有移动顺序保持不变，只在其入口增加实际时间引信预推进。
 
 - [x] **Step 4: 运行 GREEN 测试并检查旧材料差异。**
 
@@ -247,10 +247,10 @@ note: 适合扩散火势；没有引信，也不产生火药式强冲击。
 将 Gunpowder 改为延时爆破文案：
 
 ```text
-intro: 会沉降的可燃颗粒，点燃后进入约 90 tick 的短引信并产生强压力爆炸。
+intro: 会沉降的可燃颗粒，点燃后进入约 5 秒的短引信并产生强压力爆炸。
 note: 适合布置延时爆破；普通引信可被相邻水格熄灭。
 火 / 岩浆: 点燃引信并开始倒计时
-水: 八方向相邻水格可熄灭 rb=90..2 的普通引信
+水: 八方向相邻水格可熄灭 rb=250..2 的普通引信
 尘埃 / 石头 / 冰: 爆炸压力产生联动
 酸: 被酸腐蚀
 ```
