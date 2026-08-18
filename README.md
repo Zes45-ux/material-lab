@@ -40,9 +40,12 @@ The test command runs source contracts and a temporary production-build check. T
 The repository includes a precompiled WebAssembly package in `crate/pkg/`, so the default build does not require a local Rust linker. After changing Rust code, rebuild the package before building the web app:
 
 ```powershell
-wasm-pack build --target bundler
+npm run build:wasm
 npm run build
 ```
+
+The `build:wasm` and `build` scripts remove the temporary `.gitignore` that wasm-pack writes into
+`crate/pkg/`, keeping the precompiled package visible to version control.
 
 ## Build and deploy
 
@@ -52,7 +55,7 @@ The build works at a domain root or under a subpath. It generates `index.html` e
 
 ### Vercel
 
-Vercel build machines do not need Rust for the default deployment because `crate/pkg/` contains the precompiled WebAssembly package. If Rust code changes, run `wasm-pack build --target bundler` locally and commit the updated `crate/pkg/` files before deploying.
+Vercel build machines do not need Rust for the default deployment because `crate/pkg/` contains the precompiled WebAssembly package. If Rust code changes, run `npm run build:wasm` locally and commit the updated `crate/pkg/` files before deploying.
 
 ## Architecture
 

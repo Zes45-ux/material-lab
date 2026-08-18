@@ -23,6 +23,16 @@ test("repository uses one reproducible npm workflow", () => {
   assert.doesNotMatch(lock, /registry\.npmmirror\.com/);
 });
 
+test("checked-in wasm package is visible to version control", () => {
+  assert.equal(fs.existsSync(path.join(root, "crate/pkg/.gitignore")), false);
+  const result = spawnSync(
+    "git",
+    ["check-ignore", "--no-index", "crate/pkg/sandtable_bg.wasm"],
+    { cwd: root, encoding: "utf8" }
+  );
+  assert.notEqual(result.status, 0, result.stdout || result.stderr);
+});
+
 test("project metadata uses the Material Lab identity", () => {
   const pkg = JSON.parse(read("package.json"));
   const lock = JSON.parse(read("package-lock.json"));
@@ -117,7 +127,7 @@ test("all material controls have approved Chinese labels", () => {
     Empty: "清除", Wall: "墙", Sand: "沙", Water: "水", Stone: "石头",
     Ice: "冰", Gas: "气体", Cloner: "复制器", Mite: "螨虫", Wood: "木头",
     Plant: "植物", Fungus: "真菌", Seed: "种子", Fire: "火", Lava: "岩浆",
-    Acid: "酸液", Dust: "粉尘", Oil: "油", Rocket: "火箭", Gunpowder: "火药",
+    Acid: "酸液", Dust: "粉尘", Oil: "油", Rocket: "火箭", Gunpowder: "火药", Snow: "雪",
   });
 });
 
@@ -144,6 +154,18 @@ test("material guide data covers every material and only references known target
       assert.equal(typeof relation.result, "string", `${name} reaction has no result`);
     }
   }
+});
+
+test("Snow is exposed by every Chinese material surface", () => {
+  const materialInfo = JSON.parse(read("js/material-info.json"));
+  const materialsSource = read("js/components/materials.js");
+  const infoSource = read("js/components/info.js");
+  const uiSource = read("js/components/ui.js");
+
+  assert.equal(materialInfo.Snow.name, "雪");
+  assert.match(materialsSource, /"Sand",\s*"Snow",\s*"Water"/);
+  assert.match(infoSource, /<h4>雪<\/h4>/);
+  assert.match(uiSource, /21\s*种/);
 });
 
 test("material inspector shares selected material state with the rail", () => {
@@ -465,7 +487,7 @@ test("production build emits marked static entries for root and colliding base p
   const output = fs.mkdtempSync(path.join(os.tmpdir(), "sandspiel-static-test-"));
   const result = spawnSync(process.execPath, [webpackCli, "--mode=production"], {
     cwd: root,
-    env: { ...process.env, SANDSPIEL_DIST_DIR: output },
+    env: { ...process.env, SANDSPIEL_SKIP_WASM: "1", SANDSPIEL_DIST_DIR: output },
     encoding: "utf8",
   });
   assert.equal(result.status, 0, result.stderr || result.stdout);

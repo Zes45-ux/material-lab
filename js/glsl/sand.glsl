@@ -134,6 +134,10 @@ void main() {
     hue = 0.06 - fuse * 0.05;
     saturation = 0.35 + fuse * 0.55;
     lightness = 0.22 + data.g * 0.18 + fuse * (0.28 + noise * 0.12);
+  } else if (type == 21) { // snow
+    hue = 0.58;
+    saturation = 0.10;
+    lightness = 0.82 + data.g * 0.16 + noise * 0.035;
   }
   if (isSnapshot == false) {
     lightness *= (0.975 + snoise2(floor(uv * resolution / dpi)) * 0.025);

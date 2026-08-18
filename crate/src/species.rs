@@ -30,6 +30,7 @@ pub enum Species {
     Oil = 16,
     Rocket = 17,
     Gunpowder = 20,
+    Snow = 21,
 }
 
 impl Species {
@@ -55,6 +56,7 @@ impl Species {
             16 => Some(Species::Oil),
             17 => Some(Species::Rocket),
             20 => Some(Species::Gunpowder),
+            21 => Some(Species::Snow),
             _ => None,
         }
     }
@@ -71,6 +73,7 @@ impl Species {
             Species::Cloner => update_cloner(cell, api),
             Species::Rocket => update_rocket(cell, api),
             Species::Gunpowder => update_gunpowder(cell, api),
+            Species::Snow => update_snow(cell, api),
             Species::Fire => update_fire(cell, api),
             Species::Wood => update_wood(cell, api),
             Species::Lava => update_lava(cell, api),
@@ -105,6 +108,43 @@ pub fn update_sand(cell: Cell, mut api: SandApi) {
         || nbr.species == Species::Acid
     {
         api.set(0, 0, nbr);
+        api.set(0, 1, cell);
+    } else {
+        api.set(0, 0, cell);
+    }
+}
+
+pub fn update_snow(cell: Cell, mut api: SandApi) {
+    let (hx, hy) = api.rand_vec_8();
+    let heat = api.get(hx, hy);
+    if heat.species == Species::Fire || heat.species == Species::Lava {
+        api.set(
+            0,
+            0,
+            Cell {
+                species: Species::Water,
+                ra: cell.ra,
+                rb: 0,
+                clock: 0,
+            },
+        );
+        return;
+    }
+
+    let dx = api.rand_dir_2();
+    let below = api.get(0, 1);
+    if below.species == Species::Empty {
+        api.set(0, 0, EMPTY_CELL);
+        api.set(0, 1, cell);
+    } else if api.get(dx, 1).species == Species::Empty {
+        api.set(0, 0, EMPTY_CELL);
+        api.set(dx, 1, cell);
+    } else if below.species == Species::Water
+        || below.species == Species::Gas
+        || below.species == Species::Oil
+        || below.species == Species::Acid
+    {
+        api.set(0, 0, below);
         api.set(0, 1, cell);
     } else {
         api.set(0, 0, cell);
@@ -409,9 +449,14 @@ pub(crate) const GUNPOWDER_FUSE_TICKS: u8 = 250;
 pub(crate) const GUNPOWDER_FUSE_STEP_MS: f32 = 20.0;
 
 const GUNPOWDER_WATER_NEIGHBORS: [(i32, i32); 8] = [
-    (-1, -1), (0, -1), (1, -1),
-    (-1,  0),          (1,  0),
-    (-1,  1), (0,  1), (1,  1),
+    (-1, -1),
+    (0, -1),
+    (1, -1),
+    (-1, 0),
+    (1, 0),
+    (-1, 1),
+    (0, 1),
+    (1, 1),
 ];
 
 fn has_adjacent_water(api: &mut SandApi) -> bool {
@@ -1472,6 +1517,7 @@ mod tests {
         assert_eq!(Species::from_u8(2), Some(Species::Sand));
         assert_eq!(Species::from_u8(10), None);
         assert_eq!(Species::from_u8(20), Some(Species::Gunpowder));
+        assert_eq!(Species::from_u8(21), Some(Species::Snow));
         assert_eq!(Species::from_u8(u8::MAX), None);
     }
 }

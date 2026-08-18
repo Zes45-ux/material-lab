@@ -8,7 +8,8 @@
   "description": "A standalone falling-sand sandbox for exploring pixel materials and physical reactions, built with Rust/WASM, WebGL, and JavaScript.",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --mode=production",
+    "build": "webpack --mode=production && node scripts/ensure-wasm-package-trackable.cjs",
+    "build:wasm": "wasm-pack build --target bundler && node scripts/ensure-wasm-package-trackable.cjs",
     "start": "webpack-dev-server --host 127.0.0.1",
     "test": "node --test tests/*.test.cjs"
   },
