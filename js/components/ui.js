@@ -21,6 +21,7 @@ const materialColorFor = (name) => {
 };
 
 const materialForegroundFor = (color, background) => {
+  if (background.startsWith("linear-gradient(")) return "var(--figma-ink)";
   if (background !== "transparent") return "var(--figma-on-primary)";
 
   const rgba = color.match(

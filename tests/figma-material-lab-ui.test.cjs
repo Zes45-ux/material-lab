@@ -199,6 +199,32 @@ test("Selected material cards reuse the material icon background and choose read
   );
 });
 
+test("Light material gradients choose the dark selected foreground", () => {
+  const ui = read("js/components/ui.js");
+
+  assert.match(
+    ui,
+    /background\.startsWith\(["']linear-gradient\(["']\)\s*\)\s*return\s*["']var\(--figma-ink\)["']/
+  );
+  assert.match(
+    ui,
+    /if\s*\(elementID === 14\)[\s\S]*?background\s*=\s*["']linear-gradient\(/
+  );
+  assert.match(
+    ui,
+    /["']--material-foreground["']:\s*materialForegroundFor\(color,\s*background\)/
+  );
+});
+
+test("Selected material codes use the lowercase currentcolor keyword", () => {
+  const css = read("js/styles.css");
+
+  assert.match(
+    css,
+    /\.material-option\.selected \.material-option-code\s*\{[^}]*?color:\s*currentcolor;/
+  );
+});
+
 test("Figma canvas chrome keeps centered framing and a single grid layer", () => {
   const css = read("js/styles.css");
 
