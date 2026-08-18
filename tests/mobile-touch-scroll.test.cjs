@@ -23,7 +23,19 @@ test("background does not cancel native material-sheet touch scrolling", () => {
   );
   assert.match(
     paint,
+    /canvas\.addEventListener\(\s*["']touchstart["'][\s\S]*?passive:\s*false/
+  );
+  assert.match(
+    paint,
+    /canvas\.addEventListener\(\s*["']touchend["'][\s\S]*?passive:\s*false/
+  );
+  assert.match(
+    paint,
     /canvas\.addEventListener\(\s*["']touchmove["'][\s\S]*?passive:\s*false/
+  );
+  assert.match(
+    fluid,
+    /sandCanvas\.addEventListener\(\s*["']touchstart["'][\s\S]*?passive:\s*false/
   );
   assert.match(
     fluid,
@@ -66,7 +78,7 @@ test("mobile sheet keeps the scroll list and brush controls in separate hit regi
 });
 
 test("mobile controls meet the minimum touch target", () => {
-  const css = mobileCss();
+  const css = read("js/styles.css");
 
   assert.match(css, /\.topbar-button\s*\{[\s\S]*?min-height:\s*44px/);
   assert.match(
@@ -78,4 +90,11 @@ test("mobile controls meet the minimum touch target", () => {
     /\.mobile-sheet-close\s*\{[\s\S]*?width:\s*44px[\s\S]*?height:\s*44px/
   );
   assert.match(css, /\.brush-size\s*\{[\s\S]*?min-height:\s*44px/);
+  assert.match(css, /\.mobile-dock-button\s*\{[\s\S]*?min-height:\s*44px/);
+  assert.match(css, /\.wind-option\s*\{[\s\S]*?min-height:\s*56px/);
+  assert.match(css, /\.material-option\s*\{[\s\S]*?min-height:\s*48px/);
+  assert.match(
+    css,
+    /\.material-rail\s+\.wind-option,\s*\.material-rail\s+\.material-option,\s*\.material-rail\s+\.brush-size,\s*\.material-rail\s+\.mobile-sheet-close\s*\{[\s\S]*?touch-action:\s*manipulation[\s\S]*?-webkit-tap-highlight-color:\s*transparent/
+  );
 });
