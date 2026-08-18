@@ -91,11 +91,19 @@ test("mobile canvas and material tray share one clearance contract", () => {
   );
   assert.match(
     mobileCss,
-    /\.material-rail-scroll\s*\{[\s\S]*?grid-column:\s*1[\s\S]*?overflow-x:\s*auto/
+    /\.material-rail\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s*122px[\s\S]*?grid-template-rows:\s*auto\s*minmax\(0,\s*1fr\)/
   );
   assert.match(
     mobileCss,
-    /\.brush-control\s*\{[\s\S]*?position:\s*static[\s\S]*?grid-column:\s*2/
+    /\.panel-heading\s*\{[\s\S]*?grid-column:\s*1\s*\/\s*-1[\s\S]*?grid-row:\s*1/
+  );
+  assert.match(
+    mobileCss,
+    /\.material-rail-scroll\s*\{[\s\S]*?grid-column:\s*1[\s\S]*?grid-row:\s*2[\s\S]*?overflow-x:\s*auto/
+  );
+  assert.match(
+    mobileCss,
+    /\.brush-control\s*\{[\s\S]*?position:\s*static[\s\S]*?grid-column:\s*2[\s\S]*?grid-row:\s*2/
   );
   assert.match(mobileCss, /\.dg(?:\.ac)?\s*\{[\s\S]*?display:\s*none\s*!important/);
 });
