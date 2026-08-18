@@ -5,6 +5,11 @@
       "species_id": 20,
       "capability": "species:gunpowder",
       "status": "local-standalone"
+    },
+    "snow": {
+      "species_id": 21,
+      "capability": "species:snow",
+      "status": "local-standalone"
     }
   }
 }

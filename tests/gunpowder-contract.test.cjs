@@ -128,5 +128,5 @@ test("front-end registries and guides expose gunpowder as firepowder", () => {
   assert.match(infoPage, /普通引信可被相邻水格熄灭/);
   assert.match(infoPage, /最后一 tick 仍爆炸/);
   assert.match(infoPage, /压力超过 120 时直接引爆/);
-  assert.match(ui, /20\s*种/);
+  assert.match(ui, /21\s*种/);
 });

@@ -23,6 +23,23 @@
       }
     ]
   },
+  "Snow": {
+    "name": "雪",
+    "category": "基础",
+    "description": "像沙一样下落、斜落和堆积；持续接触火或岩浆时会逐步融化成水。",
+    "reactions": [
+      {
+        "with": ["Fire", "Lava"],
+        "when": "局部随机采样命中热源时",
+        "result": "当前雪粒融化为水，热源继续按原规则更新。"
+      },
+      {
+        "with": ["Water", "Gas", "Oil", "Acid"],
+        "when": "流体位于雪的正下方且雪不能先落入空位时",
+        "result": "雪下沉一格，流体移动到雪原来的位置。"
+      }
+    ]
+  },
   "Water": {
     "name": "水",
     "category": "流体",
@@ -262,6 +279,11 @@
         "with": ["Ice"],
         "when": "接触冰时",
         "result": "冰会融化成水。"
+      },
+      {
+        "with": ["Snow"],
+        "when": "接触雪时",
+        "result": "雪会融化成水。"
       }
     ]
   },
@@ -281,6 +303,11 @@
         "result": "冰会融化成水。"
       },
       {
+        "with": ["Snow"],
+        "when": "接触雪时",
+        "result": "雪会融化成水。"
+      },
+      {
         "with": ["Gas", "Dust"],
         "when": "接触气体或粉尘时",
         "result": "会产生火焰。"
@@ -298,7 +325,7 @@
     "description": "会流动并腐蚀大多数材料；墙和酸液本身不会被它替换。",
     "reactions": [
       {
-        "with": ["Sand", "Water", "Stone", "Ice", "Gas", "Cloner", "Mite", "Wood", "Plant", "Fungus", "Seed", "Fire", "Lava", "Dust", "Oil", "Rocket"],
+        "with": ["Sand", "Snow", "Water", "Stone", "Ice", "Gas", "Cloner", "Mite", "Wood", "Plant", "Fungus", "Seed", "Fire", "Lava", "Dust", "Oil", "Rocket"],
         "when": "在被阻挡且邻近其他材料时",
         "result": "酸液会替换目标位置，目标材料被腐蚀。"
       }
@@ -376,7 +403,7 @@
     "description": "会记住接触到的材料，升空后生成该材料的复制品。",
     "reactions": [
       {
-        "with": ["Sand", "Water", "Stone", "Ice", "Gas", "Mite", "Wood", "Plant", "Fungus", "Seed", "Fire", "Lava", "Acid", "Dust", "Oil"],
+        "with": ["Sand", "Snow", "Water", "Stone", "Ice", "Gas", "Mite", "Wood", "Plant", "Fungus", "Seed", "Fire", "Lava", "Acid", "Dust", "Oil"],
         "when": "发射前接触可复制材料时",
         "result": "火箭会记住该材料，发射后沿路径生成它的副本。"
       },
