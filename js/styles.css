@@ -2767,14 +2767,14 @@ a:focus-visible,
   }
 
   .topbar-button {
-    min-height: 40px;
+    min-height: 44px;
     padding: 8px 10px;
     font-size: 14px;
   }
 
   .topbar-button.icon-only {
-    width: 40px;
-    min-width: 40px;
+    width: 44px;
+    min-width: 44px;
   }
 
   .mobile-dock {
@@ -2839,6 +2839,7 @@ a:focus-visible,
     border: 0;
     background: var(--figma-overlay-scrim);
     pointer-events: auto;
+    touch-action: none;
   }
 
   .mobile-scrim[aria-hidden="false"] {
@@ -2901,6 +2902,8 @@ a:focus-visible,
 
   .mobile-sheet-close {
     display: inline-grid;
+    width: 44px;
+    height: 44px;
     place-items: center;
   }
 
@@ -2915,6 +2918,17 @@ a:focus-visible,
     padding: 12px 0 16px;
     overflow-x: hidden;
     overflow-y: auto;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  .material-rail .wind-option,
+  .material-rail .material-option,
+  .material-rail .brush-size,
+  .material-rail .mobile-sheet-close {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .material-group {
@@ -2937,6 +2951,10 @@ a:focus-visible,
     padding: 12px 0 max(4px, var(--mobile-safe-bottom));
     border-top: 1px solid var(--figma-hairline);
     background: var(--figma-canvas);
+  }
+
+  .material-rail .brush-size {
+    min-height: 44px;
   }
 
   .material-inspector {
