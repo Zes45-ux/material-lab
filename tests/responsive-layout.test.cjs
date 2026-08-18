@@ -242,6 +242,7 @@ test("mobile canvas and material density use an explicit responsive contract", (
     css,
     /@media\s*\(min-width:\s*360px\)\s*and\s*\(max-width:\s*767px\)[\s\S]*?\.material-grid\s*\{[\s\S]*?repeat\(3,\s*minmax\(0,\s*1fr\)\)/
   );
+  assert.match(css, /\.material-grid\s*\{[\s\S]*?gap:\s*6px/);
   assert.match(
     css,
     /@media\s*\(max-width:\s*359px\)[\s\S]*?\.material-grid\s*\{[\s\S]*?repeat\(2,\s*minmax\(0,\s*1fr\)\)/
