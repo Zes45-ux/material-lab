@@ -104,11 +104,11 @@ test("Figma UI uses the documented type, shape, and elevation language", () => {
   assert.match(css, /\.topbar-button\.icon-only[^}]*border-radius:\s*9999px/);
   assert.match(
     themeCss,
-    /\.material-option\.selected\s*\{[\s\S]*?background:\s*var\(--material-background,\s*var\(--material-color\)\)/
+    /\.material-option\.selected\s*\{[^}]*?background:\s*var\(--material-background,\s*var\(--material-color\)\)/
   );
   assert.match(
     themeCss,
-    /\.material-option\.selected\s*\{[\s\S]*?color:\s*var\(--figma-on-primary\)/
+    /\.material-option\.selected\s*\{[^}]*?color:\s*var\(--material-foreground,\s*var\(--figma-on-primary\)\)/
   );
   assert.match(css, /#background::before\s*\{[\s\S]*?background-image:/);
   assert.doesNotMatch(css, /#background\s*\{[^}]*radial-gradient/);
@@ -150,40 +150,52 @@ test("Wind uses the light-green token in every selected-material surface", () =>
   );
   assert.match(
     themeCss,
-    /\.wind-option\s*\{[\s\S]*?background:\s*var\(--figma-block-lime\)[\s\S]*?color:\s*var\(--figma-ink\)/
+    /\.wind-option\s*\{[^}]*?background:\s*var\(--figma-block-lime\)[^}]*?color:\s*var\(--figma-ink\)/
   );
   assert.match(
     themeCss,
-    /\.wind-option:hover,\s*\.wind-option:focus-visible\s*\{[\s\S]*?background:\s*var\(--figma-block-lime\)[\s\S]*?color:\s*var\(--figma-ink\)/
+    /\.wind-option:hover,\s*\.wind-option:focus-visible\s*\{[^}]*?background:\s*var\(--figma-block-lime\)[^}]*?color:\s*var\(--figma-ink\)/
   );
   assert.match(
     themeCss,
-    /\.wind-option\.selected\s*\{[\s\S]*?background:\s*var\(--figma-block-lime\)[\s\S]*?color:\s*var\(--figma-ink\)/
+    /\.wind-option\.selected\s*\{[^}]*?background:\s*var\(--figma-block-lime\)[^}]*?color:\s*var\(--figma-ink\)/
   );
   assert.match(
     themeCss,
-    /\.wind-glyph,\s*\.wind-option\.selected \.wind-glyph\s*\{[\s\S]*?color:\s*var\(--figma-ink\)/
+    /\.wind-glyph,\s*\.wind-option\.selected \.wind-glyph\s*\{[^}]*?color:\s*var\(--figma-ink\)/
   );
 });
 
-test("Selected material cards reuse the material icon background", () => {
+test("Selected material cards reuse the material icon background and choose readable foregrounds", () => {
   const ui = read("js/components/ui.js");
   const css = read("js/styles.css");
   const themeCss = css.slice(
     css.lastIndexOf("/* Figma brand and responsive workspace overrides. */")
   );
 
+  assert.match(ui, /const\s+materialForegroundFor\s*=\s*\(color,\s*background\)\s*=>\s*\{/);
+  assert.match(ui, /const\s+materialForegroundFor[\s\S]*?255\s*\*\s*\(1\s*-\s*alpha\)/);
+  assert.match(ui, /const\s+materialForegroundFor[\s\S]*?blackContrast[\s\S]*?whiteContrast/);
+  assert.match(ui, /const\s+materialForegroundFor[\s\S]*?var\(--figma-ink\)[\s\S]*?var\(--figma-on-primary\)/);
   assert.match(
     ui,
     /["']--material-background["']:\s*background === ["']transparent["']\s*\?\s*color\s*:\s*background/
   );
   assert.match(
-    themeCss,
-    /\.material-option\.selected\s*\{[\s\S]*?background:\s*var\(--material-background,\s*var\(--material-color\)\)/
+    ui,
+    /["']--material-foreground["']:\s*materialForegroundFor\(color,\s*background\)/
   );
   assert.match(
     themeCss,
-    /\.material-swatch\s*\{[\s\S]*?background:\s*var\(--material-background,\s*var\(--material-color\)/
+    /\.material-option\.selected\s*\{[^}]*?background:\s*var\(--material-background,\s*var\(--material-color\)\)/
+  );
+  assert.match(
+    themeCss,
+    /\.material-swatch\s*\{[^}]*?background:\s*var\(--material-background,\s*var\(--material-color\)/
+  );
+  assert.match(
+    themeCss,
+    /\.material-option\.selected\s*\{[^}]*?color:\s*var\(--material-foreground,\s*var\(--figma-on-primary\)\)/
   );
 });
 

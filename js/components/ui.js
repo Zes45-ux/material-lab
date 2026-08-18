@@ -20,6 +20,34 @@ const materialColorFor = (name) => {
   );
 };
 
+const materialForegroundFor = (color, background) => {
+  if (background !== "transparent") return "var(--figma-on-primary)";
+
+  const rgba = color.match(
+    /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)$/
+  );
+  if (!rgba) return "var(--figma-on-primary)";
+
+  const alpha = Number(rgba[4] ?? 1);
+  const channels = [1, 2, 3].map(
+    (index) => Number(rgba[index]) * alpha + 255 * (1 - alpha)
+  );
+  const luminance = channels.reduce((sum, channel, index) => {
+    const normalized = channel / 255;
+    const linear =
+      normalized <= 0.03928
+        ? normalized / 12.92
+        : ((normalized + 0.055) / 1.055) ** 2.4;
+    return sum + linear * [0.2126, 0.7152, 0.0722][index];
+  }, 0);
+  const blackContrast = (luminance + 0.05) / 0.05;
+  const whiteContrast = 1.05 / (luminance + 0.05);
+
+  return blackContrast >= whiteContrast
+    ? "var(--figma-ink)"
+    : "var(--figma-on-primary)";
+};
+
 const speciesNameForId = (elementID) => {
   if (elementID === -1) return "Wind";
   return (
@@ -56,6 +84,7 @@ const ElementButton = (name, selectedElement, setElement) => {
         "--material-color": color,
         "--material-background":
           background === "transparent" ? color : background,
+        "--material-foreground": materialForegroundFor(color, background),
       }}
     >
       <span className="material-swatch" aria-hidden="true" />

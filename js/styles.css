@@ -2549,7 +2549,7 @@ a:focus-visible,
 .material-option.selected {
   border-color: var(--figma-primary);
   background: var(--material-background, var(--material-color));
-  color: var(--figma-on-primary);
+  color: var(--material-foreground, var(--figma-on-primary));
 }
 
 .material-swatch {
