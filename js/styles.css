@@ -1868,12 +1868,16 @@ body {
 @media (max-width: 767px) {
   :root {
     --topbar-height: 60px;
+    --mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --mobile-rail-height: clamp(232px, 30dvh, 288px);
   }
 
   #canvas-stage {
+    top: var(--topbar-height);
     right: 0;
-    bottom: 232px;
+    bottom: calc(var(--mobile-rail-height) + var(--mobile-safe-bottom));
     left: 0;
+    min-height: 0;
   }
 
   #canvas-stage::before {
@@ -1924,13 +1928,21 @@ body {
     right: 0;
     bottom: 0;
     width: auto;
-    height: 232px;
-    padding: 12px 12px 10px;
+    height: calc(var(--mobile-rail-height) + var(--mobile-safe-bottom));
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 122px;
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 12px;
+    padding: 12px 12px max(10px, var(--mobile-safe-bottom));
     border-top: 1px solid var(--line);
     border-right: 0;
   }
 
   .panel-heading {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-width: 0;
     align-items: center;
     padding: 0 2px 10px;
   }
@@ -1950,11 +1962,15 @@ body {
   }
 
   .material-rail-scroll {
+    grid-column: 1;
+    grid-row: 2;
     display: flex;
+    min-width: 0;
+    min-height: 0;
     gap: 12px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding-bottom: 38px;
+    padding-bottom: 0;
   }
 
   .wind-option {
@@ -1986,16 +2002,19 @@ body {
   }
 
   .brush-control {
-    position: absolute;
-    right: 12px;
-    bottom: 10px;
-    z-index: 2;
-    width: 122px;
+    position: static;
+    right: auto;
+    bottom: auto;
+    grid-column: 2;
+    grid-row: 2;
+    align-self: end;
+    width: auto;
+    min-width: 0;
     margin: 0;
-    padding: 4px 0 0 8px;
+    padding: 4px 0 0;
     border-top: 0;
-    background: var(--surface);
-    box-shadow: -12px 0 16px rgba(232, 228, 220, 0.72);
+    background: transparent;
+    box-shadow: none;
   }
 
   .brush-size-grid {
@@ -2004,6 +2023,10 @@ body {
 
   .brush-size {
     height: 40px;
+  }
+
+  .dg.ac {
+    display: none !important;
   }
 
   .material-inspector {
