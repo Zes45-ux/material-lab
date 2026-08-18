@@ -152,7 +152,7 @@ test("mobile canvas reserves only the compact dock", () => {
     mobileCss,
     /\.material-rail\[data-mobile-open="true"\](?:,\s*\.material-inspector\[data-open="true"\])?\s*\{[\s\S]*?transform:\s*translateY\(0\)/
   );
-  assert.match(mobileCss, /\.material-rail\s*\{[\s\S]*?display:\s*flex/);
+  assert.match(mobileCss, /\.material-rail\s*\{[\s\S]*?display:\s*grid/);
   assert.match(
     mobileCss,
     /\.material-rail,\s*\.material-inspector\s*\{[\s\S]*?bottom:\s*calc\(var\(--mobile-dock-height\)\s*\+\s*var\(--mobile-safe-bottom\)\)/
@@ -167,7 +167,10 @@ test("mobile canvas reserves only the compact dock", () => {
   );
   assert.match(mobileCss, /\.mobile-dock-swatch\s*\{[\s\S]*?border:\s*2px solid currentcolor/);
   assert.match(mobileCss, /\.material-rail-scroll\s*\{[\s\S]*?display:\s*block/);
-  assert.match(mobileCss, /\.brush-control\s*\{[\s\S]*?grid-column:\s*auto/);
+  assert.match(
+    mobileCss,
+    /\.brush-control\s*\{[\s\S]*?grid-column:\s*1[\s\S]*?grid-row:\s*3/
+  );
   assert.match(
     mobileCss,
     /#fps\s*\{[\s\S]*?display:\s*none\s*!important/

@@ -4,6 +4,14 @@ const readStageGutter = (stage) => {
   return Number.isFinite(gutter) ? gutter : 20;
 };
 
+const readCanvasMaxSize = (stage) => {
+  const raw = getComputedStyle(stage).getPropertyValue("--canvas-max-size");
+  const maxSize = Number.parseFloat(raw);
+  return Number.isFinite(maxSize) && maxSize > 0
+    ? maxSize
+    : Number.POSITIVE_INFINITY;
+};
+
 const resize = () => {
   const canvas = document.getElementById("sand-canvas");
   const canvas2 = document.getElementById("fluid-canvas");
@@ -14,12 +22,13 @@ const resize = () => {
   const stageWidth = stage.clientWidth || window.innerWidth;
   const stageHeight = stage.clientHeight || window.innerHeight;
   const gutter = readStageGutter(stage);
+  const maxSize = readCanvasMaxSize(stage);
   const isMobile = window.innerWidth < 768;
+  const availableWidth = stageWidth - gutter * 2;
+  const availableHeight = stageHeight - gutter * 2;
   const size = Math.max(
     120,
-    Math.floor(
-      Math.min(stageWidth - gutter * 2, stageHeight - gutter * 2)
-    )
+    Math.floor(Math.min(availableWidth, availableHeight, maxSize))
   );
 
   stage.style.setProperty("--canvas-display-size", `${size}px`);

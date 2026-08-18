@@ -2239,10 +2239,12 @@ a:focus-visible,
 }
 
 #canvas-stage {
+  box-sizing: border-box;
   right: 0;
   left: var(--rail-width);
   grid-column: 1 / -1;
   grid-row: 1 / -1;
+  padding: var(--stage-gutter);
   background: transparent;
 }
 
@@ -2713,6 +2715,8 @@ a:focus-visible,
     --mobile-safe-top: env(safe-area-inset-top, 0px);
     --mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
     --mobile-dock-height: 64px;
+    --mobile-canvas-gutter: clamp(12px, 4vw, 24px);
+    --canvas-max-size: 600px;
   }
 
   #canvas-stage {
@@ -2721,6 +2725,7 @@ a:focus-visible,
     bottom: calc(var(--mobile-dock-height) + var(--mobile-safe-bottom));
     left: 0;
     min-height: 0;
+    padding: var(--mobile-canvas-gutter);
   }
 
   #canvas-stage::before {
@@ -2756,6 +2761,9 @@ a:focus-visible,
 
   .topbar-actions {
     gap: 4px;
+    max-width: none;
+    overflow: visible;
+    scrollbar-width: auto;
   }
 
   .topbar-button {
@@ -2856,6 +2864,7 @@ a:focus-visible,
     );
     padding: 16px;
     border: 1px solid var(--figma-hairline);
+    border-inline: 0;
     border-radius: 24px 24px 0 0;
     box-shadow: 0 4px 16px rgb(0 0 0 / 6%);
     transform: translateY(100%);
@@ -2864,10 +2873,15 @@ a:focus-visible,
   }
 
   .material-rail {
-    display: flex;
-    flex-direction: column;
-    grid-template-columns: none;
-    grid-template-rows: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    column-gap: 0;
+  }
+
+  .material-rail .panel-heading {
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .material-rail[data-mobile-open="true"],
@@ -2878,8 +2892,6 @@ a:focus-visible,
   }
 
   .material-rail .panel-heading {
-    grid-column: auto;
-    grid-row: auto;
     position: sticky;
     top: 0;
     z-index: 1;
@@ -2893,10 +2905,13 @@ a:focus-visible,
   }
 
   .material-rail-scroll {
+    grid-column: 1;
+    grid-row: 2;
     display: block;
     flex: 1 1 auto;
     min-width: 0;
     min-height: 0;
+    width: 100%;
     padding: 12px 0 16px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -2912,12 +2927,13 @@ a:focus-visible,
   }
 
   .brush-control {
-    grid-column: auto;
-    grid-row: auto;
-    flex: 0 0 auto;
-    position: sticky;
-    bottom: 0;
-    z-index: 1;
+    position: static;
+    grid-column: 1;
+    grid-row: 3;
+    align-self: stretch;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
     padding: 12px 0 max(4px, var(--mobile-safe-bottom));
     border-top: 1px solid var(--figma-hairline);
     background: var(--figma-canvas);
@@ -2937,5 +2953,23 @@ a:focus-visible,
 
   .dg.ac {
     display: none !important;
+  }
+}
+
+@media (max-width: 359px) {
+  .topbar {
+    gap: 4px;
+  }
+
+  .brand-lockup > div {
+    display: none;
+  }
+
+  .topbar-actions {
+    gap: 2px;
+  }
+
+  .topbar-button {
+    padding-inline: 8px;
   }
 }

@@ -99,6 +99,10 @@ test("canvas layout uses computed gutter, clamps the canvas, and coalesces obser
   };
   const rafQueue = [];
   const observers = [];
+  const computed = {
+    paddingLeft: "16px",
+    canvasMaxSize: "999px",
+  };
   const sandbox = {
     document: {
       readyState: "complete",
@@ -113,9 +117,9 @@ test("canvas layout uses computed gutter, clamps the canvas, and coalesces obser
     },
     getComputedStyle() {
       return {
-        paddingLeft: "16px",
-        getPropertyValue() {
-          return "999px";
+        paddingLeft: computed.paddingLeft,
+        getPropertyValue(name) {
+          return name === "--canvas-max-size" ? computed.canvasMaxSize : "";
         },
       };
     },
@@ -161,6 +165,62 @@ test("canvas layout uses computed gutter, clamps the canvas, and coalesces obser
   rafQueue.shift()();
   assert.equal(stage.style.writes.length, writesBeforeObserver + 1);
   assert.equal(stage.style.values["--canvas-display-size"], "268px");
+
+  computed.paddingLeft = "15.6px";
+  computed.canvasMaxSize = "600px";
+  stage.clientWidth = 390;
+  stage.clientHeight = 724;
+  sandbox.module.exports.resize();
+  assert.equal(stage.style.values["--canvas-display-size"], "358px");
+
+  computed.paddingLeft = "24px";
+  stage.clientWidth = 685;
+  stage.clientHeight = 1333;
+  sandbox.module.exports.resize();
+  assert.equal(stage.style.values["--canvas-display-size"], "600px");
+});
+
+test("mobile override resets legacy workspace geometry", () => {
+  const css = read("js/styles.css");
+  const mobileCss = css.slice(css.lastIndexOf("@media (max-width: 767px)"));
+
+  assert.match(
+    mobileCss,
+    /--mobile-canvas-gutter:\s*clamp\(12px,\s*4vw,\s*24px\)/
+  );
+  assert.match(mobileCss, /--canvas-max-size:\s*600px/);
+  assert.match(
+    mobileCss,
+    /#canvas-stage\s*\{[\s\S]*?padding:\s*var\(--mobile-canvas-gutter\)/
+  );
+  assert.match(
+    mobileCss,
+    /\.topbar-actions\s*\{[\s\S]*?max-width:\s*none[\s\S]*?overflow:\s*visible/
+  );
+  assert.match(
+    mobileCss,
+    /\.material-rail\s*\{[\s\S]*?display:\s*grid[\s\S]*?grid-template-rows:\s*auto\s+minmax\(0,\s*1fr\)\s+auto/
+  );
+  assert.doesNotMatch(
+    mobileCss,
+    /\.material-rail\s+\.panel-heading\s*\{[\s\S]*?grid-column:\s*auto/
+  );
+  assert.doesNotMatch(
+    mobileCss,
+    /\.material-rail\s+\.panel-heading\s*\{[\s\S]*?grid-row:\s*auto/
+  );
+  assert.match(
+    mobileCss,
+    /\.brush-control\s*\{[\s\S]*?grid-column:\s*1[\s\S]*?grid-row:\s*3[\s\S]*?align-self:\s*stretch[\s\S]*?width:\s*100%/
+  );
+  assert.match(
+    mobileCss,
+    /\.material-rail,\s*\.material-inspector\s*\{[\s\S]*?border-inline:\s*0/
+  );
+  assert.match(
+    mobileCss,
+    /@media\s*\(max-width:\s*359px\)[\s\S]*?\.brand-lockup\s*>\s*div\s*\{[\s\S]*?display:\s*none/
+  );
 });
 
 test("Figma font assets are tracked and included in the production copy list", () => {
