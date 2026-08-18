@@ -94,16 +94,81 @@ test("closed Inspector does not reserve desktop canvas width", () => {
 
 test("Figma UI uses the documented type, shape, and elevation language", () => {
   const css = read("js/styles.css");
+  const themeCss = css.slice(
+    css.lastIndexOf("/* Figma brand and responsive workspace overrides. */")
+  );
 
   assert.match(css, /@font-face\s*\{[\s\S]*?font-family:\s*["']Inter Variable["']/);
   assert.match(css, /@font-face\s*\{[\s\S]*?font-family:\s*["']JetBrains Mono["']/);
   assert.match(css, /\.topbar-button[^}]*border-radius:\s*50px/);
   assert.match(css, /\.topbar-button\.icon-only[^}]*border-radius:\s*9999px/);
-  assert.match(css, /\.material-option\.selected\s*\{[\s\S]*?background:\s*var\(--figma-primary\)/);
-  assert.match(css, /\.material-option\.selected\s*\{[\s\S]*?color:\s*var\(--figma-on-primary\)/);
+  assert.match(
+    themeCss,
+    /\.material-option\.selected\s*\{[\s\S]*?background:\s*var\(--material-background,\s*var\(--material-color\)\)/
+  );
+  assert.match(
+    themeCss,
+    /\.material-option\.selected\s*\{[\s\S]*?color:\s*var\(--figma-on-primary\)/
+  );
   assert.match(css, /#background::before\s*\{[\s\S]*?background-image:/);
   assert.doesNotMatch(css, /#background\s*\{[^}]*radial-gradient/);
   assert.doesNotMatch(css, /#sand-canvas[^}]*box-shadow:\s*0 18px 34px/);
+});
+
+test("WebGL canvas uses transparent compositing and explicit light fallback surfaces", () => {
+  const fluid = read("js/fluid.js");
+  const css = read("js/styles.css");
+  const themeCss = css.slice(
+    css.lastIndexOf("/* Figma brand and responsive workspace overrides. */")
+  );
+
+  assert.match(fluid, /alpha:\s*true/);
+  assert.match(
+    fluid,
+    /gl\.clearColor\(0(?:\.0)?,\s*0(?:\.0)?,\s*0(?:\.0)?,\s*0(?:\.0)?\)/
+  );
+  assert.match(
+    themeCss,
+    /#canvas-stage,\s*#fluid-canvas\s*\{[\s\S]*?background:\s*var\(--figma-surface-soft\)/
+  );
+});
+
+test("Wind uses the light-green token in every selected-material surface", () => {
+  const ui = read("js/components/ui.js");
+  const css = read("js/styles.css");
+  const themeCss = css.slice(
+    css.lastIndexOf("/* Figma brand and responsive workspace overrides. */")
+  );
+
+  assert.match(
+    ui,
+    /if\s*\(name === ["']Wind["']\)\s*return\s*["']var\(--figma-block-lime\)["']/
+  );
+  assert.match(
+    themeCss,
+    /\.wind-option\.selected\s*\{[\s\S]*?background:\s*var\(--figma-block-lime\)[\s\S]*?color:\s*var\(--figma-ink\)/
+  );
+});
+
+test("Selected material cards reuse the material icon background", () => {
+  const ui = read("js/components/ui.js");
+  const css = read("js/styles.css");
+  const themeCss = css.slice(
+    css.lastIndexOf("/* Figma brand and responsive workspace overrides. */")
+  );
+
+  assert.match(
+    ui,
+    /["']--material-background["']:\s*background === ["']transparent["']\s*\?\s*color\s*:\s*background/
+  );
+  assert.match(
+    themeCss,
+    /\.material-option\.selected\s*\{[\s\S]*?background:\s*var\(--material-background,\s*var\(--material-color\)\)/
+  );
+  assert.match(
+    themeCss,
+    /\.material-swatch\s*\{[\s\S]*?background:\s*var\(--material-background,\s*var\(--material-color\)/
+  );
 });
 
 test("Figma canvas chrome keeps centered framing and a single grid layer", () => {
