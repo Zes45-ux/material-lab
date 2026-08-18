@@ -10,16 +10,38 @@ test("Figma/FigJam theme exposes the material-lab token set", () => {
   const css = read("js/styles.css");
 
   for (const token of [
+    "figma-primary",
+    "figma-on-primary",
     "figma-canvas",
     "figma-ink",
-    "figma-surface",
+    "figma-surface-soft",
     "figma-hairline",
-    "figma-block-blue",
+    "figma-hairline-soft",
+    "figma-block-lime",
+    "figma-block-lilac",
+    "figma-block-cream",
+    "figma-block-pink",
     "figma-block-mint",
     "figma-block-coral",
-    "figma-block-lilac",
+    "figma-block-navy",
   ]) {
     assert.match(css, new RegExp(`--${token}\\s*:`), `missing --${token}`);
+  }
+
+  for (const declaration of [
+    "--figma-primary: #000000",
+    "--figma-on-primary: #ffffff",
+    "--figma-canvas: #ffffff",
+    "--figma-surface-soft: #f7f7f5",
+    "--figma-hairline: #e6e6e6",
+    "--figma-block-lime: #dceeb1",
+    "--figma-block-lilac: #c5b0f4",
+    "--figma-block-cream: #f4ecd6",
+    "--figma-block-pink: #efd4d4",
+    "--figma-block-mint: #c8e6cd",
+    "--figma-block-coral: #f3c9b6",
+  ]) {
+    assert.match(css, new RegExp(declaration.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
 
   for (const family of ["base", "life", "energy", "special"]) {
@@ -57,7 +79,8 @@ test("Inspector is opt-in and keyboard dismissible", () => {
   assert.match(ui, /aria-expanded=\{inspectorOpen\}/);
   assert.match(ui, /aria-controls=["']material-inspector["']/);
   assert.match(ui, /event\.key\s*===\s*["']Escape["']/);
-  assert.match(ui, /onClose=\{\(\)\s*=>\s*this\.setState\(\{ inspectorOpen: false \}\)\}/);
+  assert.match(ui, /onClose=\{this\.closeMobileSheets\}/);
+  assert.match(ui, /closeMobileSheets\(\)[\s\S]*inspectorOpen: false/);
 });
 
 test("closed Inspector does not reserve desktop canvas width", () => {
@@ -69,7 +92,39 @@ test("closed Inspector does not reserve desktop canvas width", () => {
   assert.match(css, /@media\s*\(max-width:\s*767px\)[\s\S]*?\.material-inspector\s*\{[\s\S]*?translateY\(100%\)/);
 });
 
-test("mobile canvas and material tray share one clearance contract", () => {
+test("Figma UI uses the documented type, shape, and elevation language", () => {
+  const css = read("js/styles.css");
+
+  assert.match(css, /@font-face\s*\{[\s\S]*?font-family:\s*["']Inter Variable["']/);
+  assert.match(css, /@font-face\s*\{[\s\S]*?font-family:\s*["']JetBrains Mono["']/);
+  assert.match(css, /\.topbar-button[^}]*border-radius:\s*50px/);
+  assert.match(css, /\.topbar-button\.icon-only[^}]*border-radius:\s*9999px/);
+  assert.match(css, /\.material-option\.selected\s*\{[\s\S]*?background:\s*var\(--figma-primary\)/);
+  assert.match(css, /\.material-option\.selected\s*\{[\s\S]*?color:\s*var\(--figma-on-primary\)/);
+  assert.match(css, /#background::before\s*\{[\s\S]*?background-image:/);
+  assert.doesNotMatch(css, /#background\s*\{[^}]*radial-gradient/);
+  assert.doesNotMatch(css, /#sand-canvas[^}]*box-shadow:\s*0 18px 34px/);
+});
+
+test("Figma canvas chrome keeps centered framing and a single grid layer", () => {
+  const css = read("js/styles.css");
+
+  assert.match(
+    css,
+    /#canvas-stage::before\s*\{[^}]*inset:\s*auto;[^}]*top:\s*50%;[^}]*left:\s*50%;/
+  );
+  assert.doesNotMatch(
+    css,
+    /#background\s*\{\s*position:\s*fixed;[^}]*linear-gradient/
+  );
+  assert.equal(
+    (css.match(/--figma-canvas:\s*#ffffff/g) || []).length,
+    1,
+    "--figma-canvas should have one canonical white definition"
+  );
+});
+
+test("mobile canvas reserves only the compact dock", () => {
   const css = read("js/styles.css");
   const mobileCss = css.slice(css.lastIndexOf("@media (max-width: 767px)"));
 
@@ -79,31 +134,43 @@ test("mobile canvas and material tray share one clearance contract", () => {
   );
   assert.match(
     mobileCss,
-    /--mobile-rail-height:\s*clamp\(232px,\s*30dvh,\s*288px\)/
+    /--mobile-dock-height:\s*64px/
   );
   assert.match(
     mobileCss,
-    /#canvas-stage\s*\{[\s\S]*?bottom:\s*calc\(var\(--mobile-rail-height\)\s*\+\s*var\(--mobile-safe-bottom\)\)[\s\S]*?min-height:\s*0/
+    /#canvas-stage\s*\{[\s\S]*?bottom:\s*calc\(var\(--mobile-dock-height\)\s*\+\s*var\(--mobile-safe-bottom\)\)[\s\S]*?min-height:\s*0/
   );
   assert.match(
     mobileCss,
-    /\.material-rail\s*\{[\s\S]*?height:\s*calc\(var\(--mobile-rail-height\)\s*\+\s*var\(--mobile-safe-bottom\)\)[\s\S]*?min-height:\s*0[\s\S]*?display:\s*grid/
+    /\.mobile-dock\s*\{[\s\S]*?height:\s*calc\(var\(--mobile-dock-height\)\s*\+\s*var\(--mobile-safe-bottom\)\)/
   );
   assert.match(
     mobileCss,
-    /\.material-rail\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s*122px[\s\S]*?grid-template-rows:\s*auto\s*minmax\(0,\s*1fr\)/
+    /\.material-rail(?:,\s*\.material-inspector)?\s*\{[\s\S]*?transform:\s*translateY\(100%\)/
   );
   assert.match(
     mobileCss,
-    /\.panel-heading\s*\{[\s\S]*?grid-column:\s*1\s*\/\s*-1[\s\S]*?grid-row:\s*1/
+    /\.material-rail\[data-mobile-open="true"\](?:,\s*\.material-inspector\[data-open="true"\])?\s*\{[\s\S]*?transform:\s*translateY\(0\)/
+  );
+  assert.match(mobileCss, /\.material-rail\s*\{[\s\S]*?display:\s*flex/);
+  assert.match(
+    mobileCss,
+    /\.material-rail,\s*\.material-inspector\s*\{[\s\S]*?bottom:\s*calc\(var\(--mobile-dock-height\)\s*\+\s*var\(--mobile-safe-bottom\)\)/
   );
   assert.match(
     mobileCss,
-    /\.material-rail-scroll\s*\{[\s\S]*?grid-column:\s*1[\s\S]*?grid-row:\s*2[\s\S]*?overflow-x:\s*auto/
+    /\.material-rail,\s*\.material-inspector\s*\{[\s\S]*?max-height:\s*calc\(\s*100dvh\s*-\s*var\(--topbar-height\)\s*-\s*var\(--mobile-safe-top\)\s*-\s*var\(--mobile-dock-height\)\s*-\s*var\(--mobile-safe-bottom\)\s*\)/
   );
   assert.match(
     mobileCss,
-    /\.brush-control\s*\{[\s\S]*?position:\s*static[\s\S]*?grid-column:\s*2[\s\S]*?grid-row:\s*2/
+    /\.mobile-dock-icon,\s*\.mobile-dock-swatch\s*\{[\s\S]*?background:\s*var\(--figma-primary\)/
+  );
+  assert.match(mobileCss, /\.mobile-dock-swatch\s*\{[\s\S]*?border:\s*2px solid currentcolor/);
+  assert.match(mobileCss, /\.material-rail-scroll\s*\{[\s\S]*?display:\s*block/);
+  assert.match(mobileCss, /\.brush-control\s*\{[\s\S]*?grid-column:\s*auto/);
+  assert.match(
+    mobileCss,
+    /#fps\s*\{[\s\S]*?display:\s*none\s*!important/
   );
   assert.match(mobileCss, /\.dg(?:\.ac)?\s*\{[\s\S]*?display:\s*none\s*!important/);
 });

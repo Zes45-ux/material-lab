@@ -176,8 +176,14 @@ test("material inspector shares selected material state with the rail", () => {
   assert.match(ui, /selectedElement/);
   assert.match(ui, /selectedName/);
   assert.match(ui, /<MaterialInspector[\s\S]*name=\{selectedName\}/);
-  assert.match(ui, /inspectorTab: "intro"/);
-  assert.match(ui, /setState\(\{ selectedElement: id, inspectorTab: "intro" \}\)/);
+  assert.match(
+    ui,
+    /selectElement\(selectedElement\)\s*\{\s*this\.setState\(\s*\{\s*selectedElement,\s*inspectorTab:\s*"intro",\s*mobileSheet:\s*null/
+  );
+  assert.match(
+    ui,
+    /group\.items\.map\(\(name\)\s*=>\s*ElementButton\(name, selectedElement, this\.selectElement\)\s*\)/
+  );
   assert.match(ui, /details\.reactions/);
 });
 
@@ -423,7 +429,7 @@ test("static shell is Chinese and has no remote runtime dependency", () => {
   assert.doesNotMatch(html, /adsbygoogle|googletagmanager|a\.sandspiel\.club|adslot_1/);
   assert.match(
     html,
-    /<body(?:\s+data-view="[^"]+")?>\s*<div id="background">\s*<div id="ui"><\/div>\s*<div id="fps"><\/div>\s*<main id="canvas-stage"[^>]*>\s*<canvas id="sand-canvas"><\/canvas>\s*<canvas id="fluid-canvas"><\/canvas>\s*<\/main>\s*<\/div>\s*<\/body>/
+    /<body(?:\s+data-view="[^"]+")?>\s*<div id="background" data-inspector-open="false">\s*<div id="ui"><\/div>\s*<div id="fps"><\/div>\s*<main id="canvas-stage"[^>]*>\s*<canvas id="sand-canvas"><\/canvas>\s*<canvas id="fluid-canvas"><\/canvas>\s*<\/main>\s*<\/div>\s*<\/body>/
   );
   assert.equal(manifest.name, "Material Lab");
   assert.equal(manifest.short_name, "Material Lab");
