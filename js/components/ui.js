@@ -13,7 +13,7 @@ window.species = Species;
 const palletteData = pallette();
 
 const materialColorFor = (name) => {
-  if (name === "Wind") return "#c65d3b";
+  if (name === "Wind") return "var(--figma-block-lime)";
   return (palletteData[Species[name]] || "rgba(128, 128, 128, 0.35)").replace(
     /,\s*0\.25\)/,
     ", 0.86)"

@@ -2470,7 +2470,7 @@ a:focus-visible,
 .wind-option {
   min-height: 56px;
   padding: 10px 12px;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 50px;
   background: var(--figma-block-lime);
   color: var(--figma-ink);
@@ -2478,15 +2478,15 @@ a:focus-visible,
 
 .wind-option:hover,
 .wind-option:focus-visible {
-  border: 0;
-  background: var(--figma-primary);
-  color: var(--figma-on-primary);
+  border-color: var(--figma-primary);
+  background: var(--figma-block-lime);
+  color: var(--figma-ink);
 }
 
 .wind-option.selected {
-  border: 0;
-  background: var(--figma-primary);
-  color: var(--figma-on-primary);
+  border-color: var(--figma-primary);
+  background: var(--figma-block-lime);
+  color: var(--figma-ink);
 }
 
 .wind-option strong {
@@ -2502,7 +2502,7 @@ a:focus-visible,
 
 .wind-glyph,
 .wind-option.selected .wind-glyph {
-  color: inherit;
+  color: var(--figma-ink);
 }
 
 .material-group {
@@ -2548,7 +2548,7 @@ a:focus-visible,
 
 .material-option.selected {
   border-color: var(--figma-primary);
-  background: var(--figma-primary);
+  background: var(--material-background, var(--material-color));
   color: var(--figma-on-primary);
 }
 
@@ -2558,6 +2558,7 @@ a:focus-visible,
   flex-basis: 22px;
   border: 1px solid rgb(0 0 0 / 18%);
   border-radius: 6px;
+  background: var(--material-background, var(--material-color));
 }
 
 .material-option-label {
@@ -2572,7 +2573,7 @@ a:focus-visible,
 }
 
 .material-option.selected .material-option-code {
-  color: var(--figma-on-primary);
+  color: currentColor;
   opacity: 0.72;
 }
 
