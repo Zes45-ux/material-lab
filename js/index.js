@@ -70,14 +70,6 @@ const canvas2 = document.getElementById("fluid-canvas");
 canvas.height = n * Math.ceil(window.devicePixelRatio);
 canvas.width = n * Math.ceil(window.devicePixelRatio);
 
-document.getElementById("background").addEventListener("touchmove", (e) => {
-  if (!window.paused) {
-    if (e.cancelable) {
-      e.preventDefault();
-    }
-  }
-});
-
 let fluid;
 let drawSand;
 if (!isBench) {

@@ -2239,10 +2239,12 @@ a:focus-visible,
 }
 
 #canvas-stage {
+  box-sizing: border-box;
   right: 0;
   left: var(--rail-width);
   grid-column: 1 / -1;
   grid-row: 1 / -1;
+  padding: var(--stage-gutter);
   background: transparent;
 }
 
@@ -2713,6 +2715,9 @@ a:focus-visible,
     --mobile-safe-top: env(safe-area-inset-top, 0px);
     --mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
     --mobile-dock-height: 64px;
+    --mobile-canvas-gutter: clamp(8px, 2.5vw, 16px);
+    --mobile-canvas-lift: clamp(16px, 4vh, 32px);
+    --canvas-max-size: 600px;
   }
 
   #canvas-stage {
@@ -2721,9 +2726,11 @@ a:focus-visible,
     bottom: calc(var(--mobile-dock-height) + var(--mobile-safe-bottom));
     left: 0;
     min-height: 0;
+    padding: var(--mobile-canvas-gutter);
   }
 
   #canvas-stage::before {
+    top: calc(50% - var(--mobile-canvas-lift, 0px));
     width: calc(var(--canvas-display-size, 0px) + 24px);
     height: calc(var(--canvas-display-size, 0px) + 24px);
     border-radius: 8px;
@@ -2756,17 +2763,20 @@ a:focus-visible,
 
   .topbar-actions {
     gap: 4px;
+    max-width: none;
+    overflow: visible;
+    scrollbar-width: auto;
   }
 
   .topbar-button {
-    min-height: 40px;
+    min-height: 44px;
     padding: 8px 10px;
     font-size: 14px;
   }
 
   .topbar-button.icon-only {
-    width: 40px;
-    min-width: 40px;
+    width: 44px;
+    min-width: 44px;
   }
 
   .mobile-dock {
@@ -2831,6 +2841,7 @@ a:focus-visible,
     border: 0;
     background: var(--figma-overlay-scrim);
     pointer-events: auto;
+    touch-action: none;
   }
 
   .mobile-scrim[aria-hidden="false"] {
@@ -2856,6 +2867,7 @@ a:focus-visible,
     );
     padding: 16px;
     border: 1px solid var(--figma-hairline);
+    border-inline: 0;
     border-radius: 24px 24px 0 0;
     box-shadow: 0 4px 16px rgb(0 0 0 / 6%);
     transform: translateY(100%);
@@ -2864,10 +2876,15 @@ a:focus-visible,
   }
 
   .material-rail {
-    display: flex;
-    flex-direction: column;
-    grid-template-columns: none;
-    grid-template-rows: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    column-gap: 0;
+  }
+
+  .material-rail .panel-heading {
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .material-rail[data-mobile-open="true"],
@@ -2878,8 +2895,6 @@ a:focus-visible,
   }
 
   .material-rail .panel-heading {
-    grid-column: auto;
-    grid-row: auto;
     position: sticky;
     top: 0;
     z-index: 1;
@@ -2889,38 +2904,85 @@ a:focus-visible,
 
   .mobile-sheet-close {
     display: inline-grid;
+    width: 44px;
+    height: 44px;
     place-items: center;
   }
 
   .material-rail-scroll {
+    grid-column: 1;
+    grid-row: 2;
     display: block;
     flex: 1 1 auto;
     min-width: 0;
     min-height: 0;
+    width: 100%;
     padding: 12px 0 16px;
     overflow-x: hidden;
     overflow-y: auto;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  .material-rail .wind-option,
+  .material-rail .material-option,
+  .material-rail .brush-size,
+  .material-rail .mobile-sheet-close {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .material-group {
-    padding: 12px;
-    border-radius: 24px;
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 20px;
+  }
+
+  .material-group h2 {
+    margin-bottom: 4px;
+  }
+
+  .material-grid {
+    gap: 6px;
   }
 
   .material-option {
-    min-height: 56px;
+    min-height: 48px;
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .material-swatch {
+    width: 18px;
+    height: 18px;
+    flex-basis: 18px;
+  }
+
+  .material-option-label {
+    font-size: 14px;
+  }
+
+  .material-option-code {
+    margin-top: 2px;
+    font-size: 9px;
   }
 
   .brush-control {
-    grid-column: auto;
-    grid-row: auto;
-    flex: 0 0 auto;
-    position: sticky;
-    bottom: 0;
-    z-index: 1;
+    position: static;
+    grid-column: 1;
+    grid-row: 3;
+    align-self: stretch;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
     padding: 12px 0 max(4px, var(--mobile-safe-bottom));
     border-top: 1px solid var(--figma-hairline);
     background: var(--figma-canvas);
+  }
+
+  .material-rail .brush-size {
+    min-height: 44px;
   }
 
   .material-inspector {
@@ -2937,5 +2999,33 @@ a:focus-visible,
 
   .dg.ac {
     display: none !important;
+  }
+}
+
+@media (min-width: 360px) and (max-width: 767px) {
+  .material-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 359px) {
+  .material-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .topbar {
+    gap: 4px;
+  }
+
+  .brand-lockup > div {
+    display: none;
+  }
+
+  .topbar-actions {
+    gap: 2px;
+  }
+
+  .topbar-button {
+    padding-inline: 8px;
   }
 }
