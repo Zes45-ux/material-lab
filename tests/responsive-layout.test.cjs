@@ -172,6 +172,11 @@ test("canvas layout uses computed gutter, clamps the canvas, and coalesces obser
   stage.clientHeight = 724;
   sandbox.module.exports.resize();
   assert.equal(stage.style.values["--canvas-display-size"], "358px");
+  assert.equal(canvas.style.top, "calc(50% - var(--mobile-canvas-lift, 0px))");
+  assert.equal(
+    fluidCanvas.style.top,
+    "calc(50% - var(--mobile-canvas-lift, 0px))"
+  );
 
   computed.paddingLeft = "24px";
   stage.clientWidth = 685;
@@ -186,7 +191,7 @@ test("mobile override resets legacy workspace geometry", () => {
 
   assert.match(
     mobileCss,
-    /--mobile-canvas-gutter:\s*clamp\(12px,\s*4vw,\s*24px\)/
+    /--mobile-canvas-gutter:\s*clamp\(8px,\s*2\.5vw,\s*16px\)/
   );
   assert.match(mobileCss, /--canvas-max-size:\s*600px/);
   assert.match(
@@ -221,6 +226,29 @@ test("mobile override resets legacy workspace geometry", () => {
     mobileCss,
     /@media\s*\(max-width:\s*359px\)[\s\S]*?\.brand-lockup\s*>\s*div\s*\{[\s\S]*?display:\s*none/
   );
+});
+
+test("mobile canvas and material density use an explicit responsive contract", () => {
+  const css = read("js/styles.css");
+  const layout = read("js/layout.js");
+
+  assert.match(css, /--mobile-canvas-gutter:\s*clamp\(8px,\s*2\.5vw,\s*16px\)/);
+  assert.match(css, /--mobile-canvas-lift:\s*clamp\(16px,\s*4vh,\s*32px\)/);
+  assert.match(
+    css,
+    /#canvas-stage::before\s*\{[\s\S]*?top:\s*calc\(50%\s*-\s*var\(--mobile-canvas-lift,\s*0px\)\)/
+  );
+  assert.match(
+    css,
+    /@media\s*\(min-width:\s*360px\)\s*and\s*\(max-width:\s*767px\)[\s\S]*?\.material-grid\s*\{[\s\S]*?repeat\(3,\s*minmax\(0,\s*1fr\)\)/
+  );
+  assert.match(
+    css,
+    /@media\s*\(max-width:\s*359px\)[\s\S]*?\.material-grid\s*\{[\s\S]*?repeat\(2,\s*minmax\(0,\s*1fr\)\)/
+  );
+  assert.match(css, /\.material-option\s*\{[\s\S]*?min-height:\s*48px[\s\S]*?padding:\s*6px/);
+  assert.match(css, /\.material-swatch\s*\{[\s\S]*?width:\s*18px[\s\S]*?height:\s*18px/);
+  assert.match(layout, /calc\(50% - var\(--mobile-canvas-lift, 0px\)\)/);
 });
 
 test("Figma font assets are tracked and included in the production copy list", () => {
