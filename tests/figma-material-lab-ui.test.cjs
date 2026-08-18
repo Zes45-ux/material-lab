@@ -115,6 +115,47 @@ test("Figma UI uses the documented type, shape, and elevation language", () => {
   assert.doesNotMatch(css, /#sand-canvas[^}]*box-shadow:\s*0 18px 34px/);
 });
 
+test("brand mark keeps M and grows a Plant-colored flower motif", () => {
+  const ui = read("js/components/ui.js");
+
+  assert.match(ui, /const BrandMark = \(\{ plantColor \}\) =>/);
+  assert.match(ui, /viewBox=["']0 0 40 40["']/);
+  assert.match(ui, /className=["']brand-mark-letter["'][\s\S]*?>M<\/text>/);
+  assert.match(ui, /className=["']brand-mark-stem["']/);
+  assert.match(ui, /className=["']brand-mark-leaf["']/);
+  assert.match(ui, /className=["']brand-mark-flower-petal["']/);
+  assert.match(ui, /className=["']brand-mark-flower-center["']/);
+  assert.match(ui, /const brandPlantColor = materialColorFor\(["']Plant["']\)/);
+  assert.match(ui, /<BrandMark plantColor=\{brandPlantColor\} \/>/);
+  assert.doesNotMatch(ui, /className=["']brand-mark-letter["'][\s\S]*?>S<\/text>/);
+});
+
+test("brand mark uses a pale rounded tile without motion or black-circle styling", () => {
+  const css = read("js/styles.css");
+  const themeCss = css.slice(
+    css.lastIndexOf("/* Figma brand and responsive workspace overrides. */")
+  );
+
+  for (const token of [
+    "brand-mark-surface",
+    "brand-mark-letter",
+    "brand-mark-letter-shadow",
+    "brand-mark-flower",
+    "brand-mark-flower-center",
+  ]) {
+    assert.match(themeCss, new RegExp(`--${token}\\s*:`));
+  }
+
+  assert.match(
+    themeCss,
+    /\.brand-mark\s*\{[\s\S]*?width:\s*40px[\s\S]*?height:\s*40px[\s\S]*?border-radius:\s*10px[\s\S]*?background:\s*var\(--brand-mark-surface\)/
+  );
+  assert.match(themeCss, /\.brand-mark-stem\s*\{[\s\S]*?stroke:\s*var\(--brand-mark-plant\)/);
+  assert.match(themeCss, /@media\s*\(max-width:\s*767px\)[\s\S]*?\.brand-mark\s*\{[\s\S]*?width:\s*36px[\s\S]*?height:\s*36px/);
+  assert.doesNotMatch(themeCss, /\.brand-mark\s*\{[^}]*border-radius:\s*9999px/);
+  assert.doesNotMatch(themeCss, /@keyframes\s+brand-mark|\.brand-mark[^}]*animation:/);
+});
+
 test("WebGL canvas uses transparent compositing and explicit light fallback surfaces", () => {
   const fluid = read("js/fluid.js");
   const css = read("js/styles.css");

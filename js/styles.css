@@ -2179,6 +2179,11 @@ body {
   --figma-block-coral: #f3c9b6;
   --figma-block-navy: #1f1d3d;
   --figma-overlay-scrim: rgb(0 0 0 / 60%);
+  --brand-mark-surface: #f3e6e6;
+  --brand-mark-letter: #687269;
+  --brand-mark-letter-shadow: #d7aeb4;
+  --brand-mark-flower: #e7a6b1;
+  --brand-mark-flower-center: #f3c9b6;
 
   --figma-surface: #ffffff;
   --figma-block-blue: var(--figma-block-lilac);
@@ -2293,14 +2298,54 @@ a:focus-visible,
 }
 
 .brand-mark {
+  display: block;
   width: 40px;
   height: 40px;
-  border-radius: 9999px;
-  background: var(--figma-primary);
-  color: var(--figma-on-primary);
-  font-family: "Inter Variable", "SF Pro Display", system-ui, sans-serif;
-  font-size: 24px;
-  font-weight: 540;
+  flex: 0 0 40px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--brand-mark-surface);
+  color: var(--brand-mark-letter);
+}
+
+.brand-mark-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.brand-mark-letter,
+.brand-mark-letter-shadow {
+  font-family: "PP Mondwest", Georgia, serif;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.brand-mark-letter {
+  fill: var(--brand-mark-letter);
+}
+
+.brand-mark-letter-shadow {
+  fill: var(--brand-mark-letter-shadow);
+}
+
+.brand-mark-stem {
+  fill: none;
+  stroke: var(--brand-mark-plant);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.brand-mark-leaf {
+  fill: var(--brand-mark-plant);
+}
+
+.brand-mark-flower-petal {
+  fill: var(--brand-mark-flower);
+}
+
+.brand-mark-flower-center {
+  fill: var(--brand-mark-flower-center);
 }
 
 .brand-lockup strong {
@@ -2764,7 +2809,7 @@ a:focus-visible,
   .brand-mark {
     width: 36px;
     height: 36px;
-    font-size: 22px;
+    flex-basis: 36px;
   }
 
   .brand-lockup strong {

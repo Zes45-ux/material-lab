@@ -20,6 +20,55 @@ const materialColorFor = (name) => {
   );
 };
 
+const BrandMark = ({ plantColor }) => (
+  <span
+    className="brand-mark"
+    aria-hidden="true"
+    style={{ "--brand-mark-plant": plantColor }}
+  >
+    <svg
+      className="brand-mark-svg"
+      viewBox="0 0 40 40"
+      focusable="false"
+      aria-hidden="true"
+    >
+      <text
+        className="brand-mark-letter-shadow"
+        x="19.6"
+        y="27.9"
+        textAnchor="middle"
+      >
+        M
+      </text>
+      <text
+        className="brand-mark-letter"
+        x="19"
+        y="27.4"
+        textAnchor="middle"
+      >M</text>
+      <path
+        className="brand-mark-stem"
+        d="M27 29 C27 23 28.5 18 31.5 14"
+      />
+      <path
+        className="brand-mark-leaf"
+        d="M28.4 23.5 C25.6 20.8 23.5 21.6 23.8 24.8 C25.7 25.8 27.2 25.1 28.4 23.5 Z"
+      />
+      <path
+        className="brand-mark-leaf"
+        d="M29.7 20 C31.5 17.4 34.1 17.8 34.3 20.6 C32.6 22 31 21.5 29.7 20 Z"
+      />
+      <g className="brand-mark-flower" transform="translate(31.5 12.5)">
+        <circle className="brand-mark-flower-petal" cx="0" cy="-2" r="1.6" />
+        <circle className="brand-mark-flower-petal" cx="2" cy="0" r="1.6" />
+        <circle className="brand-mark-flower-petal" cx="0" cy="2" r="1.6" />
+        <circle className="brand-mark-flower-petal" cx="-2" cy="0" r="1.6" />
+        <circle className="brand-mark-flower-center" cx="0" cy="0" r="1" />
+      </g>
+    </svg>
+  </span>
+);
+
 const materialForegroundFor = (color, background) => {
   if (background.startsWith("linear-gradient(")) return "var(--figma-ink)";
   if (background !== "transparent") return "var(--figma-on-primary)";
@@ -429,14 +478,13 @@ class Index extends React.Component {
     } = this.state;
     const selectedName = speciesNameForId(selectedElement);
     const selectedColor = materialColorFor(selectedName);
+    const brandPlantColor = materialColorFor("Plant");
 
     return (
       <React.Fragment>
         <header className="topbar">
           <div className="brand-lockup">
-            <span className="brand-mark" aria-hidden="true">
-              M
-            </span>
+            <BrandMark plantColor={brandPlantColor} />
             <div>
               <strong>Material Lab</strong>
               <span>材料实验台</span>
