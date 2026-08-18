@@ -68,3 +68,42 @@ test("closed Inspector does not reserve desktop canvas width", () => {
   assert.match(css, /\.material-inspector\.is-open\s*\{[\s\S]*?transform:\s*translateX\(0\)/);
   assert.match(css, /@media\s*\(max-width:\s*767px\)[\s\S]*?\.material-inspector\s*\{[\s\S]*?translateY\(100%\)/);
 });
+
+test("mobile canvas and material tray share one clearance contract", () => {
+  const css = read("js/styles.css");
+  const mobileCss = css.slice(css.lastIndexOf("@media (max-width: 767px)"));
+
+  assert.match(
+    mobileCss,
+    /--mobile-safe-bottom:\s*env\(safe-area-inset-bottom,\s*0px\)/
+  );
+  assert.match(
+    mobileCss,
+    /--mobile-rail-height:\s*clamp\(232px,\s*30dvh,\s*288px\)/
+  );
+  assert.match(
+    mobileCss,
+    /#canvas-stage\s*\{[\s\S]*?bottom:\s*calc\(var\(--mobile-rail-height\)\s*\+\s*var\(--mobile-safe-bottom\)\)[\s\S]*?min-height:\s*0/
+  );
+  assert.match(
+    mobileCss,
+    /\.material-rail\s*\{[\s\S]*?height:\s*calc\(var\(--mobile-rail-height\)\s*\+\s*var\(--mobile-safe-bottom\)\)[\s\S]*?min-height:\s*0[\s\S]*?display:\s*grid/
+  );
+  assert.match(
+    mobileCss,
+    /\.material-rail\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s*122px[\s\S]*?grid-template-rows:\s*auto\s*minmax\(0,\s*1fr\)/
+  );
+  assert.match(
+    mobileCss,
+    /\.panel-heading\s*\{[\s\S]*?grid-column:\s*1\s*\/\s*-1[\s\S]*?grid-row:\s*1/
+  );
+  assert.match(
+    mobileCss,
+    /\.material-rail-scroll\s*\{[\s\S]*?grid-column:\s*1[\s\S]*?grid-row:\s*2[\s\S]*?overflow-x:\s*auto/
+  );
+  assert.match(
+    mobileCss,
+    /\.brush-control\s*\{[\s\S]*?position:\s*static[\s\S]*?grid-column:\s*2[\s\S]*?grid-row:\s*2/
+  );
+  assert.match(mobileCss, /\.dg(?:\.ac)?\s*\{[\s\S]*?display:\s*none\s*!important/);
+});
