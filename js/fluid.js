@@ -85,7 +85,7 @@ function startFluid({ universe }) {
 
   function getWebGLContext(canvas) {
     const params = {
-      alpha: false,
+      alpha: true,
       depth: false,
       stencil: false,
       antialias: false,

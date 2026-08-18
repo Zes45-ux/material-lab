@@ -2179,6 +2179,13 @@ body {
   --figma-block-coral: #f3c9b6;
   --figma-block-navy: #1f1d3d;
   --figma-overlay-scrim: rgb(0 0 0 / 60%);
+  --brand-mark-surface: #f3e6e6;
+  --brand-mark-letter: #687269;
+  --brand-mark-letter-shadow: #d7aeb4;
+  --brand-mark-flower: #e7a6b1;
+  --brand-mark-flower-center: #f3c9b6;
+  --brand-mark-flower-lilac: #b8adbd;
+  --brand-mark-bud: #c5cf9d;
 
   --figma-surface: #ffffff;
   --figma-block-blue: var(--figma-block-lilac);
@@ -2265,6 +2272,20 @@ a:focus-visible,
   box-shadow: 0 4px 16px rgb(0 0 0 / 6%);
 }
 
+#canvas-stage,
+#fluid-canvas {
+  background: var(--figma-surface-soft);
+}
+
+#sand-canvas {
+  background: transparent;
+}
+
+.Info,
+.benchmark {
+  background: var(--figma-surface-soft);
+}
+
 .topbar {
   height: var(--topbar-height);
   padding: 8px var(--panel-pad);
@@ -2279,14 +2300,79 @@ a:focus-visible,
 }
 
 .brand-mark {
+  display: block;
   width: 40px;
   height: 40px;
-  border-radius: 9999px;
-  background: var(--figma-primary);
-  color: var(--figma-on-primary);
-  font-family: "Inter Variable", "SF Pro Display", system-ui, sans-serif;
-  font-size: 24px;
-  font-weight: 540;
+  flex: 0 0 40px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--brand-mark-surface);
+  color: var(--brand-mark-letter);
+}
+
+.brand-mark-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.brand-mark-letter,
+.brand-mark-letter-shadow {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.brand-mark-letter {
+  stroke: var(--brand-mark-letter);
+  stroke-width: 1.25;
+}
+
+.brand-mark-letter-shadow {
+  stroke: var(--brand-mark-letter-shadow);
+  stroke-width: 1.05;
+}
+
+.brand-mark-stem {
+  fill: none;
+  stroke: var(--brand-mark-plant);
+  stroke-width: 0.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.72;
+}
+
+.brand-mark-botanical-stem {
+  fill: none;
+  stroke: var(--brand-mark-plant);
+  stroke-width: 0.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.72;
+}
+
+.brand-mark-leaf {
+  fill: var(--brand-mark-plant);
+  opacity: 0.76;
+}
+
+.brand-mark-flower-petal {
+  fill: var(--brand-mark-flower);
+  opacity: 0.86;
+}
+
+.brand-mark-flower-petal-lilac {
+  fill: var(--brand-mark-flower-lilac);
+  opacity: 0.88;
+}
+
+.brand-mark-flower-center {
+  fill: var(--brand-mark-flower-center);
+}
+
+.brand-mark-bud {
+  fill: var(--brand-mark-bud);
+  opacity: 0.88;
 }
 
 .brand-lockup strong {
@@ -2456,7 +2542,7 @@ a:focus-visible,
 .wind-option {
   min-height: 56px;
   padding: 10px 12px;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 50px;
   background: var(--figma-block-lime);
   color: var(--figma-ink);
@@ -2464,15 +2550,15 @@ a:focus-visible,
 
 .wind-option:hover,
 .wind-option:focus-visible {
-  border: 0;
-  background: var(--figma-primary);
-  color: var(--figma-on-primary);
+  border-color: var(--figma-primary);
+  background: var(--figma-block-lime);
+  color: var(--figma-ink);
 }
 
 .wind-option.selected {
-  border: 0;
-  background: var(--figma-primary);
-  color: var(--figma-on-primary);
+  border-color: var(--figma-primary);
+  background: var(--figma-block-lime);
+  color: var(--figma-ink);
 }
 
 .wind-option strong {
@@ -2488,7 +2574,7 @@ a:focus-visible,
 
 .wind-glyph,
 .wind-option.selected .wind-glyph {
-  color: inherit;
+  color: var(--figma-ink);
 }
 
 .material-group {
@@ -2534,8 +2620,8 @@ a:focus-visible,
 
 .material-option.selected {
   border-color: var(--figma-primary);
-  background: var(--figma-primary);
-  color: var(--figma-on-primary);
+  background: var(--material-background, var(--material-color));
+  color: var(--material-foreground, var(--figma-on-primary));
 }
 
 .material-swatch {
@@ -2544,6 +2630,7 @@ a:focus-visible,
   flex-basis: 22px;
   border: 1px solid rgb(0 0 0 / 18%);
   border-radius: 6px;
+  background: var(--material-background, var(--material-color));
 }
 
 .material-option-label {
@@ -2558,7 +2645,7 @@ a:focus-visible,
 }
 
 .material-option.selected .material-option-code {
-  color: var(--figma-on-primary);
+  color: currentcolor;
   opacity: 0.72;
 }
 
@@ -2749,7 +2836,7 @@ a:focus-visible,
   .brand-mark {
     width: 36px;
     height: 36px;
-    font-size: 22px;
+    flex-basis: 36px;
   }
 
   .brand-lockup strong {

@@ -94,16 +94,196 @@ test("closed Inspector does not reserve desktop canvas width", () => {
 
 test("Figma UI uses the documented type, shape, and elevation language", () => {
   const css = read("js/styles.css");
+  const themeCss = css.slice(
+    css.lastIndexOf("/* Figma brand and responsive workspace overrides. */")
+  );
 
   assert.match(css, /@font-face\s*\{[\s\S]*?font-family:\s*["']Inter Variable["']/);
   assert.match(css, /@font-face\s*\{[\s\S]*?font-family:\s*["']JetBrains Mono["']/);
   assert.match(css, /\.topbar-button[^}]*border-radius:\s*50px/);
   assert.match(css, /\.topbar-button\.icon-only[^}]*border-radius:\s*9999px/);
-  assert.match(css, /\.material-option\.selected\s*\{[\s\S]*?background:\s*var\(--figma-primary\)/);
-  assert.match(css, /\.material-option\.selected\s*\{[\s\S]*?color:\s*var\(--figma-on-primary\)/);
+  assert.match(
+    themeCss,
+    /\.material-option\.selected\s*\{[^}]*?background:\s*var\(--material-background,\s*var\(--material-color\)\)/
+  );
+  assert.match(
+    themeCss,
+    /\.material-option\.selected\s*\{[^}]*?color:\s*var\(--material-foreground,\s*var\(--figma-on-primary\)\)/
+  );
   assert.match(css, /#background::before\s*\{[\s\S]*?background-image:/);
   assert.doesNotMatch(css, /#background\s*\{[^}]*radial-gradient/);
   assert.doesNotMatch(css, /#sand-canvas[^}]*box-shadow:\s*0 18px 34px/);
+});
+
+test("brand mark keeps M and grows a Plant-colored flower motif", () => {
+  const ui = read("js/components/ui.js");
+
+  assert.match(ui, /const BrandMark = \(\{ plantColor \}\) =>/);
+  assert.match(ui, /viewBox=["']0 0 40 40["']/);
+  assert.match(ui, /className=["']brand-mark-letter-shadow["'][\s\S]*?d=["']M10 29 C/);
+  assert.match(ui, /className=["']brand-mark-letter["'][\s\S]*?d=["']M10 29 C/);
+  assert.doesNotMatch(ui, /<text[\s\S]*className=["']brand-mark-letter["']/);
+  assert.match(ui, /className=["']brand-mark-stem["']/);
+  assert.match(ui, /className=["']brand-mark-leaf["']/);
+  assert.match(ui, /className=["']brand-mark-flower-petal["']/);
+  assert.match(ui, /className=["']brand-mark-flower-center["']/);
+  assert.match(ui, /const brandPlantColor = materialColorFor\(["']Plant["']\)/);
+  assert.match(ui, /<BrandMark plantColor=\{brandPlantColor\} \/>/);
+  assert.doesNotMatch(ui, /className=["']brand-mark-letter["'][\s\S]*?>S<\/text>/);
+});
+
+test("brand mark keeps floral accents sparse, organic, and asymmetric", () => {
+  const ui = read("js/components/ui.js");
+  const flowerGroups = ui.match(
+    /<g className=["']brand-mark-flower["'] transform=/g
+  );
+  const leafDetails = ui.match(/className=["']brand-mark-leaf["']/g);
+
+  assert.match(ui, /className=["']brand-mark-botanical-motif["']/);
+  assert.match(ui, /className=["']brand-mark-botanical-stem["']/);
+  assert.match(ui, /className=["']brand-mark-bud["']/);
+  assert.match(ui, /className=["']brand-mark-flower-petal-lilac["']/);
+  assert.ok(flowerGroups && flowerGroups.length >= 3 && flowerGroups.length <= 5);
+  assert.ok(leafDetails && leafDetails.length >= 3 && leafDetails.length <= 6);
+  assert.match(ui, /transform=["']translate\(10\.5 27\.5\) rotate\(-18\)["']/);
+  assert.match(ui, /transform=["']translate\(20 28\.5\) rotate\(12\)["']/);
+  assert.match(ui, /transform=["']translate\(28\.8 26\.5\) rotate\(26\)["']/);
+});
+
+test("brand mark uses a pale rounded tile without motion or black-circle styling", () => {
+  const css = read("js/styles.css");
+  const themeCss = css.slice(
+    css.lastIndexOf("/* Figma brand and responsive workspace overrides. */")
+  );
+
+  for (const token of [
+    "brand-mark-surface",
+    "brand-mark-letter",
+    "brand-mark-letter-shadow",
+    "brand-mark-flower",
+    "brand-mark-flower-center",
+  ]) {
+    assert.match(themeCss, new RegExp(`--${token}\\s*:`));
+  }
+
+  assert.match(
+    themeCss,
+    /\.brand-mark\s*\{[\s\S]*?width:\s*40px[\s\S]*?height:\s*40px[\s\S]*?border-radius:\s*10px[\s\S]*?background:\s*var\(--brand-mark-surface\)/
+  );
+  assert.match(themeCss, /\.brand-mark-stem\s*\{[\s\S]*?stroke:\s*var\(--brand-mark-plant\)/);
+  assert.match(themeCss, /@media\s*\(max-width:\s*767px\)[\s\S]*?\.brand-mark\s*\{[\s\S]*?width:\s*36px[\s\S]*?height:\s*36px/);
+  assert.doesNotMatch(themeCss, /\.brand-mark\s*\{[^}]*border-radius:\s*9999px/);
+  assert.doesNotMatch(themeCss, /@keyframes\s+brand-mark|\.brand-mark[^}]*animation:/);
+});
+
+test("WebGL canvas uses transparent compositing and explicit light fallback surfaces", () => {
+  const fluid = read("js/fluid.js");
+  const css = read("js/styles.css");
+  const themeCss = css.slice(
+    css.lastIndexOf("/* Figma brand and responsive workspace overrides. */")
+  );
+
+  assert.match(fluid, /alpha:\s*true/);
+  assert.match(
+    fluid,
+    /gl\.clearColor\(0(?:\.0)?,\s*0(?:\.0)?,\s*0(?:\.0)?,\s*0(?:\.0)?\)/
+  );
+  assert.match(
+    themeCss,
+    /#canvas-stage,\s*#fluid-canvas\s*\{[\s\S]*?background:\s*var\(--figma-surface-soft\)/
+  );
+  assert.match(
+    themeCss,
+    /\.Info,\s*\.benchmark\s*\{[\s\S]*?background:\s*var\(--figma-surface-soft\)/
+  );
+});
+
+test("Wind uses the light-green token in every selected-material surface", () => {
+  const ui = read("js/components/ui.js");
+  const css = read("js/styles.css");
+  const themeCss = css.slice(
+    css.lastIndexOf("/* Figma brand and responsive workspace overrides. */")
+  );
+
+  assert.match(
+    ui,
+    /if\s*\(name === ["']Wind["']\)\s*return\s*["']var\(--figma-block-lime\)["']/
+  );
+  assert.match(
+    themeCss,
+    /\.wind-option\s*\{[^}]*?background:\s*var\(--figma-block-lime\)[^}]*?color:\s*var\(--figma-ink\)/
+  );
+  assert.match(
+    themeCss,
+    /\.wind-option:hover,\s*\.wind-option:focus-visible\s*\{[^}]*?background:\s*var\(--figma-block-lime\)[^}]*?color:\s*var\(--figma-ink\)/
+  );
+  assert.match(
+    themeCss,
+    /\.wind-option\.selected\s*\{[^}]*?background:\s*var\(--figma-block-lime\)[^}]*?color:\s*var\(--figma-ink\)/
+  );
+  assert.match(
+    themeCss,
+    /\.wind-glyph,\s*\.wind-option\.selected \.wind-glyph\s*\{[^}]*?color:\s*var\(--figma-ink\)/
+  );
+});
+
+test("Selected material cards reuse the material icon background and choose readable foregrounds", () => {
+  const ui = read("js/components/ui.js");
+  const css = read("js/styles.css");
+  const themeCss = css.slice(
+    css.lastIndexOf("/* Figma brand and responsive workspace overrides. */")
+  );
+
+  assert.match(ui, /const\s+materialForegroundFor\s*=\s*\(color,\s*background\)\s*=>\s*\{/);
+  assert.match(ui, /const\s+materialForegroundFor[\s\S]*?255\s*\*\s*\(1\s*-\s*alpha\)/);
+  assert.match(ui, /const\s+materialForegroundFor[\s\S]*?blackContrast[\s\S]*?whiteContrast/);
+  assert.match(ui, /const\s+materialForegroundFor[\s\S]*?var\(--figma-ink\)[\s\S]*?var\(--figma-on-primary\)/);
+  assert.match(
+    ui,
+    /["']--material-background["']:\s*background === ["']transparent["']\s*\?\s*color\s*:\s*background/
+  );
+  assert.match(
+    ui,
+    /["']--material-foreground["']:\s*materialForegroundFor\(color,\s*background\)/
+  );
+  assert.match(
+    themeCss,
+    /\.material-option\.selected\s*\{[^}]*?background:\s*var\(--material-background,\s*var\(--material-color\)\)/
+  );
+  assert.match(
+    themeCss,
+    /\.material-swatch\s*\{[^}]*?background:\s*var\(--material-background,\s*var\(--material-color\)/
+  );
+  assert.match(
+    themeCss,
+    /\.material-option\.selected\s*\{[^}]*?color:\s*var\(--material-foreground,\s*var\(--figma-on-primary\)\)/
+  );
+});
+
+test("Light material gradients choose the dark selected foreground", () => {
+  const ui = read("js/components/ui.js");
+
+  assert.match(
+    ui,
+    /background\.startsWith\(["']linear-gradient\(["']\)\s*\)\s*return\s*["']var\(--figma-ink\)["']/
+  );
+  assert.match(
+    ui,
+    /if\s*\(elementID === 14\)[\s\S]*?background\s*=\s*["']linear-gradient\(/
+  );
+  assert.match(
+    ui,
+    /["']--material-foreground["']:\s*materialForegroundFor\(color,\s*background\)/
+  );
+});
+
+test("Selected material codes use the lowercase currentcolor keyword", () => {
+  const css = read("js/styles.css");
+
+  assert.match(
+    css,
+    /\.material-option\.selected \.material-option-code\s*\{[^}]*?color:\s*currentcolor;/
+  );
 });
 
 test("Figma canvas chrome keeps centered framing and a single grid layer", () => {
