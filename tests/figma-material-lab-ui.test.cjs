@@ -131,6 +131,10 @@ test("WebGL canvas uses transparent compositing and explicit light fallback surf
     themeCss,
     /#canvas-stage,\s*#fluid-canvas\s*\{[\s\S]*?background:\s*var\(--figma-surface-soft\)/
   );
+  assert.match(
+    themeCss,
+    /\.Info,\s*\.benchmark\s*\{[\s\S]*?background:\s*var\(--figma-surface-soft\)/
+  );
 });
 
 test("Wind uses the light-green token in every selected-material surface", () => {
@@ -146,7 +150,19 @@ test("Wind uses the light-green token in every selected-material surface", () =>
   );
   assert.match(
     themeCss,
+    /\.wind-option\s*\{[\s\S]*?background:\s*var\(--figma-block-lime\)[\s\S]*?color:\s*var\(--figma-ink\)/
+  );
+  assert.match(
+    themeCss,
+    /\.wind-option:hover,\s*\.wind-option:focus-visible\s*\{[\s\S]*?background:\s*var\(--figma-block-lime\)[\s\S]*?color:\s*var\(--figma-ink\)/
+  );
+  assert.match(
+    themeCss,
     /\.wind-option\.selected\s*\{[\s\S]*?background:\s*var\(--figma-block-lime\)[\s\S]*?color:\s*var\(--figma-ink\)/
+  );
+  assert.match(
+    themeCss,
+    /\.wind-glyph,\s*\.wind-option\.selected \.wind-glyph\s*\{[\s\S]*?color:\s*var\(--figma-ink\)/
   );
 });
 
