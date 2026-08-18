@@ -2274,6 +2274,11 @@ a:focus-visible,
   background: transparent;
 }
 
+.Info,
+.benchmark {
+  background: var(--figma-surface-soft);
+}
+
 .topbar {
   height: var(--topbar-height);
   padding: 8px var(--panel-pad);
