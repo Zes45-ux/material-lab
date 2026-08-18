@@ -170,6 +170,7 @@ test("canvas layout uses computed gutter, clamps the canvas, and coalesces obser
   computed.canvasMaxSize = "600px";
   stage.clientWidth = 390;
   stage.clientHeight = 724;
+  sandbox.window.innerWidth = 390;
   sandbox.module.exports.resize();
   assert.equal(stage.style.values["--canvas-display-size"], "358px");
   assert.equal(canvas.style.top, "calc(50% - var(--mobile-canvas-lift, 0px))");
@@ -181,8 +182,16 @@ test("canvas layout uses computed gutter, clamps the canvas, and coalesces obser
   computed.paddingLeft = "24px";
   stage.clientWidth = 685;
   stage.clientHeight = 1333;
+  sandbox.window.innerWidth = 685;
   sandbox.module.exports.resize();
   assert.equal(stage.style.values["--canvas-display-size"], "600px");
+
+  sandbox.window.innerWidth = 768;
+  stage.clientWidth = 390;
+  stage.clientHeight = 724;
+  sandbox.module.exports.resize();
+  assert.equal(canvas.style.top, "50%");
+  assert.equal(fluidCanvas.style.top, "50%");
 });
 
 test("mobile override resets legacy workspace geometry", () => {
