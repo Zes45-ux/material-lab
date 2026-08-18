@@ -182,14 +182,21 @@ class Index extends React.Component {
       selectedElement: Species.Water,
       inspectorTab: "intro",
       inspectorOpen: false,
+      mobileSheet: null,
     };
 
     this.selectElement = this.selectElement.bind(this);
     this.togglePause = this.togglePause.bind(this);
     this.reset = this.reset.bind(this);
+    this.openMobileSheet = this.openMobileSheet.bind(this);
+    this.closeMobileSheets = this.closeMobileSheets.bind(this);
+    this.toggleInspector = this.toggleInspector.bind(this);
     this.handleInspectorKeyDown = (event) => {
-      if (event.key === "Escape" && this.state.inspectorOpen) {
-        this.setState({ inspectorOpen: false });
+      if (
+        event.key === "Escape" &&
+        (this.state.inspectorOpen || this.state.mobileSheet)
+      ) {
+        this.closeMobileSheets();
       }
     };
     window.UI = this;
@@ -197,14 +204,30 @@ class Index extends React.Component {
 
   componentDidMount() {
     window.addEventListener("keydown", this.handleInspectorKeyDown);
+    this.syncInspectorLayout(this.state.inspectorOpen);
   }
 
   componentWillUnmount() {
     window.removeEventListener("keydown", this.handleInspectorKeyDown);
+    this.syncInspectorLayout(false);
+    delete window.UI;
+  }
+
+  componentDidUpdate(previousProps, previousState) {
+    if (previousState.inspectorOpen !== this.state.inspectorOpen) {
+      this.syncInspectorLayout(this.state.inspectorOpen);
+    }
+  }
+
+  syncInspectorLayout(isOpen) {
+    const background = document.getElementById("background");
+    if (background) {
+      background.dataset.inspectorOpen = isOpen ? "true" : "false";
+    }
   }
 
   selectElement(selectedElement) {
-    this.setState({ selectedElement });
+    this.setState({ selectedElement, mobileSheet: null });
   }
 
   togglePause() {
@@ -224,7 +247,29 @@ class Index extends React.Component {
 
   setSize(event, size) {
     event.preventDefault();
-    this.setState({ size });
+    this.setState({ size, mobileSheet: null });
+  }
+
+  openMobileSheet(name) {
+    if (name !== "materials" && name !== "inspector") return;
+
+    this.setState({
+      mobileSheet: name,
+      inspectorOpen: name === "inspector",
+    });
+  }
+
+  closeMobileSheets() {
+    this.setState({ mobileSheet: null, inspectorOpen: false });
+  }
+
+  toggleInspector() {
+    if (this.state.inspectorOpen) {
+      this.closeMobileSheets();
+      return;
+    }
+
+    this.openMobileSheet("inspector");
   }
 
   reset() {
@@ -264,8 +309,16 @@ class Index extends React.Component {
   }
 
   render() {
-    const { size, paused, selectedElement, inspectorTab, inspectorOpen } = this.state;
+    const {
+      size,
+      paused,
+      selectedElement,
+      inspectorTab,
+      inspectorOpen,
+      mobileSheet,
+    } = this.state;
     const selectedName = speciesNameForId(selectedElement);
+    const selectedColor = materialColorFor(selectedName);
 
     return (
       <React.Fragment>
@@ -326,24 +379,101 @@ class Index extends React.Component {
           </nav>
         </header>
 
+        <nav className="mobile-dock" aria-label="移动端工具">
+          <button
+            type="button"
+            className={
+              mobileSheet === "materials"
+                ? "mobile-dock-button is-active"
+                : "mobile-dock-button"
+            }
+            aria-expanded={mobileSheet === "materials"}
+            aria-controls="material-rail"
+            onClick={() => this.openMobileSheet("materials")}
+          >
+            <span
+              className="mobile-dock-swatch"
+              aria-hidden="true"
+              style={{ background: selectedColor }}
+            />
+            <span>材料</span>
+          </button>
+          <button
+            type="button"
+            className={
+              mobileSheet === "materials"
+                ? "mobile-dock-button is-active"
+                : "mobile-dock-button"
+            }
+            aria-expanded={mobileSheet === "materials"}
+            aria-controls="material-rail"
+            onClick={() => this.openMobileSheet("materials")}
+          >
+            <span className="mobile-dock-icon" aria-hidden="true">
+              •
+            </span>
+            <span>{sizeMap[size]} px</span>
+          </button>
+          <button
+            type="button"
+            className={
+              mobileSheet === "inspector"
+                ? "mobile-dock-button is-active"
+                : "mobile-dock-button"
+            }
+            aria-expanded={inspectorOpen}
+            aria-controls="material-inspector"
+            onClick={this.toggleInspector}
+          >
+            <span className="mobile-dock-icon" aria-hidden="true">
+              i
+            </span>
+            <span>详情</span>
+          </button>
+        </nav>
+
+        <button
+          type="button"
+          className="mobile-scrim"
+          aria-label="关闭面板"
+          aria-hidden={!mobileSheet}
+          tabIndex={mobileSheet ? 0 : -1}
+          onClick={this.closeMobileSheets}
+        />
+
         <button
           type="button"
           className="inspector-trigger"
           aria-expanded={inspectorOpen}
           aria-controls="material-inspector"
-          onClick={() => this.setState({ inspectorOpen: !inspectorOpen })}
+          onClick={this.toggleInspector}
         >
           <span aria-hidden="true">i</span>
           <span>{selectedName}</span>
         </button>
 
-        <aside className="material-rail" aria-label="材料选择">
+        <aside
+          id="material-rail"
+          className="material-rail"
+          data-mobile-open={mobileSheet === "materials"}
+          aria-label="材料选择"
+        >
           <div className="panel-heading">
             <div>
               <p className="panel-kicker">材料工具</p>
               <h1>选择材料</h1>
             </div>
-            <span className="material-count">21 种</span>
+            <div className="panel-heading-actions">
+              <span className="material-count">21 种</span>
+              <button
+                type="button"
+                className="mobile-sheet-close"
+                aria-label="关闭材料选择"
+                onClick={this.closeMobileSheets}
+              >
+                ×
+              </button>
+            </div>
           </div>
 
           <div className="material-rail-scroll">
@@ -372,7 +502,11 @@ class Index extends React.Component {
                 <div className="material-grid">
                   {group.items.map((name) =>
                     ElementButton(name, selectedElement, (id) =>
-                      this.setState({ selectedElement: id, inspectorTab: "intro" })
+                      this.setState({
+                        selectedElement: id,
+                        inspectorTab: "intro",
+                        mobileSheet: null,
+                      })
                     )
                   )}
                 </div>
@@ -413,7 +547,7 @@ class Index extends React.Component {
           tab={inspectorTab}
           setTab={(tab) => this.setState({ inspectorTab: tab })}
           open={inspectorOpen}
-          onClose={() => this.setState({ inspectorOpen: false })}
+          onClose={this.closeMobileSheets}
         />
       </React.Fragment>
     );

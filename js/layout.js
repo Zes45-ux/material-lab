@@ -1,3 +1,9 @@
+const readStageGutter = (stage) => {
+  const raw = getComputedStyle(stage).getPropertyValue("--stage-gutter");
+  const gutter = Number.parseFloat(raw);
+  return Number.isFinite(gutter) ? gutter : 20;
+};
+
 const resize = () => {
   const canvas = document.getElementById("sand-canvas");
   const canvas2 = document.getElementById("fluid-canvas");
@@ -7,12 +13,16 @@ const resize = () => {
 
   const stageWidth = stage.clientWidth || window.innerWidth;
   const stageHeight = stage.clientHeight || window.innerHeight;
+  const gutter = readStageGutter(stage);
   const isMobile = window.innerWidth < 768;
-  const padding = isMobile ? 20 : 36;
   const size = Math.max(
     120,
-    Math.min(stageWidth - padding * 2, stageHeight - padding * 2)
+    Math.floor(
+      Math.min(stageWidth - gutter * 2, stageHeight - gutter * 2)
+    )
   );
+
+  stage.style.setProperty("--canvas-display-size", `${size}px`);
 
   [canvas, canvas2].forEach((target) => {
     target.style.width = `${size}px`;
@@ -32,10 +42,22 @@ const resize = () => {
   }
 };
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", resize);
-} else {
+let stageObserver;
+
+const setup = () => {
   resize();
+
+  const stage = document.getElementById("canvas-stage");
+  if (stage && typeof ResizeObserver !== "undefined") {
+    stageObserver = new ResizeObserver(() => resize());
+    stageObserver.observe(stage);
+  }
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", setup, { once: true });
+} else {
+  setup();
 }
 
 window.addEventListener("deviceorientation", resize, true);

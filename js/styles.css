@@ -89,7 +89,7 @@ a:focus-visible {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.7), transparent 58%);
+  background: var(--paper);
   content: "";
   pointer-events: none;
 }
@@ -951,8 +951,10 @@ body {
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(circle at 50% 44%, rgba(255, 255, 255, 0.72), transparent 42%),
+    linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
     var(--paper);
+  background-size: 32px 32px;
 }
 
 #background::before {
@@ -2146,5 +2148,797 @@ body {
   .material-option,
   .brush-size {
     transition: none;
+  }
+}
+
+/* Figma brand and responsive workspace overrides. */
+@font-face {
+  font-family: "Inter Variable";
+  src: url("/assets/InterVariable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/assets/JetBrainsMono-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --figma-primary: #000000;
+  --figma-on-primary: #ffffff;
+  --figma-ink: #000000;
+  --figma-canvas: #ffffff;
+  --figma-surface-soft: #f7f7f5;
+  --figma-hairline: #e6e6e6;
+  --figma-hairline-soft: #f1f1f1;
+  --figma-block-lime: #dceeb1;
+  --figma-block-lilac: #c5b0f4;
+  --figma-block-cream: #f4ecd6;
+  --figma-block-pink: #efd4d4;
+  --figma-block-mint: #c8e6cd;
+  --figma-block-coral: #f3c9b6;
+  --figma-block-navy: #1f1d3d;
+  --figma-overlay-scrim: rgb(0 0 0 / 60%);
+
+  --figma-canvas: #ffffff;
+  --figma-surface: #ffffff;
+  --figma-block-blue: var(--figma-block-lilac);
+  --figma-focus: var(--figma-primary);
+  --paper: var(--figma-surface-soft);
+  --surface: var(--figma-canvas);
+  --surface-solid: var(--figma-canvas);
+  --surface-raised: var(--figma-canvas);
+  --ink: var(--figma-ink);
+  --muted: var(--figma-ink);
+  --line: var(--figma-hairline);
+  --line-strong: var(--figma-ink);
+  --accent: var(--figma-primary);
+  --accent-deep: var(--figma-primary);
+  --accent-wash: var(--figma-surface-soft);
+  --shadow: 0 4px 16px rgb(0 0 0 / 6%);
+  --topbar-height: clamp(56px, 3.2vw, 64px);
+  --rail-width: clamp(232px, 16vw, 320px);
+  --inspector-width: clamp(312px, 20vw, 420px);
+  --stage-gutter: clamp(16px, 1.4vw, 32px);
+  --panel-pad: clamp(16px, 1.2vw, 24px);
+}
+
+html,
+body {
+  background: var(--figma-surface-soft);
+}
+
+body,
+button,
+input,
+textarea,
+select {
+  color: var(--figma-ink);
+  font-family: "Inter Variable", "SF Pro Display", system-ui, sans-serif;
+  font-feature-settings: "kern" 1;
+  font-synthesis: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+.mobile-dock-button:focus-visible,
+.mobile-sheet-close:focus-visible {
+  outline: 2px solid var(--figma-primary);
+  outline-offset: 3px;
+}
+
+#background {
+  background: var(--figma-surface-soft);
+}
+
+#background::before {
+  opacity: 0.7;
+  background-image:
+    linear-gradient(var(--figma-hairline-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--figma-hairline-soft) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+#canvas-stage {
+  right: 0;
+  left: var(--rail-width);
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  background: transparent;
+}
+
+#canvas-stage::before {
+  top: 50%;
+  left: 50%;
+  width: calc(var(--canvas-display-size, 0px) + 48px);
+  height: calc(var(--canvas-display-size, 0px) + 48px);
+  inset: auto;
+  border: 1px solid var(--figma-hairline);
+  border-radius: 24px;
+  transform: translate(-50%, -50%);
+}
+
+#canvas-stage canvas {
+  border: 1px solid var(--figma-hairline);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 6%);
+}
+
+.topbar {
+  height: var(--topbar-height);
+  padding: 8px var(--panel-pad);
+  border-bottom: 1px solid var(--figma-hairline);
+  background: var(--figma-canvas);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.brand-lockup {
+  min-width: 0;
+}
+
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background: var(--figma-primary);
+  color: var(--figma-on-primary);
+  font-family: "Inter Variable", "SF Pro Display", system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 540;
+}
+
+.brand-lockup strong {
+  font-family: "Inter Variable", "SF Pro Display", system-ui, sans-serif;
+  font-size: clamp(20px, 1.3vw, 30px);
+  font-weight: 540;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.brand-lockup div span,
+.canvas-status,
+.material-count,
+.panel-kicker,
+.material-group h2,
+.brush-heading,
+.inspector-code,
+.material-option-code {
+  color: var(--figma-ink);
+  font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.brand-lockup div span {
+  margin-top: 4px;
+  font-size: 10px;
+  opacity: 0.72;
+}
+
+.canvas-status {
+  font-size: 11px;
+  opacity: 0.72;
+}
+
+.status-pip {
+  background: var(--figma-primary);
+  box-shadow: none;
+}
+
+.status-pip.paused {
+  background: var(--figma-primary);
+  box-shadow: none;
+}
+
+.topbar-actions {
+  gap: 8px;
+}
+
+.topbar-button {
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 18px 10px;
+  border: 0;
+  border-radius: 50px;
+  background: var(--figma-canvas);
+  color: var(--figma-ink);
+  font-size: clamp(14px, 0.8vw, 17px);
+  font-weight: 480;
+  line-height: 1.25;
+}
+
+.topbar-button:hover,
+.topbar-button:focus-visible {
+  background: var(--figma-surface-soft);
+  color: var(--figma-ink);
+  transform: none;
+}
+
+.topbar-button.is-active {
+  background: var(--figma-primary);
+  color: var(--figma-on-primary);
+}
+
+.topbar-button.icon-only {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 9999px;
+  background: var(--figma-surface-soft);
+  font-size: 20px;
+}
+
+.topbar-button.icon-only:hover,
+.topbar-button.icon-only:focus-visible {
+  background: var(--figma-primary);
+  color: var(--figma-on-primary);
+}
+
+.control-glyph {
+  margin-right: 8px;
+}
+
+.material-rail,
+.material-inspector {
+  background: var(--figma-canvas);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.material-rail {
+  padding: var(--panel-pad);
+  border-right: 1px solid var(--figma-hairline);
+}
+
+.material-inspector {
+  border-left: 1px solid var(--figma-hairline);
+  box-shadow: none;
+}
+
+.panel-heading {
+  padding: 0 0 16px;
+  border-bottom: 1px solid var(--figma-hairline);
+}
+
+.panel-heading h1,
+.inspector-heading h2 {
+  font-family: "Inter Variable", "SF Pro Display", system-ui, sans-serif;
+  font-weight: 540;
+  letter-spacing: -0.03em;
+}
+
+.panel-heading h1 {
+  font-size: clamp(26px, 1.5vw, 32px);
+}
+
+.panel-kicker,
+.material-group h2 {
+  margin-bottom: 6px;
+  font-size: 11px;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.material-count {
+  padding: 8px 12px;
+  border: 1px solid var(--figma-hairline);
+  border-radius: 50px;
+  background: var(--figma-surface-soft);
+  font-size: 11px;
+}
+
+.panel-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-sheet-close {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--figma-surface-soft);
+  color: var(--figma-ink);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.material-rail-scroll {
+  padding: 16px 0;
+  scrollbar-color: var(--figma-ink) transparent;
+}
+
+.wind-option {
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 50px;
+  background: var(--figma-block-lime);
+  color: var(--figma-ink);
+}
+
+.wind-option:hover,
+.wind-option:focus-visible {
+  border: 0;
+  background: var(--figma-primary);
+  color: var(--figma-on-primary);
+}
+
+.wind-option.selected {
+  border: 0;
+  background: var(--figma-primary);
+  color: var(--figma-on-primary);
+}
+
+.wind-option strong {
+  font-size: 16px;
+  font-weight: 540;
+}
+
+.wind-option small,
+.wind-option.selected small {
+  color: inherit;
+  opacity: 0.72;
+}
+
+.wind-glyph,
+.wind-option.selected .wind-glyph {
+  color: inherit;
+}
+
+.material-group {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 24px;
+}
+
+.material-group[data-family="base"] {
+  --family-color: var(--figma-block-lilac);
+}
+
+.material-group[data-family="life"] {
+  --family-color: var(--figma-block-mint);
+}
+
+.material-group[data-family="energy"] {
+  --family-color: var(--figma-block-coral);
+}
+
+.material-group[data-family="special"] {
+  --family-color: var(--figma-block-pink);
+}
+
+.material-grid {
+  gap: 8px;
+}
+
+.material-option {
+  min-height: 60px;
+  padding: 8px;
+  border: 1px solid var(--figma-hairline);
+  border-radius: 8px;
+  background: var(--figma-canvas);
+  color: var(--figma-ink);
+}
+
+.material-option:hover,
+.material-option:focus-visible {
+  border-color: var(--figma-primary);
+  transform: none;
+}
+
+.material-option.selected {
+  border-color: var(--figma-primary);
+  background: var(--figma-primary);
+  color: var(--figma-on-primary);
+}
+
+.material-swatch {
+  width: 22px;
+  height: 22px;
+  flex-basis: 22px;
+  border: 1px solid rgb(0 0 0 / 18%);
+  border-radius: 6px;
+}
+
+.material-option-label {
+  font-size: clamp(15px, 0.82vw, 17px);
+  font-weight: 540;
+}
+
+.material-option-code {
+  margin-top: 4px;
+  font-size: 10px;
+  opacity: 0.72;
+}
+
+.material-option.selected .material-option-code {
+  color: var(--figma-on-primary);
+  opacity: 0.72;
+}
+
+.brush-control {
+  padding: 16px 0 0;
+  border-top: 1px solid var(--figma-hairline);
+}
+
+.brush-heading {
+  font-size: 11px;
+}
+
+.brush-heading output {
+  color: var(--figma-ink);
+  font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
+}
+
+.brush-size-grid {
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.brush-size {
+  min-height: 40px;
+  border: 1px solid var(--figma-hairline);
+  border-radius: 9999px;
+  background: var(--figma-surface-soft);
+}
+
+.brush-size:hover,
+.brush-size:focus-visible {
+  border-color: var(--figma-primary);
+}
+
+.brush-size.selected {
+  border-color: var(--figma-primary);
+  background: var(--figma-primary);
+  color: var(--figma-on-primary);
+}
+
+.inspector-heading {
+  padding: var(--panel-pad);
+}
+
+.inspector-heading h2 {
+  font-size: clamp(26px, 1.5vw, 32px);
+}
+
+.inspector-swatch {
+  border-radius: 8px;
+  font-family: "Inter Variable", "SF Pro Display", system-ui, sans-serif;
+  box-shadow: none;
+}
+
+.inspector-close,
+.inspector-trigger {
+  border-radius: 9999px;
+  background: var(--figma-surface-soft);
+  color: var(--figma-ink);
+}
+
+.inspector-close:hover,
+.inspector-close:focus-visible,
+.inspector-trigger:hover,
+.inspector-trigger:focus-visible {
+  background: var(--figma-primary);
+  color: var(--figma-on-primary);
+}
+
+.inspector-tabs {
+  border-top: 1px solid var(--figma-hairline);
+  border-bottom: 1px solid var(--figma-hairline);
+}
+
+.inspector-tab.active {
+  border-bottom-color: var(--figma-primary);
+  color: var(--figma-primary);
+}
+
+.material-intro,
+.reaction-result,
+.material-facts,
+.inspector-note {
+  color: var(--figma-ink);
+  font-size: clamp(16px, 0.9vw, 18px);
+  font-weight: 330;
+  line-height: 1.45;
+}
+
+.inspector-note {
+  background: var(--figma-block-cream);
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+#fps {
+  border: 1px solid var(--figma-hairline);
+  border-radius: 50px;
+  background: var(--figma-surface-soft);
+  box-shadow: none;
+  color: var(--figma-ink);
+  font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
+}
+
+.mobile-dock,
+.mobile-scrim {
+  display: none;
+}
+
+#background[data-inspector-open="true"] #canvas-stage {
+  right: 0;
+}
+
+@media (min-width: 1200px) {
+  #background[data-inspector-open="true"] #canvas-stage {
+    right: var(--inspector-width);
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --rail-width: clamp(320px, 15vw, 420px);
+    --inspector-width: clamp(400px, 18vw, 520px);
+    --stage-gutter: clamp(20px, 1.25vw, 40px);
+  }
+
+  .material-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .material-option {
+    min-height: 64px;
+  }
+}
+
+@media (max-width: 1199px) and (min-width: 768px) {
+  :root {
+    --rail-width: clamp(232px, 23vw, 280px);
+    --inspector-width: clamp(312px, 28vw, 360px);
+  }
+
+  .material-rail {
+    padding: 16px;
+  }
+
+  .material-option {
+    min-height: 56px;
+  }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --topbar-height: 56px;
+    --mobile-safe-top: env(safe-area-inset-top, 0px);
+    --mobile-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --mobile-dock-height: 64px;
+  }
+
+  #canvas-stage {
+    top: calc(var(--topbar-height) + var(--mobile-safe-top));
+    right: 0;
+    bottom: calc(var(--mobile-dock-height) + var(--mobile-safe-bottom));
+    left: 0;
+    min-height: 0;
+  }
+
+  #canvas-stage::before {
+    width: calc(var(--canvas-display-size, 0px) + 24px);
+    height: calc(var(--canvas-display-size, 0px) + 24px);
+    border-radius: 8px;
+  }
+
+  #canvas-stage canvas {
+    border-radius: 8px;
+  }
+
+  .topbar {
+    top: 0;
+    height: calc(var(--topbar-height) + var(--mobile-safe-top));
+    padding: var(--mobile-safe-top) 8px 0;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+
+  .brand-lockup strong {
+    font-size: 20px;
+  }
+
+  .brand-lockup div span,
+  .canvas-status {
+    display: none;
+  }
+
+  .topbar-actions {
+    gap: 4px;
+  }
+
+  .topbar-button {
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .topbar-button.icon-only {
+    width: 40px;
+    min-width: 40px;
+  }
+
+  .mobile-dock {
+    position: absolute;
+    z-index: 13;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    height: calc(var(--mobile-dock-height) + var(--mobile-safe-bottom));
+    padding: 8px 8px var(--mobile-safe-bottom);
+    border-top: 1px solid var(--figma-hairline);
+    background: var(--figma-canvas);
+    gap: 8px;
+    pointer-events: auto;
+  }
+
+  .mobile-dock-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 44px;
+    gap: 6px;
+    border: 0;
+    border-radius: 50px;
+    background: var(--figma-canvas);
+    color: var(--figma-ink);
+    font-size: 14px;
+    font-weight: 480;
+  }
+
+  .mobile-dock-button.is-active {
+    background: var(--figma-primary);
+    color: var(--figma-on-primary);
+  }
+
+  .mobile-dock-icon,
+  .mobile-dock-swatch {
+    display: inline-grid;
+    width: 22px;
+    height: 22px;
+    place-items: center;
+    border-radius: 9999px;
+    background: currentColor;
+    color: var(--figma-on-primary);
+    font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  .mobile-dock-swatch {
+    border: 2px solid currentColor;
+  }
+
+  .mobile-scrim {
+    position: absolute;
+    z-index: 11;
+    inset: 0;
+    display: none;
+    border: 0;
+    background: var(--figma-overlay-scrim);
+    pointer-events: auto;
+  }
+
+  .mobile-scrim[aria-hidden="false"] {
+    display: block;
+  }
+
+  .inspector-trigger {
+    display: none;
+  }
+
+  .material-rail,
+  .material-inspector {
+    z-index: 12;
+    top: auto;
+    right: 0;
+    bottom: calc(var(--mobile-dock-height) + var(--mobile-safe-bottom));
+    left: 0;
+    width: auto;
+    height: min(64dvh, 560px);
+    max-height: calc(100dvh - var(--topbar-height) - var(--mobile-safe-top));
+    padding: 16px;
+    border: 1px solid var(--figma-hairline);
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 6%);
+    transform: translateY(100%);
+    visibility: hidden;
+    transition: transform 180ms ease, visibility 0s linear 180ms;
+  }
+
+  .material-rail {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
+    grid-template-rows: none;
+  }
+
+  .material-rail[data-mobile-open="true"],
+  .material-inspector[data-open="true"] {
+    transform: translateY(0);
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  .material-rail .panel-heading {
+    grid-column: auto;
+    grid-row: auto;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 0 0 12px;
+    background: var(--figma-canvas);
+  }
+
+  .mobile-sheet-close {
+    display: inline-grid;
+    place-items: center;
+  }
+
+  .material-rail-scroll {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    padding: 12px 0 16px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .material-group {
+    padding: 12px;
+    border-radius: 24px;
+  }
+
+  .material-option {
+    min-height: 56px;
+  }
+
+  .brush-control {
+    grid-column: auto;
+    grid-row: auto;
+    flex: 0 0 auto;
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    padding: 12px 0 max(4px, var(--mobile-safe-bottom));
+    border-top: 1px solid var(--figma-hairline);
+    background: var(--figma-canvas);
+  }
+
+  .material-inspector {
+    overflow-y: auto;
+  }
+
+  .material-inspector .inspector-heading {
+    padding: 0 0 16px;
+  }
+
+  #fps {
+    display: none !important;
+  }
+
+  .dg.ac {
+    display: none !important;
   }
 }
