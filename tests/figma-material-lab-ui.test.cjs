@@ -120,7 +120,9 @@ test("brand mark keeps M and grows a Plant-colored flower motif", () => {
 
   assert.match(ui, /const BrandMark = \(\{ plantColor \}\) =>/);
   assert.match(ui, /viewBox=["']0 0 40 40["']/);
-  assert.match(ui, /className=["']brand-mark-letter["'][\s\S]*?>M<\/text>/);
+  assert.match(ui, /className=["']brand-mark-letter-shadow["'][\s\S]*?d=["']M10 29 C/);
+  assert.match(ui, /className=["']brand-mark-letter["'][\s\S]*?d=["']M10 29 C/);
+  assert.doesNotMatch(ui, /<text[\s\S]*className=["']brand-mark-letter["']/);
   assert.match(ui, /className=["']brand-mark-stem["']/);
   assert.match(ui, /className=["']brand-mark-leaf["']/);
   assert.match(ui, /className=["']brand-mark-flower-petal["']/);
@@ -128,6 +130,24 @@ test("brand mark keeps M and grows a Plant-colored flower motif", () => {
   assert.match(ui, /const brandPlantColor = materialColorFor\(["']Plant["']\)/);
   assert.match(ui, /<BrandMark plantColor=\{brandPlantColor\} \/>/);
   assert.doesNotMatch(ui, /className=["']brand-mark-letter["'][\s\S]*?>S<\/text>/);
+});
+
+test("brand mark keeps floral accents sparse, organic, and asymmetric", () => {
+  const ui = read("js/components/ui.js");
+  const flowerGroups = ui.match(
+    /<g className=["']brand-mark-flower["'] transform=/g
+  );
+  const leafDetails = ui.match(/className=["']brand-mark-leaf["']/g);
+
+  assert.match(ui, /className=["']brand-mark-botanical-motif["']/);
+  assert.match(ui, /className=["']brand-mark-botanical-stem["']/);
+  assert.match(ui, /className=["']brand-mark-bud["']/);
+  assert.match(ui, /className=["']brand-mark-flower-petal-lilac["']/);
+  assert.ok(flowerGroups && flowerGroups.length >= 3 && flowerGroups.length <= 5);
+  assert.ok(leafDetails && leafDetails.length >= 3 && leafDetails.length <= 6);
+  assert.match(ui, /transform=["']translate\(10\.5 27\.5\) rotate\(-18\)["']/);
+  assert.match(ui, /transform=["']translate\(20 28\.5\) rotate\(12\)["']/);
+  assert.match(ui, /transform=["']translate\(28\.8 26\.5\) rotate\(26\)["']/);
 });
 
 test("brand mark uses a pale rounded tile without motion or black-circle styling", () => {

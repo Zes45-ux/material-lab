@@ -32,38 +32,105 @@ const BrandMark = ({ plantColor }) => (
       focusable="false"
       aria-hidden="true"
     >
-      <text
+      <path
         className="brand-mark-letter-shadow"
-        x="19.6"
-        y="27.9"
-        textAnchor="middle"
-      >
-        M
-      </text>
-      <text
+        d="M10 29 C9.4 24.1 9.8 16.9 10.9 11 C12.8 11.4 16.6 26.4 20.1 29 C23.4 26.5 27.1 11.7 29.2 11 C30.1 17.1 30.5 24.2 30 29"
+        transform="translate(0.45 0.4)"
+      />
+      <path
         className="brand-mark-letter"
-        x="19"
-        y="27.4"
-        textAnchor="middle"
-      >M</text>
-      <path
-        className="brand-mark-stem"
-        d="M27 29 C27 23 28.5 18 31.5 14"
+        d="M10 29 C9.4 24.1 9.8 16.9 10.9 11 C12.8 11.4 16.6 26.4 20.1 29 C23.4 26.5 27.1 11.7 29.2 11 C30.1 17.1 30.5 24.2 30 29"
       />
-      <path
-        className="brand-mark-leaf"
-        d="M28.4 23.5 C25.6 20.8 23.5 21.6 23.8 24.8 C25.7 25.8 27.2 25.1 28.4 23.5 Z"
-      />
-      <path
-        className="brand-mark-leaf"
-        d="M29.7 20 C31.5 17.4 34.1 17.8 34.3 20.6 C32.6 22 31 21.5 29.7 20 Z"
-      />
-      <g className="brand-mark-flower" transform="translate(31.5 12.5)">
-        <circle className="brand-mark-flower-petal" cx="0" cy="-2" r="1.6" />
-        <circle className="brand-mark-flower-petal" cx="2" cy="0" r="1.6" />
-        <circle className="brand-mark-flower-petal" cx="0" cy="2" r="1.6" />
-        <circle className="brand-mark-flower-petal" cx="-2" cy="0" r="1.6" />
-        <circle className="brand-mark-flower-center" cx="0" cy="0" r="1" />
+      <g className="brand-mark-botanical-motif">
+        <path
+          className="brand-mark-botanical-stem"
+          d="M10.2 28.8 C10.8 27.5 11.1 26.7 11.2 25.6 C11.6 24.3 12.4 23.3 13.2 22.6 M11 27.2 C9.7 26.5 8.6 25.8 7.8 24.7 M20.1 28.8 C19.2 27.6 18.5 26.4 18.1 25.1 M20.2 28.7 C21.4 27.5 22.2 26.6 22.9 25.4 M29.8 28.9 C29.1 27.7 28.8 26.6 29 25.4 C29.3 24.3 30.3 23.6 31.5 22.8"
+        />
+        <path
+          className="brand-mark-stem"
+          d="M20.1 28.8 C20.5 27.8 20.8 27.1 21.1 26.3"
+        />
+        <path
+          className="brand-mark-leaf"
+          d="M10.7 26.2 C8.7 24.5 7.3 24.8 7.8 26.3 C8.7 27 9.8 27 10.7 26.2 Z"
+        />
+        <path
+          className="brand-mark-leaf"
+          d="M13 23.1 C11.4 21.6 10.1 21.8 10.5 23.2 C11.2 24 12.1 24.1 13 23.1 Z"
+        />
+        <path
+          className="brand-mark-leaf"
+          d="M22.3 25.7 C23.8 23.8 25.1 23.9 24.9 25.2 C24.3 26.3 23.4 26.5 22.3 25.7 Z"
+        />
+        <path
+          className="brand-mark-leaf"
+          d="M29 25.3 C30.8 23.2 32.2 23.5 31.8 25.1 C31.1 26.2 30 26.2 29 25.3 Z"
+        />
+        <g className="brand-mark-flower" transform="translate(10.5 27.5) rotate(-18)">
+          <path
+            className="brand-mark-flower-petal"
+            d="M0 -0.25 C-0.3 -1.8 0.5 -2.45 1.15 -1.18 C1.25 -0.55 0.65 -0.05 0 -0.25 Z"
+          />
+          <path
+            className="brand-mark-flower-petal"
+            d="M-0.25 0.1 C-1.85 -0.45 -2.35 0.35 -1.12 1.08 C-0.45 1.17 0.05 0.65 -0.25 0.1 Z"
+          />
+          <path
+            className="brand-mark-flower-petal"
+            d="M0.2 0.15 C1.05 1.2 0.55 2.2 -0.45 1.52 C-0.9 1.02 -0.55 0.3 0.2 0.15 Z"
+          />
+          <circle className="brand-mark-flower-center" cx="0" cy="0" r="0.62" />
+        </g>
+        <g className="brand-mark-flower" transform="translate(15.2 23.8) rotate(-34)">
+          <path
+            className="brand-mark-flower-petal-lilac"
+            d="M0 -0.2 C-0.1 -1.65 0.85 -2.15 1.3 -0.98 C1.3 -0.45 0.7 -0.04 0 -0.2 Z"
+          />
+          <path
+            className="brand-mark-flower-petal"
+            d="M-0.18 0.12 C-1.55 -0.4 -2.12 0.35 -1.02 1.08 C-0.45 1.15 0 0.64 -0.18 0.12 Z"
+          />
+          <path
+            className="brand-mark-flower-petal"
+            d="M0.18 0.12 C0.95 0.95 0.58 1.9 -0.3 1.43 C-0.72 0.98 -0.48 0.28 0.18 0.12 Z"
+          />
+          <circle className="brand-mark-flower-center" cx="0" cy="0" r="0.56" />
+        </g>
+        <g className="brand-mark-flower" transform="translate(20 28.5) rotate(12)">
+          <path
+            className="brand-mark-flower-petal"
+            d="M0 -0.2 C-0.35 -1.65 0.45 -2.35 1.1 -1.12 C1.2 -0.5 0.62 -0.05 0 -0.2 Z"
+          />
+          <path
+            className="brand-mark-flower-petal-lilac"
+            d="M-0.18 0.08 C-1.65 -0.58 -2.28 0.25 -1.05 1.08 C-0.42 1.12 0.02 0.58 -0.18 0.08 Z"
+          />
+          <path
+            className="brand-mark-flower-petal"
+            d="M0.16 0.2 C1.2 1.06 0.75 2.02 -0.32 1.45 C-0.78 0.96 -0.5 0.32 0.16 0.2 Z"
+          />
+          <circle className="brand-mark-flower-center" cx="0" cy="0" r="0.6" />
+        </g>
+        <g className="brand-mark-flower" transform="translate(28.8 26.5) rotate(26)">
+          <path
+            className="brand-mark-flower-petal"
+            d="M0 -0.2 C-0.2 -1.55 0.58 -2.25 1.12 -1.05 C1.2 -0.48 0.62 -0.03 0 -0.2 Z"
+          />
+          <path
+            className="brand-mark-flower-petal"
+            d="M-0.16 0.12 C-1.48 -0.5 -2.1 0.3 -1.02 1.08 C-0.45 1.16 0.03 0.64 -0.16 0.12 Z"
+          />
+          <path
+            className="brand-mark-flower-petal-lilac"
+            d="M0.2 0.18 C1.12 1.02 0.68 2.02 -0.32 1.48 C-0.78 1.02 -0.5 0.34 0.2 0.18 Z"
+          />
+          <circle className="brand-mark-flower-center" cx="0" cy="0" r="0.6" />
+        </g>
+        <path
+          className="brand-mark-bud"
+          d="M12.8 23.3 C11.7 22.3 12.2 21.5 13 21.6 C13.8 22 13.7 22.7 12.8 23.3 Z"
+        />
+        <circle className="brand-mark-bud" cx="31.7" cy="22.4" r="0.72" />
       </g>
     </svg>
   </span>
