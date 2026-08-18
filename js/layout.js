@@ -1,5 +1,5 @@
 const readStageGutter = (stage) => {
-  const raw = getComputedStyle(stage).getPropertyValue("--stage-gutter");
+  const raw = getComputedStyle(stage).paddingLeft;
   const gutter = Number.parseFloat(raw);
   return Number.isFinite(gutter) ? gutter : 20;
 };
@@ -43,13 +43,28 @@ const resize = () => {
 };
 
 let stageObserver;
+let resizeFrame = null;
+
+const scheduleResize = () => {
+  if (resizeFrame !== null) return;
+
+  const requestFrame =
+    typeof requestAnimationFrame === "function"
+      ? requestAnimationFrame
+      : (callback) => setTimeout(callback, 0);
+
+  resizeFrame = requestFrame(() => {
+    resizeFrame = null;
+    resize();
+  });
+};
 
 const setup = () => {
   resize();
 
   const stage = document.getElementById("canvas-stage");
   if (stage && typeof ResizeObserver !== "undefined") {
-    stageObserver = new ResizeObserver(() => resize());
+    stageObserver = new ResizeObserver(scheduleResize);
     stageObserver.observe(stage);
   }
 };

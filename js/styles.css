@@ -950,11 +950,6 @@ body {
   height: 100dvh;
   overflow: hidden;
   isolation: isolate;
-  background:
-    linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
-    var(--paper);
-  background-size: 32px 32px;
 }
 
 #background::before {
@@ -2185,7 +2180,6 @@ body {
   --figma-block-navy: #1f1d3d;
   --figma-overlay-scrim: rgb(0 0 0 / 60%);
 
-  --figma-canvas: #ffffff;
   --figma-surface: #ffffff;
   --figma-block-blue: var(--figma-block-lilac);
   --figma-focus: var(--figma-primary);
@@ -2253,11 +2247,11 @@ a:focus-visible,
 }
 
 #canvas-stage::before {
+  inset: auto;
   top: 50%;
   left: 50%;
   width: calc(var(--canvas-display-size, 0px) + 48px);
   height: calc(var(--canvas-display-size, 0px) + 48px);
-  inset: auto;
   border: 1px solid var(--figma-hairline);
   border-radius: 24px;
   transform: translate(-50%, -50%);
@@ -2818,7 +2812,7 @@ a:focus-visible,
     height: 22px;
     place-items: center;
     border-radius: 9999px;
-    background: currentColor;
+    background: var(--figma-primary);
     color: var(--figma-on-primary);
     font-family: "JetBrains Mono", "SF Mono", Menlo, monospace;
     font-size: 12px;
@@ -2826,7 +2820,7 @@ a:focus-visible,
   }
 
   .mobile-dock-swatch {
-    border: 2px solid currentColor;
+    border: 2px solid currentcolor;
   }
 
   .mobile-scrim {
@@ -2856,7 +2850,10 @@ a:focus-visible,
     left: 0;
     width: auto;
     height: min(64dvh, 560px);
-    max-height: calc(100dvh - var(--topbar-height) - var(--mobile-safe-top));
+    max-height: calc(
+      100dvh - var(--topbar-height) - var(--mobile-safe-top) -
+        var(--mobile-dock-height) - var(--mobile-safe-bottom)
+    );
     padding: 16px;
     border: 1px solid var(--figma-hairline);
     border-radius: 24px 24px 0 0;

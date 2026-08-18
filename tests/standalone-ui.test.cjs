@@ -176,8 +176,14 @@ test("material inspector shares selected material state with the rail", () => {
   assert.match(ui, /selectedElement/);
   assert.match(ui, /selectedName/);
   assert.match(ui, /<MaterialInspector[\s\S]*name=\{selectedName\}/);
-  assert.match(ui, /inspectorTab: "intro"/);
-  assert.match(ui, /selectedElement:\s*id[\s\S]*inspectorTab:\s*"intro"/);
+  assert.match(
+    ui,
+    /selectElement\(selectedElement\)\s*\{\s*this\.setState\(\s*\{\s*selectedElement,\s*inspectorTab:\s*"intro",\s*mobileSheet:\s*null/
+  );
+  assert.match(
+    ui,
+    /group\.items\.map\(\(name\)\s*=>\s*ElementButton\(name, selectedElement, this\.selectElement\)\s*\)/
+  );
   assert.match(ui, /details\.reactions/);
 });
 

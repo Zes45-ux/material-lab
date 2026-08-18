@@ -41,7 +41,7 @@ test("Figma/FigJam theme exposes the material-lab token set", () => {
     "--figma-block-mint: #c8e6cd",
     "--figma-block-coral: #f3c9b6",
   ]) {
-    assert.match(css, new RegExp(declaration.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")));
+    assert.match(css, new RegExp(declaration.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
 
   for (const family of ["base", "life", "energy", "special"]) {
@@ -102,8 +102,26 @@ test("Figma UI uses the documented type, shape, and elevation language", () => {
   assert.match(css, /\.material-option\.selected\s*\{[\s\S]*?background:\s*var\(--figma-primary\)/);
   assert.match(css, /\.material-option\.selected\s*\{[\s\S]*?color:\s*var\(--figma-on-primary\)/);
   assert.match(css, /#background::before\s*\{[\s\S]*?background-image:/);
-  assert.doesNotMatch(css, /#background\s*\{[\s\S]*?radial-gradient/);
+  assert.doesNotMatch(css, /#background\s*\{[^}]*radial-gradient/);
   assert.doesNotMatch(css, /#sand-canvas[^}]*box-shadow:\s*0 18px 34px/);
+});
+
+test("Figma canvas chrome keeps centered framing and a single grid layer", () => {
+  const css = read("js/styles.css");
+
+  assert.match(
+    css,
+    /#canvas-stage::before\s*\{[^}]*inset:\s*auto;[^}]*top:\s*50%;[^}]*left:\s*50%;/
+  );
+  assert.doesNotMatch(
+    css,
+    /#background\s*\{\s*position:\s*fixed;[^}]*linear-gradient/
+  );
+  assert.equal(
+    (css.match(/--figma-canvas:\s*#ffffff/g) || []).length,
+    1,
+    "--figma-canvas should have one canonical white definition"
+  );
 });
 
 test("mobile canvas reserves only the compact dock", () => {
@@ -139,6 +157,15 @@ test("mobile canvas reserves only the compact dock", () => {
     mobileCss,
     /\.material-rail,\s*\.material-inspector\s*\{[\s\S]*?bottom:\s*calc\(var\(--mobile-dock-height\)\s*\+\s*var\(--mobile-safe-bottom\)\)/
   );
+  assert.match(
+    mobileCss,
+    /\.material-rail,\s*\.material-inspector\s*\{[\s\S]*?max-height:\s*calc\(\s*100dvh\s*-\s*var\(--topbar-height\)\s*-\s*var\(--mobile-safe-top\)\s*-\s*var\(--mobile-dock-height\)\s*-\s*var\(--mobile-safe-bottom\)\s*\)/
+  );
+  assert.match(
+    mobileCss,
+    /\.mobile-dock-icon,\s*\.mobile-dock-swatch\s*\{[\s\S]*?background:\s*var\(--figma-primary\)/
+  );
+  assert.match(mobileCss, /\.mobile-dock-swatch\s*\{[\s\S]*?border:\s*2px solid currentcolor/);
   assert.match(mobileCss, /\.material-rail-scroll\s*\{[\s\S]*?display:\s*block/);
   assert.match(mobileCss, /\.brush-control\s*\{[\s\S]*?grid-column:\s*auto/);
   assert.match(
