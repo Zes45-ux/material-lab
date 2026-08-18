@@ -2265,6 +2265,15 @@ a:focus-visible,
   box-shadow: 0 4px 16px rgb(0 0 0 / 6%);
 }
 
+#canvas-stage,
+#fluid-canvas {
+  background: var(--figma-surface-soft);
+}
+
+#sand-canvas {
+  background: transparent;
+}
+
 .topbar {
   height: var(--topbar-height);
   padding: 8px var(--panel-pad);
