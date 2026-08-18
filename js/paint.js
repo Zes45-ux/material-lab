@@ -68,7 +68,7 @@ canvas.addEventListener("touchstart", (event) => {
   painting = true;
   lastPaint = event;
   handleTouches(event);
-});
+}, { passive: false });
 
 canvas.addEventListener("touchend", (event) => {
   if (event.cancelable) {
@@ -77,7 +77,7 @@ canvas.addEventListener("touchend", (event) => {
   lastPaint = null;
   painting = false;
   clearInterval(repeat);
-});
+}, { passive: false });
 
 canvas.addEventListener("touchmove", (event) => {
   if (!window.paused) {
@@ -87,7 +87,7 @@ canvas.addEventListener("touchmove", (event) => {
   }
   clearInterval(repeat);
   handleTouches(event);
-});
+}, { passive: false });
 
 function smoothPaint(event) {
   clearInterval(repeat);

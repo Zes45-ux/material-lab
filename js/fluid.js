@@ -1074,7 +1074,9 @@ function startFluid({ universe }) {
           pointer.y = canvasTop;
       }
   };
-  sandCanvas.addEventListener("touchmove", handleTouchMove, false);
+  sandCanvas.addEventListener("touchmove", handleTouchMove, {
+    passive: false,
+  });
 
   const handleMouseDown = () => {
     pointers[0].down = true;
@@ -1100,7 +1102,9 @@ function startFluid({ universe }) {
       pointers[i].color = fluidColor;
     }
   };
-  sandCanvas.addEventListener("touchstart", handleTouchStart);
+  sandCanvas.addEventListener("touchstart", handleTouchStart, {
+    passive: false,
+  });
 
   const handleMouseUp = () => {
     pointers[0].down = false;
