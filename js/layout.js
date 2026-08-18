@@ -23,14 +23,15 @@ const resize = () => {
   const stageHeight = stage.clientHeight || window.innerHeight;
   const gutter = readStageGutter(stage);
   const maxSize = readCanvasMaxSize(stage);
-  const isMobile = window.innerWidth < 768;
+  const isMobile =
+    window.innerWidth < 768 ||
+    (typeof window.matchMedia !== "function" && stageWidth < 768);
   const availableWidth = stageWidth - gutter * 2;
   const availableHeight = stageHeight - gutter * 2;
   const size = Math.max(
     120,
     Math.floor(Math.min(availableWidth, availableHeight, maxSize))
   );
-
   stage.style.setProperty("--canvas-display-size", `${size}px`);
 
   [canvas, canvas2].forEach((target) => {
@@ -38,6 +39,9 @@ const resize = () => {
     target.style.height = `${size}px`;
     target.style.left = "50%";
     target.style.top = "50%";
+    if (isMobile) {
+      target.style.top = "calc(50% - var(--mobile-canvas-lift, 0px))";
+    }
     target.style.right = "auto";
     target.style.bottom = "auto";
     target.style.margin = "0";
