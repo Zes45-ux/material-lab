@@ -1,75 +1,85 @@
 # Material Lab
 
-Material Lab is a standalone falling-sand sandbox for exploring pixel materials and physical reactions, built with Rust/WASM, WebGL, and JavaScript.
+[![License: MIT](https://img.shields.io/badge/license-MIT-4c4c4c)](LICENSE)
 
-Draw with sand, water, plants, fire, and other materials on a pixel canvas. Pause the simulation, undo a change, reset the scene, or use wind to see how materials interact.
+English · [简体中文](README.zh-CN.md)
 
-The project runs locally without an account, cloud backend, community service, advertising, or telemetry. The production build is a static site that can be deployed to any static file host.
+Material Lab is a standalone falling-sand sandbox for exploring pixel materials and physical reactions. It combines a Rust/WASM simulation core with WebGL and JavaScript so you can draw materials, pause the world, and watch gravity, fluids, heat, combustion, growth, and pressure interact.
+
+The project runs without an account, cloud backend, community service, advertising, or telemetry. The production output is a static site that can be deployed to any static file host.
 
 ![Material Lab screenshot](Screenshot.png)
 
-## Requirements
+## ✨ Features
+
+- Pixel-based simulation powered by Rust/WASM and WebGL
+- Materials including sand, water, snow, ice, stone, gas, oil, acid, plants, fungi, seeds, fire, lava, dust, gunpowder, rockets, and utility tools
+- Reactions such as gravity, fluid flow, combustion, melting, freezing, corrosion, plant growth, and explosive pressure
+- Draw, erase, pause, undo, reset the scene, and use wind to change the simulation
+- A material guide at `info/` and a performance page at `bench/`
+- Static production files with no runtime backend
+
+## ⚙️ Requirements
 
 - A modern browser with WebAssembly support
-- Node.js `^20.17.0 || >=22.9.0` and npm (`npm@11.19.0` is pinned by the repository)
-- [Rust and rustup](https://rustup.rs/)
-- [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
+- Node.js `^20.17.0 || >=22.9.0`
+- npm `11.19.0` (pinned by the repository)
+- [Rust and rustup](https://rustup.rs/) and [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) only when rebuilding the WebAssembly package
 
-Check the toolchain before starting:
+## 🚀 Quick start
 
-```powershell
-node --version
-npm --version
-rustup --version
-wasm-pack --version
-```
-
-## Run locally
-
-From the repository root:
-
-```powershell
+```bash
+git clone https://github.com/Zes45-ux/material-lab.git
+cd material-lab
 npm install
 npm test
 npm run build
 npm run start
 ```
 
-The test command runs source contracts and a temporary production-build check. The build command writes deployable static files to `dist/`. The start command keeps a local development server running; use another terminal for additional commands while it is active.
+`npm test` runs source contracts and a temporary production-build check. `npm run build` writes deployable files to `dist/`. `npm run start` starts a local development server at `127.0.0.1`; open the address printed by webpack-dev-server.
 
 The repository includes a precompiled WebAssembly package in `crate/pkg/`, so the default build does not require a local Rust linker. After changing Rust code, rebuild the package before building the web app:
 
-```powershell
+```bash
 npm run build:wasm
 npm run build
 ```
 
-The `build:wasm` and `build` scripts remove the temporary `.gitignore` that wasm-pack writes into
-`crate/pkg/`, keeping the precompiled package visible to version control.
+## 📦 Build and deploy
 
-## Build and deploy
+The committed `package-lock.json` is the canonical dependency lockfile; use npm rather than pnpm or Yarn. Webpack bundles the front end, WebGL shaders, local assets, and checked-in Rust/WASM output into `dist/`.
 
-The committed `package-lock.json` is the canonical dependency lockfile; use npm rather than pnpm or Yarn. Webpack compiles the front end and packages the checked-in Rust/WASM output into `dist/`. The generated `index.html`, JavaScript bundle, WebAssembly, and local assets can be served by any static file server.
+The generated HTML, JavaScript, WebAssembly package, and assets can be served by any static file server. The build supports both a domain root and a subpath, and generates entries for the `info/` and `bench/` routes without requiring backend rewrite rules.
 
-The build works at a domain root or under a subpath. It generates `index.html` entries for the `info/` and `bench/` routes, so a static server does not need backend rewrite rules for those paths.
+The repository includes a `vercel.json` configuration for Vercel. Vercel build machines can use the checked-in `crate/pkg/` package; if Rust code changes, run `npm run build:wasm` locally and commit the updated package before deploying.
 
-### Vercel
+## 🗂️ Project structure
 
-Vercel build machines do not need Rust for the default deployment because `crate/pkg/` contains the precompiled WebAssembly package. If Rust code changes, run `npm run build:wasm` locally and commit the updated `crate/pkg/` files before deploying.
+```text
+.
+├── index.html              # Application shell and metadata
+├── crate/
+│   ├── src/                # Rust simulation source
+│   └── pkg/                # Checked-in WebAssembly package
+├── js/
+│   ├── components/         # UI, menus, materials, and benchmark controls
+│   ├── glsl/               # WebGL simulation and display shaders
+│   └── *.js                # Rendering, layout, state, and application logic
+├── assets/                 # Fonts, icons, and local visual assets
+├── tests/                  # Source contracts and packaging checks
+├── scripts/                # Build maintenance scripts
+├── docs/                   # Design notes and project research
+├── webpack.config.js       # Static application build
+└── vercel.json             # Vercel build and output configuration
+```
 
-## Architecture
-
-- `crate/` contains the Rust simulation and WebAssembly package.
-- `js/` contains the React controls, WebGL renderer, fluid simulation, material data, and shaders.
-- `webpack.config.js` builds the static application and copies the local assets.
-- `tests/` contains source contracts and production packaging checks.
-
-## Attribution
+## 📚 Attribution
 
 Material Lab is derived from [Sandspiel](https://github.com/maxbittker/sandspiel), created by [Max Bittker](https://maxbittker.com). Sandspiel is a falling-sand game built with Rust/WASM, WebGL, and JavaScript, inspired in part by ha55ii's [Powder Game](https://dan-ball.jp/en/javagame/dust/). See [Making Sandspiel](https://maxbittker.com/making-sandspiel) for the original design and development background.
 
 The fluid simulation is adapted from [PavelDoGreat/WebGL-Fluid-Simulation](https://github.com/PavelDoGreat/WebGL-Fluid-Simulation).
 
-## License
+## 📄 License
 
 This project uses the [MIT License](LICENSE). Preserve the license and copyright notices when using, copying, or distributing the project.
