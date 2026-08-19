@@ -3087,6 +3087,21 @@ a:focus-visible,
   .dg.ac {
     display: none !important;
   }
+
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .topbar-actions {
+    gap: 2px;
+    padding: 3px;
+  }
+
+  .material-rail,
+  .material-inspector {
+    box-shadow: var(--sheet-shadow);
+  }
 }
 
 @media (min-width: 360px) and (max-width: 767px) {
@@ -3115,4 +3130,81 @@ a:focus-visible,
   .topbar-button {
     padding-inline: 8px;
   }
+}
+
+/* Home page polish pass. */
+:root {
+  --header-control-gap: clamp(12px, 2vw, 32px);
+  --canvas-frame-gap: 24px;
+  --canvas-shadow: 0 8px 24px rgb(0 0 0 / 8%);
+  --sheet-shadow: 0 -12px 32px rgb(0 0 0 / 10%);
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--header-control-gap);
+  align-items: center;
+}
+
+.brand-lockup {
+  gap: 12px;
+}
+
+.canvas-status {
+  justify-self: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--figma-hairline);
+  border-radius: 9999px;
+  background: var(--figma-surface-soft);
+  opacity: 1;
+}
+
+.topbar-actions {
+  min-width: 0;
+  margin-left: 0;
+  justify-self: end;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--figma-hairline);
+  border-radius: 9999px;
+  background: var(--figma-surface-soft);
+}
+
+.topbar-button {
+  background: transparent;
+}
+
+.topbar-button:hover,
+.topbar-button:focus-visible {
+  background: var(--figma-canvas);
+}
+
+#canvas-stage::before {
+  width: calc(var(--canvas-display-size, 0px) + var(--canvas-frame-gap) * 2);
+  height: calc(var(--canvas-display-size, 0px) + var(--canvas-frame-gap) * 2);
+  background: var(--figma-canvas);
+  box-shadow: var(--canvas-shadow);
+}
+
+#canvas-stage canvas {
+  box-shadow: var(--canvas-shadow);
+}
+
+.material-option:hover:not(.selected),
+.material-option:focus-visible:not(.selected) {
+  background: var(--figma-surface-soft);
+}
+
+.material-option.selected {
+  box-shadow: inset 0 0 0 2px var(--figma-primary);
+}
+
+.brush-size {
+  min-height: 44px;
+}
+
+.inspector-trigger {
+  box-shadow: 0 4px 14px rgb(0 0 0 / 8%);
 }
