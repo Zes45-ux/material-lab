@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-19T00:00:00+08:00",
+  "title": "Design System: Material Lab",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Ink Black",
+        "canonical": "#000000",
+        "tonalRamp": ["#111111", "#262626", "#404040", "#5a5a5a", "#737373", "#999999", "#c7c7c7", "#f7f7f5"]
+      },
+      "on-primary": {
+        "role": "neutral",
+        "displayName": "White Signal",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#111111", "#262626", "#404040", "#5a5a5a", "#737373", "#999999", "#c7c7c7", "#ffffff"]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Canvas White",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#111111", "#262626", "#404040", "#5a5a5a", "#737373", "#999999", "#c7c7c7", "#ffffff"]
+      },
+      "surface-soft": {
+        "role": "neutral",
+        "displayName": "Soft Laboratory",
+        "canonical": "#f7f7f5",
+        "tonalRamp": ["#171715", "#343431", "#51514f", "#6e6e6c", "#8b8b88", "#aaa9a5", "#d2d1cd", "#f7f7f5"]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#e6e6e6",
+        "tonalRamp": ["#181818", "#333333", "#4d4d4d", "#686868", "#828282", "#9d9d9d", "#c3c3c3", "#e6e6e6"]
+      },
+      "hairline-soft": {
+        "role": "neutral",
+        "displayName": "Soft Hairline",
+        "canonical": "#f1f1f1",
+        "tonalRamp": ["#1d1d1d", "#383838", "#535353", "#6e6e6e", "#898989", "#a4a4a4", "#c9c9c9", "#f1f1f1"]
+      },
+      "block-lime": {
+        "role": "secondary",
+        "displayName": "Wind Lime",
+        "canonical": "#dceeb1",
+        "tonalRamp": ["#1f3214", "#365223", "#526f36", "#70904d", "#8cac63", "#b0ca80", "#c9dfa0", "#dceeb1"]
+      },
+      "block-lilac": {
+        "role": "secondary",
+        "displayName": "Material Lilac",
+        "canonical": "#c5b0f4",
+        "tonalRamp": ["#2a2046", "#4d3f72", "#6b5a99", "#8976b8", "#a28ed0", "#b2a0df", "#bdb1ea", "#c5b0f4"]
+      },
+      "block-cream": {
+        "role": "tertiary",
+        "displayName": "Research Cream",
+        "canonical": "#f4ecd6",
+        "tonalRamp": ["#4a3420", "#705435", "#99764b", "#b79362", "#cdb184", "#dfc9a0", "#ecdfbd", "#f4ecd6"]
+      },
+      "block-pink": {
+        "role": "secondary",
+        "displayName": "Special Pink",
+        "canonical": "#efd4d4",
+        "tonalRamp": ["#4c252c", "#77434a", "#9d6268", "#ba7f84", "#cd999d", "#dcaeb2", "#e8c1c3", "#efd4d4"]
+      },
+      "block-mint": {
+        "role": "secondary",
+        "displayName": "Botanical Mint",
+        "canonical": "#c8e6cd",
+        "tonalRamp": ["#1d3b26", "#3a6445", "#568763", "#75a47c", "#91ba97", "#a6caa9", "#b8d8bd", "#c8e6cd"]
+      },
+      "block-coral": {
+        "role": "secondary",
+        "displayName": "Energy Coral",
+        "canonical": "#f3c9b6",
+        "tonalRamp": ["#4b2a1e", "#784633", "#9f614b", "#bb7d66", "#d09983", "#dfa995", "#ebbaaa", "#f3c9b6"]
+      },
+      "overlay-scrim": {
+        "role": "neutral",
+        "displayName": "Overlay Scrim",
+        "canonical": "rgb(0 0 0 / 60%)",
+        "tonalRamp": ["rgb(0 0 0 / 8%)", "rgb(0 0 0 / 16%)", "rgb(0 0 0 / 24%)", "rgb(0 0 0 / 32%)", "rgb(0 0 0 / 40%)", "rgb(0 0 0 / 48%)", "rgb(0 0 0 / 56%)", "rgb(0 0 0 / 60%)"]
+      },
+      "brand-mark-surface": {
+        "role": "neutral",
+        "displayName": "Brand Rose Paper",
+        "canonical": "#f3e6e6",
+        "tonalRamp": ["#44272c", "#6e464c", "#96636a", "#b47e84", "#c99a9f", "#d9b2b6", "#e8d0d1", "#f3e6e6"]
+      },
+      "brand-mark-letter": {
+        "role": "neutral",
+        "displayName": "Brand Sage Ink",
+        "canonical": "#687269",
+        "tonalRamp": ["#18231b", "#304235", "#485d4c", "#607563", "#788b7a", "#93a399", "#b7c1b9", "#687269"]
+      },
+      "brand-mark-letter-shadow": {
+        "role": "tertiary",
+        "displayName": "Brand Blush Shadow",
+        "canonical": "#d7aeb4",
+        "tonalRamp": ["#4c252d", "#77424b", "#9e626b", "#ba8088", "#cb969d", "#d7aeb4", "#e4c5c8", "#f2e5e5"]
+      },
+      "brand-mark-flower": {
+        "role": "tertiary",
+        "displayName": "Brand Flower Rose",
+        "canonical": "#e7a6b1",
+        "tonalRamp": ["#562633", "#864251", "#ae6371", "#c77f8c", "#d6929d", "#e0a0aa", "#e5a5af", "#e7a6b1"]
+      },
+      "brand-mark-flower-center": {
+        "role": "tertiary",
+        "displayName": "Brand Coral Center",
+        "canonical": "#f3c9b6",
+        "tonalRamp": ["#4b2a1e", "#784633", "#9f614b", "#bb7d66", "#d09983", "#dfa995", "#ebbaaa", "#f3c9b6"]
+      },
+      "brand-mark-flower-lilac": {
+        "role": "tertiary",
+        "displayName": "Brand Lilac Petal",
+        "canonical": "#b8adbd",
+        "tonalRamp": ["#352d3b", "#5a4f63", "#7b6e85", "#95869e", "#a597ac", "#b0a5b7", "#b5aabb", "#b8adbd"]
+      },
+      "brand-mark-bud": {
+        "role": "tertiary",
+        "displayName": "Brand Bud Olive",
+        "canonical": "#c5cf9d",
+        "tonalRamp": ["#303715", "#566326", "#7a873d", "#9aa85d", "#aeba7d", "#bac58e", "#c1cb99", "#c5cf9d"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Inter Display",
+        "purpose": "Material rail and inspector headings; calm hierarchy without a separate display face."
+      },
+      "label": {
+        "displayName": "JetBrains Mono Labels",
+        "purpose": "Status, counts, family headings, and material codes where a technical register is useful."
+      }
+    },
+    "shadows": [
+      {
+        "name": "canvas-and-sheet-lift",
+        "value": "0 4px 16px rgb(0 0 0 / 6%)",
+        "purpose": "Quietly separates the pixel canvas and mobile sheets from the soft laboratory background."
+      },
+      {
+        "name": "overlay-scrim",
+        "value": "rgb(0 0 0 / 60%)",
+        "purpose": "Temporary focus layer behind a mobile tool sheet."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-transition",
+        "value": "180ms ease",
+        "purpose": "Compact hover, active, drawer, and visibility transitions."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "Removes non-essential transitions for users who request reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "767px"
+      },
+      {
+        "name": "tablet",
+        "value": "768px–1199px"
+      },
+      {
+        "name": "desktop-inspector",
+        "value": "1200px"
+      },
+      {
+        "name": "wide",
+        "value": "1920px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Action Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "A compact pill for active canvas commands such as pause or resume.",
+      "html": "<button class='ds-button-primary' type='button'>暂停</button>",
+      "css": ".ds-button-primary { min-height: 40px; padding: 8px 18px 10px; border: 0; border-radius: 9999px; background: #000000; color: #ffffff; font: 480 14px/1.25 'Inter Variable', system-ui, sans-serif; transition: background-color 180ms ease, color 180ms ease; } .ds-button-primary:hover { background: #f7f7f5; color: #000000; } .ds-button-primary:focus-visible { outline: 2px solid #000000; outline-offset: 3px; } .ds-button-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Icon Action Button",
+      "kind": "button",
+      "refersTo": "button-icon",
+      "description": "A circular undo or utility action that stays secondary to the canvas.",
+      "html": "<button class='ds-button-icon' type='button' aria-label='撤销'>↶</button>",
+      "css": ".ds-button-icon { display: inline-grid; width: 40px; height: 40px; place-items: center; border: 0; border-radius: 9999px; background: #f7f7f5; color: #000000; font: 400 20px/1 'Inter Variable', system-ui, sans-serif; transition: background-color 180ms ease, color 180ms ease; } .ds-button-icon:hover, .ds-button-icon:focus-visible { background: #000000; color: #ffffff; } .ds-button-icon:focus-visible { outline: 2px solid #000000; outline-offset: 3px; }"
+    },
+    {
+      "name": "Material Family Block",
+      "kind": "custom",
+      "refersTo": "material-group",
+      "description": "A pastel organizational container for one material family, never a promotional card.",
+      "html": "<section class='ds-material-group'><h2>生命</h2><div class='ds-material-grid'><button class='ds-material-option' type='button'><span class='ds-material-swatch' aria-hidden='true'></span><span>植物</span></button></div></section>",
+      "css": ".ds-material-group { padding: 16px; border-radius: 24px; background: #c8e6cd; } .ds-material-group h2 { margin: 0 0 6px; color: #000000; font: 400 11px/1.3 'JetBrains Mono', monospace; letter-spacing: 0.04em; text-transform: uppercase; } .ds-material-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }"
+    },
+    {
+      "name": "Material Option",
+      "kind": "custom",
+      "refersTo": "material-option",
+      "description": "A tactile material selector that keeps the native swatch visible and uses color only for state.",
+      "html": "<button class='ds-material-option' type='button' aria-pressed='false'><span class='ds-material-swatch' aria-hidden='true'></span><span class='ds-material-copy'><strong>植物</strong><small>Plant</small></span></button>",
+      "css": ".ds-material-option { display: flex; min-height: 60px; align-items: center; gap: 8px; padding: 8px; border: 1px solid #e6e6e6; border-radius: 8px; background: #ffffff; color: #000000; text-align: left; font: 540 15px/1.25 'Inter Variable', system-ui, sans-serif; transition: border-color 180ms ease; } .ds-material-option:hover, .ds-material-option:focus-visible { border-color: #000000; } .ds-material-option:focus-visible { outline: 2px solid #000000; outline-offset: 3px; } .ds-material-swatch { width: 22px; height: 22px; flex: 0 0 22px; border: 1px solid rgb(0 0 0 / 18%); border-radius: 6px; background: #c8e6cd; } .ds-material-copy { display: grid; gap: 4px; } .ds-material-copy small { color: #000000; font: 400 10px/1.3 'JetBrains Mono', monospace; opacity: 0.72; }"
+    },
+    {
+      "name": "Brush Size Control",
+      "kind": "custom",
+      "refersTo": "brush-size",
+      "description": "A five-step compact control for the available brush sizes, with the selected size filled in black.",
+      "html": "<div class='ds-brush-size-grid' role='group' aria-label='笔刷大小'><button class='ds-brush-size' type='button'>•</button><button class='ds-brush-size is-selected' type='button'>•</button><button class='ds-brush-size' type='button'>•</button></div>",
+      "css": ".ds-brush-size-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; } .ds-brush-size { min-height: 40px; border: 1px solid #e6e6e6; border-radius: 9999px; background: #f7f7f5; color: #000000; } .ds-brush-size:hover, .ds-brush-size:focus-visible { border-color: #000000; } .ds-brush-size.is-selected { border-color: #000000; background: #000000; color: #ffffff; } .ds-brush-size:focus-visible { outline: 2px solid #000000; outline-offset: 3px; }"
+    },
+    {
+      "name": "Inspector Note",
+      "kind": "custom",
+      "refersTo": "inspector-note",
+      "description": "A soft research callout for a material-specific note inside the inspector.",
+      "html": "<div class='ds-inspector-note'><span class='ds-note-mark' aria-hidden='true'></span><p>会在受热时改变状态。</p></div>",
+      "css": ".ds-inspector-note { display: flex; gap: 10px; padding: 13px 14px; border-radius: 8px; background: #f4ecd6; color: #000000; font: 330 16px/1.45 'Inter Variable', system-ui, sans-serif; } .ds-note-mark { width: 4px; flex: 0 0 4px; border-radius: 2px; background: #000000; }"
+    },
+    {
+      "name": "Mobile Dock Button",
+      "kind": "nav",
+      "refersTo": "mobile-dock-button",
+      "description": "A 44px touch control for opening material, brush, or inspector sheets on small screens.",
+      "html": "<button class='ds-mobile-dock-button is-active' type='button'><span class='ds-mobile-dock-icon'>i</span><span>详情</span></button>",
+      "css": ".ds-mobile-dock-button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 9999px; background: #ffffff; color: #000000; font: 480 14px/1.25 'Inter Variable', system-ui, sans-serif; } .ds-mobile-dock-button.is-active { background: #000000; color: #ffffff; } .ds-mobile-dock-icon { display: inline-grid; width: 22px; height: 22px; place-items: center; border-radius: 9999px; background: #000000; color: #ffffff; font: 400 12px/1 'JetBrains Mono', monospace; } .ds-mobile-dock-button.is-active .ds-mobile-dock-icon { background: #ffffff; color: #000000; } .ds-mobile-dock-button:focus-visible { outline: 2px solid #000000; outline-offset: 3px; }"
+    },
+    {
+      "name": "Inspector Tabs",
+      "kind": "nav",
+      "refersTo": "inspector-tab",
+      "description": "A two-way information hierarchy for material introduction and reaction details.",
+      "html": "<div class='ds-inspector-tabs' role='tablist'><button class='ds-inspector-tab is-active' role='tab'>简介</button><button class='ds-inspector-tab' role='tab'>反应</button></div>",
+      "css": ".ds-inspector-tabs { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #e6e6e6; border-bottom: 1px solid #e6e6e6; } .ds-inspector-tab { min-height: 42px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #000000; font: 540 13px/1 'Inter Variable', system-ui, sans-serif; } .ds-inspector-tab:hover, .ds-inspector-tab:focus-visible, .ds-inspector-tab.is-active { color: #000000; } .ds-inspector-tab.is-active { border-bottom-color: #000000; } .ds-inspector-tab:focus-visible { outline: 2px solid #000000; outline-offset: 3px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Canvas-First Material Workbench",
+    "overview": "Material Lab is a quiet instrument for manipulating a living pixel world. The canvas carries the visual drama; the interface stays close to a precise workbench, with a white simulation field, compact black controls, and a material catalog organized into soft color blocks. Every surface should help the user notice cause and effect rather than compete with it.\n\nThe visual language is editorial and tactile without becoming ornamental. Inter Variable provides a calm, contemporary interface voice, while JetBrains Mono marks technical metadata and status. Pastel family surfaces create a gentle taxonomy around the native material swatches, and the botanical mark gives the otherwise monochrome chrome a small, hand-drawn signature. Depth comes from hairlines, spacing, and restrained shadows rather than glass-heavy effects.",
+    "keyCharacteristics": [
+      "Canvas-first composition with the simulation as the only visual core.",
+      "Near-black operational chrome on white and soft off-white surfaces.",
+      "Pastel material-family blocks: lilac, mint, coral, pink, and lime.",
+      "Inter Variable for interface hierarchy and JetBrains Mono for labels and codes.",
+      "Pill-shaped actions paired with compact 6–24px corner radii.",
+      "Pixel fidelity preserved through the native material palette and crisp rendering."
+    ],
+    "rules": [
+      {
+        "name": "The Ink-First Rule",
+        "body": "Black is reserved for action, selection, focus, and essential reading; it is not used as decorative noise.",
+        "section": "colors"
+      },
+      {
+        "name": "The Material-Block Rule",
+        "body": "Pastel family surfaces organize the catalog, but native material swatches remain the source of truth for material color.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Interface Voice Rule",
+        "body": "Use Inter for user-facing hierarchy; use JetBrains Mono only when the content is genuinely metadata, status, or a code.",
+        "section": "typography"
+      },
+      {
+        "name": "The Canvas-First Rule",
+        "body": "The central simulation keeps the largest uninterrupted field of attention. Tool surfaces may frame, cover, or temporarily dock around it, but closed panels must not leave a reserved blank column.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat-by-Default Rule",
+        "body": "Start with surface contrast and hairlines; add a shadow only when an object needs to separate from the canvas or a temporary sheet.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep the simulation canvas as the dominant visual object.",
+      "Do use Inter Variable for interface hierarchy and JetBrains Mono for technical labels.",
+      "Do use pastel family blocks to organize materials while preserving each native material swatch.",
+      "Do preserve crisp pixel rendering, local fonts, local assets, and the existing botanical mark.",
+      "Do use one-pixel hairlines, compact spacing, and restrained transitions to communicate structure.",
+      "Do preserve visible focus states, reduced-motion behavior, safe-area handling, and 44px mobile touch targets."
+    ],
+    "donts": [
+      "Don't add remote fonts, remote imagery, or runtime visual dependencies.",
+      "Don't repaint or normalize the native material palette to match the UI pastels.",
+      "Don't turn the material catalog or inspector into oversized marketing cards.",
+      "Don't add heavy shadows, persistent blur, glossy gradients, or decorative motion to ordinary controls.",
+      "Don't reserve a blank inspector column when the inspector is closed.",
+      "Don't replace the canvas's pixelated rendering with smooth scaling or anti-aliased treatment.",
+      "Don't use gradients in the chrome; the special material swatch gradient is an explicit data-driven exception."
+    ]
+  }
+}

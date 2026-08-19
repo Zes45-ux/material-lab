@@ -357,3 +357,41 @@ test("mobile canvas reserves only the compact dock", () => {
   );
   assert.match(mobileCss, /\.dg(?:\.ac)?\s*\{[\s\S]*?display:\s*none\s*!important/);
 });
+
+test("home workspace polish reinforces hierarchy and responsive surfaces", () => {
+  const css = read("js/styles.css");
+  const polishCss = css.slice(css.lastIndexOf("/* Home page polish pass. */"));
+  const polishStart = css.lastIndexOf("/* Home page polish pass. */");
+  const mobilePolishCss = css.slice(
+    css.lastIndexOf("@media (max-width: 767px)", polishStart)
+  );
+
+  assert.match(polishCss, /--header-control-gap:\s*clamp\(12px,/);
+  assert.match(polishCss, /--canvas-shadow:\s*0 8px 24px/);
+  assert.match(polishCss, /--sheet-shadow:\s*0 -12px 32px/);
+  assert.match(polishCss, /\.topbar\s*\{[\s\S]*?display:\s*grid/);
+  assert.match(
+    polishCss,
+    /\.topbar-actions\s*\{[\s\S]*?border:\s*1px solid var\(--figma-hairline\)/
+  );
+  assert.match(
+    polishCss,
+    /#canvas-stage::before\s*\{[\s\S]*?background:\s*var\(--figma-canvas\)/
+  );
+  assert.match(
+    polishCss,
+    /\.material-option:hover:not\(.selected\),[\s\S]*?background:\s*var\(--figma-surface-soft\)/
+  );
+  assert.match(
+    polishCss,
+    /\.material-option\.selected\s*\{[\s\S]*?box-shadow:\s*inset 0 0 0 2px var\(--figma-primary\)/
+  );
+  assert.match(
+    mobilePolishCss,
+    /@media\s*\(max-width:\s*767px\)[\s\S]*?\.topbar\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto/
+  );
+  assert.match(
+    mobilePolishCss,
+    /@media\s*\(max-width:\s*767px\)[\s\S]*?\.material-rail,[\s\S]*?box-shadow:\s*var\(--sheet-shadow\)/
+  );
+});
